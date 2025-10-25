@@ -6,7 +6,6 @@
 
 typedef struct {
     unsigned isWall : 1;
-    unsigned visited : 1;
 } Cell;
 
 typedef struct Map {
@@ -18,7 +17,7 @@ typedef struct Map {
 
     Player* player;
 
-    void (*update)(struct Map*);
+    void (*update)(struct Map*, int, int);
     void (*free)(struct Map*);
 } Map;
 

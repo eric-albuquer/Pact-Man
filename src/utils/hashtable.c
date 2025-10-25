@@ -83,7 +83,7 @@ static void* delete(HashTable* this, char* key) {
     Bucket* b = this->buckets[idx];
     Bucket* keys = this->keys;
     HashNode* node = hasBucket(b, key);
-    if (node == NULL) return;
+    if (node == NULL) return NULL;
 
     if (node->prev)
         node->prev->next = node->next;

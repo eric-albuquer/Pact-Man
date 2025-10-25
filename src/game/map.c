@@ -1,24 +1,34 @@
 #include "map.h"
-#include <stdlib.h>
-#include <stdio.h>
+
 #include <math.h>
-#include "linkedlist.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "enemy.h"
+#include "linkedlist.h"
 
-static Cell createCell(bool isWall) { return (Cell){isWall, 0}; }
+static Cell createCell(bool isWall) { return (Cell){isWall}; }
 
-static void update(Map* this) {
-    this->player->x += 0.05;
-    this->player->y += 0.02;
+static void update(Map* this, int dx, int dy) {
+    int nx = this->player->x + dx;
+    int ny = this->player->y + dy;
+
+    if (nx >= 0 && nx < this->cols && ny >= 0 && ny < this->rows &&
+        !this->matrix[ny][nx].isWall) {
+        this->player->lastX = this->player->x;
+        this->player->lastY = this->player->y;
+        this->player->x = nx;
+        this->player->y = ny;
+    }
 }
 
 static void loadChunks(Map* this, uInt64 chunkSize) {
-    int chunkArea = chunkSize * chunkSize;
-    HashTable* chunks = new_HashTable((this->rows * this->cols) / chunkArea);
-    this->chunks = chunks;
-
     int chunkRows = ceil(this->rows / (float)chunkSize);
     int chunkCols = ceil(this->cols / (float)chunkSize);
+    int totalChunks = chunkRows * chunkCols;
+    HashTable* chunks = new_HashTable(totalChunks);
+    this->chunks = chunks;
+
     for (int i = 0; i < chunkRows; i++) {
         for (int j = 0; j < chunkCols; j++) {
             LinkedList* list = new_LinkedList();
@@ -39,13 +49,13 @@ static void mazeGen(Map* this) {
 
 static void biomeGen(Map* this) { return; }
 
-static void _free(Map* this){
+static void _free(Map* this) {
     HashNode* cur = this->chunks->keys->head;
-    while(cur != NULL){
+    while (cur != NULL) {
         LinkedList* list = cur->data;
         Node* curList = list->head;
         Node* temp;
-        while(curList != NULL){
+        while (curList != NULL) {
             temp = curList;
             curList = curList->next;
             Enemy* e = temp->data;
@@ -57,7 +67,7 @@ static void _free(Map* this){
     HashTable* h = this->chunks;
     h->free(h);
 
-    for (uInt64 i = 0; i < this->rows; i++){
+    for (uInt64 i = 0; i < this->rows; i++) {
         free(this->matrix[i]);
     }
     free(this->matrix);

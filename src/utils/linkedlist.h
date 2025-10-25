@@ -19,7 +19,7 @@ typedef struct LinkedList {
     void* (*removeFirst)(struct LinkedList*);
     void* (*removeLast)(struct LinkedList*);
 
-    void (*free)(struct LinkedList*)
+    void (*free)(struct LinkedList*);
 } LinkedList;
 
 LinkedList* new_LinkedList();

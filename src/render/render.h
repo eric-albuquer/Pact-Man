@@ -14,6 +14,8 @@ typedef struct Render {
     int offsetHalfX;
     int offsetHalfY;
 
+    uInt64 frameCount;
+
     void (*drawMap)(struct Render*, Map*);
     void (*free)(struct Render*);
 } Render;

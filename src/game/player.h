@@ -4,12 +4,15 @@
 #include "utils.h"
 
 typedef struct Player {
-    float x;
-    float y;
+    Int64 x;
+    Int64 y;
+
+    Int64 lastX;
+    Int64 lastY;
 
     void (*free)(struct Player*);
 } Player;
 
-Player* new_Player(float x, float y);
+Player* new_Player(Int64 x, Int64 y);
 
 #endif
