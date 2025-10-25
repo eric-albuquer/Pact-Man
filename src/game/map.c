@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "enemy.h"
 #include "linkedlist.h"
@@ -39,11 +40,52 @@ static void loadChunks(Map* this, uInt64 chunkSize) {
     }
 }
 
-static void mazeGen(Map* this) {
-    for (uInt64 i = 0; i < this->rows; i++) {
-        for (uInt64 j = 0; j < this->cols; j++) {
-            this->matrix[i][j] = createCell((i & 1) && (j & 1));
+void mazeGen(Map* map) {
+    uInt64 rows = map->rows;
+    uInt64 cols = map->cols;
+
+    for (uInt64 y = 0; y < rows; y++) {
+        for (uInt64 x = 0; x < cols; x++) {
+            map->matrix[y][x] = createCell(0);
         }
+    }
+
+    for (uInt64 x = 0; x < cols; x++) {
+        map->matrix[0][x].isWall = 1;
+        map->matrix[rows-1][x].isWall = 1;
+    }
+    for (uInt64 y = 0; y < rows; y++) {
+        map->matrix[y][0].isWall = 1;
+        map->matrix[y][cols-1].isWall = 1;
+    }
+
+    srand(time(NULL));
+
+    int step = 2;
+    for (int y = 1; y < (int)rows-1; y += step) {
+        for (int x = 1; x < (int)cols-1; x += step) {
+            if (rand() % 100 < 80) {
+                map->matrix[y][x].isWall = 1;
+
+                int dir = rand() % 4;
+                int nx = x;
+                int ny = y;
+                switch(dir) {
+                    case 0: ny = y - 1; break; // cima
+                    case 1: ny = y + 1; break; // baixo
+                    case 2: nx = x - 1; break; // esquerda
+                    case 3: nx = x + 1; break; // direita
+                }
+                if (nx > 0 && nx < (int)cols-1 && ny > 0 && ny < (int)rows-1)
+                    map->matrix[ny][nx].isWall = 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < (int)(rows*cols/200); i++) {
+        int x = 1 + rand() % (cols-2);
+        int y = 1 + rand() % (rows-2);
+        map->matrix[y][x].isWall = 0;
     }
 }
 

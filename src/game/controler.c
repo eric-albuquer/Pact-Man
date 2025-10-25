@@ -21,6 +21,7 @@ static void _free(Controler* this) { free(this); }
 Controler* new_Controler() {
     Controler* this = malloc(sizeof(Controler));
     reset(this);
+    
     this->getInputs = getInputs;
     this->reset = reset;
     this->free = _free;
