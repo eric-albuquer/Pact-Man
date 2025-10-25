@@ -15,6 +15,7 @@ typedef struct Render {
     int offsetHalfY;
 
     void (*drawMap)(struct Render*, Map*);
+    void (*free)(struct Render*);
 } Render;
 
 Render* new_Render(int width, int height, int cellSize, int renderDist);

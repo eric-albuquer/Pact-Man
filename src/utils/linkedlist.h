@@ -14,13 +14,12 @@ typedef struct LinkedList {
     Node* tail;
     uInt64 length;
 
-    void (*addFirst)(struct LinkedList*, void* data);
-    void (*addLast)(struct LinkedList*, void* data);
+    void (*addFirst)(struct LinkedList*, void*);
+    void (*addLast)(struct LinkedList*, void*);
     void* (*removeFirst)(struct LinkedList*);
     void* (*removeLast)(struct LinkedList*);
-    
-    void (*clear)(struct LinkedList*);
-    void (*free)(struct LinkedList*);
+
+    void (*free)(struct LinkedList*)
 } LinkedList;
 
 LinkedList* new_LinkedList();

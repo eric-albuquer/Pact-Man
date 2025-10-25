@@ -19,6 +19,7 @@ typedef struct Map {
     Player* player;
 
     void (*update)(struct Map*);
+    void (*free)(struct Map*);
 } Map;
 
 Map* new_Map(uInt64 rows, uInt64 cols, uInt64 chunkSize);

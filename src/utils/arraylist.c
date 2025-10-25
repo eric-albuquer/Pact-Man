@@ -12,23 +12,9 @@ static void push(ArrayList* this, void* obj) {
     this->data[this->length++] = obj;
 }
 
-static void _free(ArrayList* this){
-    for (uInt64 i = 0; i < this->length; i++){
-        free(this->data[i]);
-    }
-    free(this);
-}
-
 static void* pop(ArrayList* this){
     if (this->length == 0) return NULL;
     return this->data[--this->length];
-}
-
-static void clear(ArrayList* this){
-    for (uInt64 i = 0; i < this->length; i++){
-        free(this->data[i]);
-    }
-    this->length = 0;
 }
 
 static Int64 indexOf(ArrayList* this, const void* data){
@@ -80,6 +66,10 @@ static Int64 binarySearch(ArrayList* this, const void* data, int (*cmp)(const vo
     return bSearch(this, 0, this->length - 1, data, cmp);
 }
 
+static void _free(ArrayList* this){
+    free(this);
+}
+
 ArrayList* new_ArrayList() {
     ArrayList* arr = malloc(sizeof(ArrayList));
     arr->length = 0;
@@ -91,7 +81,7 @@ ArrayList* new_ArrayList() {
     arr->sort = sort;
     arr->binarySearch = binarySearch;
     arr->indexOf = indexOf;
-    arr->clear = clear;
+
     arr->free = _free;
     return arr;
 }

@@ -78,7 +78,7 @@ bool has(HashTable* this, char* key) {
     return hasBucket(b, key) != NULL;
 }
 
-static void delete(HashTable* this, char* key) {
+static void* delete(HashTable* this, char* key) {
     uInt64 idx = fnv1a(key) % this->length;
     Bucket* b = this->buckets[idx];
     Bucket* keys = this->keys;
@@ -103,23 +103,9 @@ static void delete(HashTable* this, char* key) {
     else
         keys->tail = node->prevKey;
 
-    free(node->data);
+    void* data = node->data;
     free(node);
-}
-
-static void clear(HashTable* this) {
-    HashNode* cur = this->keys->head;
-    HashNode* temp;
-    while (cur != NULL) {
-        temp = cur;
-        cur = cur->nextKey;
-        free(temp->data);
-        free(temp);
-    }
-    for (uInt64 i = 0; i < this->length; i++) {
-        this->buckets[i]->head = this->buckets[i]->tail = NULL;
-    }
-    this->keys->head = this->keys->tail = NULL;
+    return data;
 }
 
 static void _free(HashTable* this) {
@@ -128,7 +114,6 @@ static void _free(HashTable* this) {
     while (cur != NULL) {
         temp = cur;
         cur = cur->nextKey;
-        free(temp->data);
         free(temp);
     }
     for (uInt64 i = 0; i < this->length; i++) {
@@ -152,7 +137,7 @@ HashTable* new_HashTable(uInt64 length) {
     h->get = get;
     h->has = has;
     h->delete = delete;
-    h->clear = clear;
+    
     h->free = _free;
     return h;
 }

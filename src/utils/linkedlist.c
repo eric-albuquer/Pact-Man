@@ -9,31 +9,6 @@ static Node* new_Node(Node* prev, Node* next, void* data){
     return node;
 }
 
-static void clear(LinkedList* this){
-    Node* cur = this->head;
-    Node* temp;
-    while(cur != NULL){
-        temp = cur;
-        cur = cur->next;
-        free(temp->data);
-        free(temp);
-    }
-    this->head = this->tail = NULL;
-    this->length = 0;
-}
-
-static void _free(LinkedList* this){
-    Node* cur = this->head;
-    Node* temp;
-    while(cur != NULL){
-        temp = cur;
-        cur = cur->next;
-        free(temp->data);
-        free(temp);
-    }
-    free(this);
-}
-
 static void addFirst(LinkedList* this, void* data){
     Node* node = new_Node(NULL, this->head, data);
     if (this->head) this->head->prev = node;
@@ -74,16 +49,27 @@ static void* removeLast(LinkedList* this){
     return data;
 }
 
+static void _free(LinkedList* this){
+    Node* cur = this->head;
+    Node* temp = cur;
+    while(cur != NULL){
+        temp = cur;
+        cur = cur->next;
+        free(temp);
+    }
+    free(this);
+}
+
 LinkedList* new_LinkedList(){
     LinkedList* this = malloc(sizeof(LinkedList));
     this->head = this->tail = NULL;
     this->length = 0;
 
-    this->clear = clear;
-    this->free = _free;
     this->addFirst = addFirst;
     this->addLast = addLast;
     this->removeFirst = removeFirst;
     this->removeLast = removeLast;
+
+    this->free = _free;
     return this;
 }

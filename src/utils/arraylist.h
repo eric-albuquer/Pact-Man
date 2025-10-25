@@ -15,8 +15,7 @@ typedef struct ArrayList {
     Int64 (*indexOf)(struct ArrayList*, const void*);
     void (*sort)(struct ArrayList*, int(*cmp)(const void*, const void*));
     Int64 (*binarySearch)(struct ArrayList*, const void*, int(*cmp)(const void*, const void*));
-    
-    void (*clear)(struct ArrayList*);
+
     void (*free)(struct ArrayList*);
 } ArrayList;
 

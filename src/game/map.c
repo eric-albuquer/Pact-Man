@@ -1,8 +1,9 @@
 #include "map.h"
-
 #include <stdlib.h>
-
+#include <stdio.h>
+#include <math.h>
 #include "linkedlist.h"
+#include "enemy.h"
 
 static Cell createCell(bool isWall) { return (Cell){isWall, 0}; }
 
@@ -38,6 +39,32 @@ static void mazeGen(Map* this) {
 
 static void biomeGen(Map* this) { return; }
 
+static void _free(Map* this){
+    HashNode* cur = this->chunks->keys->head;
+    while(cur != NULL){
+        LinkedList* list = cur->data;
+        Node* curList = list->head;
+        Node* temp;
+        while(curList != NULL){
+            temp = curList;
+            curList = curList->next;
+            Enemy* e = temp->data;
+            e->free(e);
+            free(temp);
+        }
+        cur = cur->nextKey;
+    }
+    HashTable* h = this->chunks;
+    h->free(h);
+
+    for (uInt64 i = 0; i < this->rows; i++){
+        free(this->matrix[i]);
+    }
+    free(this->matrix);
+    Player* p = this->player;
+    p->free(p);
+}
+
 Map* new_Map(uInt64 rows, uInt64 cols, uInt64 chunkSize) {
     Map* this = malloc(sizeof(Map));
     this->rows = rows;
@@ -53,5 +80,6 @@ Map* new_Map(uInt64 rows, uInt64 cols, uInt64 chunkSize) {
 
     this->player = new_Player(10, 10);
     this->update = update;
+    this->free = _free;
     return this;
 }

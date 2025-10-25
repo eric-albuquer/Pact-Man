@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "render.h"
+#include "map.h"
 
 int main(void) {
     InitWindow(1920, 1080, "Teste Raylib");
@@ -15,6 +16,9 @@ int main(void) {
             render->drawMap(render, map);
         EndDrawing();
     }
+
+    map->free(map);
+    render->free(render);
 
     CloseWindow();
     return 0;

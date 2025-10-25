@@ -3,9 +3,11 @@
 
 #include "utils.h"
 
-typedef struct {
+typedef struct Player {
     float x;
     float y;
+
+    void (*free)(struct Player*);
 } Player;
 
 Player* new_Player(float x, float y);

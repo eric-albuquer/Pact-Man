@@ -35,6 +35,10 @@ static void drawMap(Render* this, Map* map) {
     }
 }
 
+void _free(Render* this){
+    free(this);
+}
+
 Render* new_Render(int width, int height, int cellSize, int renderDist) {
     Render* render = malloc(sizeof(Render));
     render->width = width;
@@ -46,5 +50,6 @@ Render* new_Render(int width, int height, int cellSize, int renderDist) {
     render->offsetHalfY = height >> 1;
 
     render->drawMap = drawMap;
+    render->free = _free;
     return render;
 }
