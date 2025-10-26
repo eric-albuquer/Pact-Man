@@ -12,6 +12,7 @@ typedef struct Map {
     unsigned int rows;
     unsigned int cols;
     Cell **matrix;
+    int **dist;
 
     HashTable* chunks;
 
