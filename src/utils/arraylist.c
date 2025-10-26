@@ -17,8 +17,8 @@ static void* pop(ArrayList* this){
     return this->data[--this->length];
 }
 
-static Int64 indexOf(ArrayList* this, const void* data){
-    for (Int64 i = 0; i < this->length; i++){
+static int indexOf(ArrayList* this, const void* data){
+    for (int i = 0; i < this->length; i++){
         if (this->data[i] == data) return i;
     }
     return -1;
@@ -30,13 +30,13 @@ static void swap(void** a, void** b){
     *b = temp;
 }
 
-static void quickSort(ArrayList* this, Int64 start, Int64 end, int (*cmp)(const void*, const void*)){
+static void quickSort(ArrayList* this, int start, int end, int (*cmp)(const void*, const void*)){
     if (start >= end) return;
     swap(&this->data[(start + end) >> 1], &this->data[end]);
     void* pivot = this->data[end];
-    Int64 idx = start;
+    int idx = start;
 
-    for (Int64 i = start; i < end; i++){
+    for (int i = start; i < end; i++){
         if (cmp(this->data[i], pivot) < 0){
             swap(&this->data[i], &this->data[idx++]);
         }
@@ -51,9 +51,9 @@ static void sort(ArrayList* this, int (*cmp)(const void*, const void*)){
     quickSort(this, 0, this->length - 1, cmp);
 }
 
-static Int64 bSearch(ArrayList* this, Int64 start, Int64 end, const void* data, int (*cmp)(const void*, const void*)){
+static int bSearch(ArrayList* this, int start, int end, const void* data, int (*cmp)(const void*, const void*)){
     if (start > end) return -1LL;
-    Int64 mid = (start + end) >> 1;
+    int mid = (start + end) >> 1;
     void* midData = this->data[mid];
     int comp = cmp(midData, data);
     if (comp == 0) return mid;
@@ -62,7 +62,7 @@ static Int64 bSearch(ArrayList* this, Int64 start, Int64 end, const void* data, 
     return -1LL;
 }
 
-static Int64 binarySearch(ArrayList* this, const void* data, int (*cmp)(const void*, const void*)){
+static int binarySearch(ArrayList* this, const void* data, int (*cmp)(const void*, const void*)){
     return bSearch(this, 0, this->length - 1, data, cmp);
 }
 

@@ -1,8 +1,6 @@
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
-#include "utils.h"
-
 typedef struct Node {
     struct Node* next;
     struct Node* prev;
@@ -12,7 +10,7 @@ typedef struct Node {
 typedef struct LinkedList {
     Node* head;
     Node* tail;
-    uInt64 length;
+    unsigned int length;
 
     void (*addFirst)(struct LinkedList*, void*);
     void (*addLast)(struct LinkedList*, void*);

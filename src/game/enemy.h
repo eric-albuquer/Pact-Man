@@ -1,15 +1,13 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
-#include "utils.h"
-
 typedef struct Enemy {
-    Int64 x;
-    Int64 y;
+    int x;
+    int y;
 
     void (*free)(struct Enemy*);
 } Enemy;
 
-Enemy* new_Enemy(Int64 x, Int64 y);
+Enemy* new_Enemy(int x, int y);
 
 #endif

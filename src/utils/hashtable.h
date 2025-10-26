@@ -1,7 +1,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-#include "utils.h"
+#include <stdbool.h>
 
 typedef struct HashNode {
     struct HashNode* next;
@@ -18,7 +18,7 @@ typedef struct {
 } Bucket;
 
 typedef struct HashTable {
-    uInt64 length;
+    unsigned int length;
     Bucket* keys;
     Bucket** buckets;
 
@@ -30,6 +30,6 @@ typedef struct HashTable {
     void (*free)(struct HashTable*);
 } HashTable;
 
-HashTable* new_HashTable(uInt64 length);
+HashTable* new_HashTable(unsigned int length);
 
 #endif

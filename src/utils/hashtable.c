@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define FNV64_OFFSET 14695981039346656037ull
-#define FNV64_PRIME 1099511628211ull
+#define FNV32_OFFSET 2166136261u
+#define FNV32_PRIME 16777619u
 
 static HashNode* new_Node(HashNode* prev, HashNode* next, HashNode* prevKey,
                           HashNode* nextKey, char* key, void* data) {
@@ -29,20 +29,20 @@ static HashNode* hasBucket(Bucket* b, char* key) {
     return NULL;
 }
 
-static uInt64 fnv1a(const char* str) {
-    uInt64 hash = FNV64_OFFSET;
+static unsigned int fnv1a(const char* str) {
+    unsigned int hash = FNV32_OFFSET;
     unsigned char c;
 
     while ((c = (unsigned char)*str++)) {
         hash ^= c;
-        hash *= FNV64_PRIME;
+        hash *= FNV32_PRIME;
     }
 
     return hash;
 }
 
 static void set(HashTable* this, char* key, void* data) {
-    uInt64 idx = fnv1a(key) % this->length;
+    unsigned int idx = fnv1a(key) % this->length;
     Bucket* b = this->buckets[idx];
     Bucket* keys = this->keys;
     HashNode* node = hasBucket(b, key);
@@ -66,20 +66,20 @@ static void set(HashTable* this, char* key, void* data) {
 }
 
 static void* get(HashTable* this, char* key) {
-    uInt64 idx = fnv1a(key) % this->length;
+    unsigned int idx = fnv1a(key) % this->length;
     Bucket* b = this->buckets[idx];
     HashNode* node = hasBucket(b, key);
     return node != NULL ? node->data : NULL;
 }
 
 bool has(HashTable* this, char* key) {
-    uInt64 idx = fnv1a(key) % this->length;
+    unsigned int idx = fnv1a(key) % this->length;
     Bucket* b = this->buckets[idx];
     return hasBucket(b, key) != NULL;
 }
 
 static void* delete(HashTable* this, char* key) {
-    uInt64 idx = fnv1a(key) % this->length;
+    unsigned int idx = fnv1a(key) % this->length;
     Bucket* b = this->buckets[idx];
     Bucket* keys = this->keys;
     HashNode* node = hasBucket(b, key);
@@ -116,7 +116,7 @@ static void _free(HashTable* this) {
         cur = cur->nextKey;
         free(temp);
     }
-    for (uInt64 i = 0; i < this->length; i++) {
+    for (unsigned int i = 0; i < this->length; i++) {
         free(this->buckets[i]);
     }
     free(this->buckets);
@@ -124,12 +124,12 @@ static void _free(HashTable* this) {
     free(this);
 }
 
-HashTable* new_HashTable(uInt64 length) {
+HashTable* new_HashTable(unsigned int length) {
     HashTable* h = malloc(sizeof(HashTable));
     h->length = length;
     h->keys = new_Bucket();
     h->buckets = malloc(sizeof(Bucket) * length);
-    for (uInt64 i = 0; i < length; i++) {
+    for (unsigned int i = 0; i < length; i++) {
         h->buckets[i] = new_Bucket();
     }
 

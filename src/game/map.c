@@ -23,7 +23,7 @@ static void update(Map* this, int dx, int dy) {
     }
 }
 
-static void loadChunks(Map* this, uInt64 chunkSize) {
+static void loadChunks(Map* this, unsigned int chunkSize) {
     int chunkRows = ceil(this->rows / (float)chunkSize);
     int chunkCols = ceil(this->cols / (float)chunkSize);
     int totalChunks = chunkRows * chunkCols;
@@ -41,20 +41,20 @@ static void loadChunks(Map* this, uInt64 chunkSize) {
 }
 
 void mazeGen(Map* map) {
-    uInt64 rows = map->rows;
-    uInt64 cols = map->cols;
+    unsigned int rows = map->rows;
+    unsigned int cols = map->cols;
 
-    for (uInt64 y = 0; y < rows; y++) {
-        for (uInt64 x = 0; x < cols; x++) {
+    for (unsigned int y = 0; y < rows; y++) {
+        for (unsigned int x = 0; x < cols; x++) {
             map->matrix[y][x] = createCell(0);
         }
     }
 
-    for (uInt64 x = 0; x < cols; x++) {
+    for (unsigned int x = 0; x < cols; x++) {
         map->matrix[0][x].isWall = 1;
         map->matrix[rows-1][x].isWall = 1;
     }
-    for (uInt64 y = 0; y < rows; y++) {
+    for (unsigned int y = 0; y < rows; y++) {
         map->matrix[y][0].isWall = 1;
         map->matrix[y][cols-1].isWall = 1;
     }
@@ -109,7 +109,7 @@ static void _free(Map* this) {
     HashTable* h = this->chunks;
     h->free(h);
 
-    for (uInt64 i = 0; i < this->rows; i++) {
+    for (unsigned int i = 0; i < this->rows; i++) {
         free(this->matrix[i]);
     }
     free(this->matrix);
@@ -117,12 +117,12 @@ static void _free(Map* this) {
     p->free(p);
 }
 
-Map* new_Map(uInt64 rows, uInt64 cols, uInt64 chunkSize) {
+Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
     Map* this = malloc(sizeof(Map));
     this->rows = rows;
     this->cols = cols;
     this->matrix = malloc(sizeof(Cell*) * rows);
-    for (uInt64 i = 0; i < rows; i++) {
+    for (unsigned int i = 0; i < rows; i++) {
         this->matrix[i] = malloc(sizeof(Cell) * cols);
     }
 

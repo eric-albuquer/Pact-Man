@@ -1,18 +1,16 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "utils.h"
-
 typedef struct Player {
-    Int64 x;
-    Int64 y;
+    int x;
+    int y;
 
-    Int64 lastX;
-    Int64 lastY;
+    int lastX;
+    int lastY;
 
     void (*free)(struct Player*);
 } Player;
 
-Player* new_Player(Int64 x, Int64 y);
+Player* new_Player(int x, int y);
 
 #endif

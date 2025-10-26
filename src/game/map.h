@@ -9,8 +9,8 @@ typedef struct {
 } Cell;
 
 typedef struct Map {
-    uInt64 rows;
-    uInt64 cols;
+    unsigned int rows;
+    unsigned int cols;
     Cell **matrix;
 
     HashTable* chunks;
@@ -21,6 +21,6 @@ typedef struct Map {
     void (*free)(struct Map*);
 } Map;
 
-Map* new_Map(uInt64 rows, uInt64 cols, uInt64 chunkSize);
+Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize);
 
 #endif

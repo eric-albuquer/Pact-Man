@@ -5,7 +5,7 @@ static void _free(Player* this){
     free(this);
 }
 
-Player* new_Player(Int64 x, Int64 y){
+Player* new_Player(int x, int y){
     Player* this = malloc(sizeof(Player));
     this->x = x;
     this->y = y;

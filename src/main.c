@@ -9,7 +9,7 @@ int main(void) {
 
     Render* render = new_Render(1920, 1080, 60, 50);
     Controler* controler = new_Controler();
-    Map* map = new_Map(1000, 1000, 30);
+    Map* map = new_Map(3000, 1000, 30);
 
     float lastTime = 0;
 
