@@ -71,7 +71,7 @@ int enemyStepTowardsPlayer(Map *map, Enemy *e) {
     if (!map || !e) return 0;
 
     int **dist = map->dist;
-    int enemyPosX = e->x, enemyPosY;
+    int enemyPosX = e->x, enemyPosY = e->y;
     
     if (!inBounds(map, enemyPosX, enemyPosY)) return 0;
     if (dist[enemyPosY][enemyPosX] <= 0) return 0;

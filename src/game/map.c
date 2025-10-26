@@ -5,22 +5,27 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "controler.h"
 #include "enemy.h"
 #include "linkedlist.h"
 
 static Cell createCell(bool isWall) { return (Cell){isWall}; }
 
-static void update(Map* this, int dx, int dy) {
-    int nx = this->player->x + dx;
-    int ny = this->player->y + dy;
-
-    if (nx >= 0 && nx < this->cols && ny >= 0 && ny < this->rows &&
-        !this->matrix[ny][nx].isWall) {
-        this->player->lastX = this->player->x;
-        this->player->lastY = this->player->y;
-        this->player->x = nx;
-        this->player->y = ny;
-    }
+static void update(Map* this, LinkedList* ioBuffer) {
+    while (ioBuffer->length > 0){
+        Input* input = ioBuffer->removeFirst(ioBuffer);
+        int nx = this->player->x + input->dx;
+        int ny = this->player->y + input->dy;
+        free(input);
+        if (nx >= 0 && nx < this->cols && ny >= 0 && ny < this->rows &&
+            !this->matrix[ny][nx].isWall) {
+            this->player->lastX = this->player->x;
+            this->player->lastY = this->player->y;
+            this->player->x = nx;
+            this->player->y = ny;
+            break;
+        }
+    };
 }
 
 static void loadChunks(Map* this, unsigned int chunkSize) {
@@ -52,39 +57,48 @@ void mazeGen(Map* map) {
 
     for (unsigned int x = 0; x < cols; x++) {
         map->matrix[0][x].isWall = 1;
-        map->matrix[rows-1][x].isWall = 1;
+        map->matrix[rows - 1][x].isWall = 1;
     }
     for (unsigned int y = 0; y < rows; y++) {
         map->matrix[y][0].isWall = 1;
-        map->matrix[y][cols-1].isWall = 1;
+        map->matrix[y][cols - 1].isWall = 1;
     }
 
     srand(time(NULL));
 
     int step = 2;
-    for (int y = 1; y < (int)rows-1; y += step) {
-        for (int x = 1; x < (int)cols-1; x += step) {
+    for (int y = 1; y < (int)rows - 1; y += step) {
+        for (int x = 1; x < (int)cols - 1; x += step) {
             if (rand() % 100 < 80) {
                 map->matrix[y][x].isWall = 1;
 
                 int dir = rand() % 4;
                 int nx = x;
                 int ny = y;
-                switch(dir) {
-                    case 0: ny = y - 1; break; // cima
-                    case 1: ny = y + 1; break; // baixo
-                    case 2: nx = x - 1; break; // esquerda
-                    case 3: nx = x + 1; break; // direita
+                switch (dir) {
+                    case 0:
+                        ny = y - 1;
+                        break;  // cima
+                    case 1:
+                        ny = y + 1;
+                        break;  // baixo
+                    case 2:
+                        nx = x - 1;
+                        break;  // esquerda
+                    case 3:
+                        nx = x + 1;
+                        break;  // direita
                 }
-                if (nx > 0 && nx < (int)cols-1 && ny > 0 && ny < (int)rows-1)
+                if (nx > 0 && nx < (int)cols - 1 && ny > 0 &&
+                    ny < (int)rows - 1)
                     map->matrix[ny][nx].isWall = 1;
             }
         }
     }
 
-    for (int i = 0; i < (int)(rows*cols/200); i++) {
-        int x = 1 + rand() % (cols-2);
-        int y = 1 + rand() % (rows-2);
+    for (int i = 0; i < (int)(rows * cols / 200); i++) {
+        int x = 1 + rand() % (cols - 2);
+        int y = 1 + rand() % (rows - 2);
         map->matrix[y][x].isWall = 0;
     }
 }

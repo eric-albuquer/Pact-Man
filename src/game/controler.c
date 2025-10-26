@@ -2,25 +2,44 @@
 #include <stdlib.h>
 
 static void reset(Controler* this){
-    this->dx = this->dy = 0;
+    Node* cur = this->ioBuffer->head;
+    Node* temp;
+    while(cur != NULL){
+        temp = cur;
+        cur = cur->next;
+        free(temp->data);
+        free(temp);
+    }
+    this->ioBuffer->head = this->ioBuffer->tail = NULL;
+    this->ioBuffer->length = 0;
 }
 
 static void getInputs(Controler* this) {
+    Input *inp = calloc(1, sizeof(Input));
+    LinkedList* ioBuffer = this->ioBuffer;
     if (IsKeyDown(KEY_W))
-        this->dy = -1;
+        inp->dy = -1;
     else if (IsKeyDown(KEY_S))
-        this->dy = 1;
+        inp->dy = 1;
     else if (IsKeyDown(KEY_A))
-        this->dx = -1;
+        inp->dx = -1;
     else if (IsKeyDown(KEY_D))
-        this->dx = 1;
+        inp->dx = 1;
+
+    if (inp->dx != 0 || inp->dy != 0){
+        ioBuffer->addFirst(ioBuffer, inp);
+    }
+        
 }
 
-static void _free(Controler* this) { free(this); }
+static void _free(Controler* this) { 
+    reset(this);
+    free(this);
+}
 
 Controler* new_Controler() {
     Controler* this = malloc(sizeof(Controler));
-    reset(this);
+    this->ioBuffer = new_LinkedList();
     
     this->getInputs = getInputs;
     this->reset = reset;

@@ -3,6 +3,7 @@
 
 #include "player.h"
 #include "hashtable.h"
+#include "linkedlist.h"
 
 typedef struct {
     unsigned isWall : 1;
@@ -18,7 +19,7 @@ typedef struct Map {
 
     Player* player;
 
-    void (*update)(struct Map*, int, int);
+    void (*update)(struct Map*, LinkedList*);
     void (*free)(struct Map*);
 } Map;
 

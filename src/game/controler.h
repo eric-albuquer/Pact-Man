@@ -2,10 +2,15 @@
 #define CONTROLER_H
 
 #include "raylib.h"
+#include "linkedlist.h"
 
-typedef struct Controler {
+typedef struct Input {
     int dx;
     int dy;
+} Input;
+
+typedef struct Controler {
+    LinkedList* ioBuffer;
 
     void (*getInputs)(struct Controler*);
     void (*reset)(struct Controler*);
