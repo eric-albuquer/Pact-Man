@@ -44,12 +44,12 @@ void _free(Render* this){
     free(this);
 }
 
-Render* new_Render(int width, int height, int cellSize, int renderDist) {
+Render* new_Render(int width, int height, int cellSize) {
     Render* render = malloc(sizeof(Render));
     render->width = width;
     render->height = height;
     render->cellSize = cellSize;
-    render->renderDist = renderDist;
+    render->renderDist = ((width / cellSize) >> 1) + 1;
     render->frameCount = 0;
 
     render->offsetHalfX = width >> 1;

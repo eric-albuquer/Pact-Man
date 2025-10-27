@@ -10,7 +10,7 @@ typedef struct Input {
 } Input;
 
 typedef struct Controler {
-    LinkedList* ioBuffer;
+    LinkedList* inputBuffer;
 
     void (*getInputs)(struct Controler*);
     void (*reset)(struct Controler*);

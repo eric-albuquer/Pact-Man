@@ -11,9 +11,9 @@
 
 static Cell createCell(bool isWall) { return (Cell){isWall}; }
 
-static void update(Map* this, LinkedList* ioBuffer) {
-    while (ioBuffer->length > 0){
-        Input* input = ioBuffer->removeFirst(ioBuffer);
+static void update(Map* this, LinkedList* inputBuffer) {
+    while (inputBuffer->length > 0) {
+        Input* input = inputBuffer->removeFirst(inputBuffer);
         int nx = this->player->x + input->dx;
         int ny = this->player->y + input->dy;
         free(input);
@@ -103,6 +103,27 @@ void mazeGen(Map* map) {
     }
 }
 
+static void mazeGen2(Map* map) {
+    unsigned int rows = map->rows;
+    unsigned int cols = map->cols;
+
+    srand(time(NULL));
+
+    for (unsigned int y = 0; y < rows; y++) {
+        for (unsigned int x = 0; x < cols; x++) {
+            bool evenAndEven = (y % 2 == 0) || (x % 2 == 0);
+            map->matrix[y][x] = createCell(evenAndEven);
+        }
+    }
+
+    for (unsigned int y = 1; y < rows - 1; y++) {
+        for (unsigned int x = 1; x < cols - 1; x++) {
+            if ((y % 2 == 0) && (x % 2 == 0)) continue;
+            if (rand() % 100 <= 60) map->matrix[y][x].isWall = 0;
+        }
+    }
+}
+
 static void biomeGen(Map* this) { return; }
 
 static void _free(Map* this) {
@@ -141,10 +162,10 @@ Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
     }
 
     loadChunks(this, chunkSize);
-    mazeGen(this);
+    mazeGen2(this);
     biomeGen(this);
 
-    this->player = new_Player(10, 10);
+    this->player = new_Player(50, rows >> 1);
     this->update = update;
     this->free = _free;
     return this;

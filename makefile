@@ -30,3 +30,5 @@ clean:
 # mingw32-make run
 # mingw32-make test
 # mingw32-make clean
+
+# mingw32-make clean && mingw32-make run

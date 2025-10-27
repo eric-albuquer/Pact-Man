@@ -7,9 +7,9 @@ int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
     SetTargetFPS(60);
 
-    Render* render = new_Render(1920, 1080, 60, 50);
+    Render* render = new_Render(1920, 1080, 35);
     Controler* controler = new_Controler();
-    Map* map = new_Map(1000, 1000, 30);
+    Map* map = new_Map(2000, 1000, 30);
 
     float lastTime = 0;
 
@@ -19,7 +19,7 @@ int main(void) {
         controler->getInputs(controler);
         if (lastTime >= 0.15) {
             lastTime = 0;
-            map->update(map, controler->ioBuffer);
+            map->update(map, controler->inputBuffer);
             controler->reset(controler);
         }
         BeginDrawing();

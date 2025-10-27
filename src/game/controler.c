@@ -1,46 +1,55 @@
 #include "controler.h"
+
 #include <stdlib.h>
 
-static void reset(Controler* this){
-    Node* cur = this->ioBuffer->head;
+static void reset(Controler* this) {
+    Node* cur = this->inputBuffer->head;
     Node* temp;
-    while(cur != NULL){
+    while (cur != NULL) {
         temp = cur;
         cur = cur->next;
         free(temp->data);
         free(temp);
     }
-    this->ioBuffer->head = this->ioBuffer->tail = NULL;
-    this->ioBuffer->length = 0;
+    this->inputBuffer->head = this->inputBuffer->tail = NULL;
+    this->inputBuffer->length = 0;
+}
+
+static void addInput(Controler* this, int dx, int dy) {
+    LinkedList* inputBuffer = this->inputBuffer;
+    Input* last = inputBuffer->head ? inputBuffer->head->data : NULL;
+    if (last == NULL || (last->dx != dx || last->dy != dy)) {
+        Input* inp = malloc(sizeof(Input));
+        inp->dx = dx;
+        inp->dy = dy;
+        inputBuffer->addFirst(inputBuffer, inp);
+    }
 }
 
 static void getInputs(Controler* this) {
-    Input *inp = calloc(1, sizeof(Input));
-    LinkedList* ioBuffer = this->ioBuffer;
-    if (IsKeyDown(KEY_W))
-        inp->dy = -1;
-    else if (IsKeyDown(KEY_S))
-        inp->dy = 1;
-    else if (IsKeyDown(KEY_A))
-        inp->dx = -1;
-    else if (IsKeyDown(KEY_D))
-        inp->dx = 1;
-
-    if (inp->dx != 0 || inp->dy != 0){
-        ioBuffer->addFirst(ioBuffer, inp);
+    if (IsKeyDown(KEY_W)){
+        addInput(this, 0, -1);
     }
-        
+    if (IsKeyDown(KEY_S)){
+        addInput(this, 0, 1);
+    }
+    if (IsKeyDown(KEY_A)){
+        addInput(this, -1, 0);
+    }
+    else if (IsKeyDown(KEY_D)){
+        addInput(this, 1, 0);
+    }
 }
 
-static void _free(Controler* this) { 
+static void _free(Controler* this) {
     reset(this);
     free(this);
 }
 
 Controler* new_Controler() {
     Controler* this = malloc(sizeof(Controler));
-    this->ioBuffer = new_LinkedList();
-    
+    this->inputBuffer = new_LinkedList();
+
     this->getInputs = getInputs;
     this->reset = reset;
     this->free = _free;

@@ -20,6 +20,6 @@ typedef struct Render {
     void (*free)(struct Render*);
 } Render;
 
-Render* new_Render(int width, int height, int cellSize, int renderDist);
+Render* new_Render(int width, int height, int cellSize);
 
 #endif
