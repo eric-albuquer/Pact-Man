@@ -9,7 +9,7 @@
 #include "enemy.h"
 #include "linkedlist.h"
 
-static Cell createCell(bool isWall) { return (Cell){isWall}; }
+static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
 static void update(Map* this, LinkedList* inputBuffer) {
     while (inputBuffer->length > 0) {
@@ -26,17 +26,31 @@ static void update(Map* this, LinkedList* inputBuffer) {
             break;
         }
     };
+
+    int chunkX = this->player->x / this->chunkSize;
+    int chunkY = this->player->y / this->chunkSize;
+    static char key[100];
+    sprintf(key, "%d,%d", chunkY, chunkX);
+    HashTable* chunks = this->chunks;
+    LinkedList* enemies = chunks->get(chunks, key);
+    Node* cur = enemies->head;
+    while (cur != NULL) {
+        Enemy* e = cur->data;
+        // path finder aqui
+        cur = cur->next;
+    }
 }
 
 static void loadChunks(Map* this, unsigned int chunkSize) {
-    int chunkRows = ceil(this->rows / (float)chunkSize);
-    int chunkCols = ceil(this->cols / (float)chunkSize);
-    int totalChunks = chunkRows * chunkCols;
+    this->chunkRows = ceil(this->rows / (float)chunkSize);
+    this->chunkCols = ceil(this->cols / (float)chunkSize);
+    this->chunkSize = chunkSize;
+    int totalChunks = this->chunkRows * this->chunkCols;
     HashTable* chunks = new_HashTable(totalChunks);
     this->chunks = chunks;
 
-    for (int i = 0; i < chunkRows; i++) {
-        for (int j = 0; j < chunkCols; j++) {
+    for (int i = 0; i < this->chunkRows; i++) {
+        for (int j = 0; j < this->chunkCols; j++) {
             LinkedList* list = new_LinkedList();
             char key[100];
             sprintf(key, "%d,%d", i, j);
@@ -45,65 +59,7 @@ static void loadChunks(Map* this, unsigned int chunkSize) {
     }
 }
 
-void mazeGen(Map* map) {
-    unsigned int rows = map->rows;
-    unsigned int cols = map->cols;
-
-    for (unsigned int y = 0; y < rows; y++) {
-        for (unsigned int x = 0; x < cols; x++) {
-            map->matrix[y][x] = createCell(0);
-        }
-    }
-
-    for (unsigned int x = 0; x < cols; x++) {
-        map->matrix[0][x].isWall = 1;
-        map->matrix[rows - 1][x].isWall = 1;
-    }
-    for (unsigned int y = 0; y < rows; y++) {
-        map->matrix[y][0].isWall = 1;
-        map->matrix[y][cols - 1].isWall = 1;
-    }
-
-    srand(time(NULL));
-
-    int step = 2;
-    for (int y = 1; y < (int)rows - 1; y += step) {
-        for (int x = 1; x < (int)cols - 1; x += step) {
-            if (rand() % 100 < 80) {
-                map->matrix[y][x].isWall = 1;
-
-                int dir = rand() % 4;
-                int nx = x;
-                int ny = y;
-                switch (dir) {
-                    case 0:
-                        ny = y - 1;
-                        break;  // cima
-                    case 1:
-                        ny = y + 1;
-                        break;  // baixo
-                    case 2:
-                        nx = x - 1;
-                        break;  // esquerda
-                    case 3:
-                        nx = x + 1;
-                        break;  // direita
-                }
-                if (nx > 0 && nx < (int)cols - 1 && ny > 0 &&
-                    ny < (int)rows - 1)
-                    map->matrix[ny][nx].isWall = 1;
-            }
-        }
-    }
-
-    for (int i = 0; i < (int)(rows * cols / 200); i++) {
-        int x = 1 + rand() % (cols - 2);
-        int y = 1 + rand() % (rows - 2);
-        map->matrix[y][x].isWall = 0;
-    }
-}
-
-static void mazeGen2(Map* map) {
+static void mazeGen(Map* map) {
     unsigned int rows = map->rows;
     unsigned int cols = map->cols;
 
@@ -119,12 +75,51 @@ static void mazeGen2(Map* map) {
     for (unsigned int y = 1; y < rows - 1; y++) {
         for (unsigned int x = 1; x < cols - 1; x++) {
             if ((y % 2 == 0) && (x % 2 == 0)) continue;
-            if (rand() % 100 <= 60) map->matrix[y][x].isWall = 0;
+            if (rand() % 100 <= 65) map->matrix[y][x].isWall = 0;
         }
     }
 }
 
-static void biomeGen(Map* this) { return; }
+static void biomeGen(Map* this) {
+    const int totalBiomes = 4;
+    const int deltaX = this->cols / totalBiomes;
+    Cell** matrix = this->matrix;
+    for (int i = 1; i < totalBiomes; i++) {
+        int dx = deltaX * i;
+        for (int y = 0; y < this->rows; y++) {
+            dx += (rand() % 5) - 2;
+            for (int x = dx; x >= 0 && matrix[y][x].biomeType == 0; x--) {
+                matrix[y][x].biomeType = i;
+            }
+        }
+    }
+
+    for (int y = 0; y < this->rows; y++) {
+        for (int x = this->cols - 1; x >= 0 && matrix[y][x].biomeType == 0;
+             x--) {
+            matrix[y][x].biomeType = totalBiomes;
+        }
+    }
+
+    const int range = this->chunkSize >> 1;
+    static char key[100];
+    HashTable* chunks = this->chunks;
+    for (int i = 0; i < this->chunkRows; i++) {
+        for (int j = 0; j < this->chunkCols; j++) {
+            sprintf(key, "%d,%d", i, j);
+            LinkedList* enemies = chunks->get(chunks, key);
+            int count = rand() % 3;
+            for (int k = 0; k < count; k++) {
+                int x = ((rand() % range) * 2) + j * this->chunkSize + 1;
+                int y = ((rand() % range) * 2) + i * this->chunkSize + 1;
+                if (x >= this->cols || y >= this->rows) continue;
+                Enemy* e = new_Enemy(x, y);
+                enemies->addFirst(enemies, e);
+                matrix[y][x].hasEnemy = 1;
+            }
+        }
+    }
+}
 
 static void _free(Map* this) {
     HashNode* cur = this->chunks->keys->head;
@@ -162,10 +157,10 @@ Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
     }
 
     loadChunks(this, chunkSize);
-    mazeGen2(this);
+    mazeGen(this);
     biomeGen(this);
 
-    this->player = new_Player(50, rows >> 1);
+    this->player = new_Player(10, 10);
     this->update = update;
     this->free = _free;
     return this;

@@ -7,6 +7,13 @@ static void drawMap(Render* this, Map* map) {
     int px = map->player->x;
     int py = map->player->y;
 
+    static const Color colors[4] = {
+        (Color){100, 0, 0, 255},
+        (Color){160, 0, 0, 255},
+        (Color){0, 100, 0, 255},
+        (Color){0, 0, 150, 255},
+    };
+
     for (int i = -this->renderDist; i <= this->renderDist; i++) {
         int yIdx = i + py;
         if (yIdx < 0 || yIdx >= map->rows) continue;
@@ -15,9 +22,18 @@ static void drawMap(Render* this, Map* map) {
             int xIdx = j + px;
             if (xIdx < 0 || xIdx >= map->cols) continue;
 
-            Color color = map->matrix[yIdx][xIdx].isWall
-                ? (Color){127, 127, 127, 255}
-                : (Color){0, 0, 0, 255};
+            int biomeType = map->matrix[yIdx][xIdx].biomeType;
+            Color color = colors[biomeType - 1];
+
+            if (map->matrix[yIdx][xIdx].isWall){
+                color.r += 50;
+                color.g += 50;
+                color.b += 50;
+            } else if (map->matrix[yIdx][xIdx].hasEnemy){
+                color.r = 255;
+                color.g = 255;
+                color.b = 0;
+            }
 
             DrawRectangle(
                 this->offsetHalfX + j * this->cellSize,

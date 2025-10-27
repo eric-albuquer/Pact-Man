@@ -6,7 +6,9 @@
 #include "linkedlist.h"
 
 typedef struct {
-    unsigned isWall : 1;
+    bool isWall;
+    bool hasEnemy;
+    unsigned int biomeType;
 } Cell;
 
 typedef struct Map {
@@ -16,6 +18,9 @@ typedef struct Map {
     int **dist;
 
     HashTable* chunks;
+    int chunkRows;
+    int chunkCols;
+    int chunkSize;
 
     Player* player;
 

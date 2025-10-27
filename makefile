@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -O2 -I./src/utils -I./src/tests -I./src/game -I./src/render
-LDFLAGS = -lraylib -lopengl32 -lgdi32 -lwinmm
+LDFLAGS = -L"C:/msys64/mingw64/lib" -lopengl32 -lgdi32 -lwinmm -lraylib
+CFLAGS  = -Wall -O2 -I./src/utils -I./src/tests -I./src/game -I./src/render -I"C:/msys64/mingw64/include"
 
 # Compila todos os arquivos .c da src/ e subpastas game, render e utils
 SRC_MAIN = $(wildcard src/*.c src/utils/*.c src/game/*.c src/render/*.c)
