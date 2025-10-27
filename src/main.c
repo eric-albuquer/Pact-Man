@@ -9,7 +9,7 @@ int main(void) {
 
     Render* render = new_Render(1920, 1080, 35);
     Controler* controler = new_Controler();
-    Map* map = new_Map(100, 200, 30);
+    Map* map = new_Map(100, 200, 20);
 
     float lastTime = 0;
 
@@ -19,7 +19,7 @@ int main(void) {
         controler->getInputs(controler);
         if (lastTime >= 0.15) {
             lastTime = 0;
-            map->update(map, controler->inputBuffer);
+            map->update(map, controler);
             controler->reset(controler);
         }
         BeginDrawing();

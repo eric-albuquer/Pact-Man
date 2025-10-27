@@ -5,14 +5,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "controler.h"
 #include "enemy.h"
-#include "linkedlist.h"
 #include "pathfinding.h"
 
 static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
-static void update(Map* this, LinkedList* inputBuffer) {
+static void updatePlayer(Map* this, LinkedList* inputBuffer) {
     while (inputBuffer->length > 0) {
         Input* input = inputBuffer->removeFirst(inputBuffer);
         int nx = this->player->x + input->dx;
@@ -26,7 +24,9 @@ static void update(Map* this, LinkedList* inputBuffer) {
             break;
         }
     };
+}
 
+static void updateEnemies(Map* this) {
     mapDistancePlayer(this, this->chunkSize << 1);
     static char key[100];
     HashTable* chunks = this->chunks;
@@ -38,7 +38,6 @@ static void update(Map* this, LinkedList* inputBuffer) {
             int chunkX = this->player->chunkX + j;
             if (chunkX < 0 || chunkX >= this->chunkCols) continue;
             sprintf(key, "%d,%d", chunkY, chunkX);
-            
             LinkedList* enemies = chunks->get(chunks, key);
             Node* cur = enemies->head;
             while (cur != NULL) {
@@ -47,7 +46,6 @@ static void update(Map* this, LinkedList* inputBuffer) {
                 if (enemyStepTowardsPlayer(this, e) &&
                     e->updateChunk(e, this->chunkSize)) {
                     enemies->removeNode(enemies, cur);
-                    printf("Mudando de chunk\n");
                     sprintf(key, "%d,%d", e->chunkY, e->chunkX);
                     LinkedList* enemies2 = chunks->get(chunks, key);
                     enemies2->addFirst(enemies2, e);
@@ -56,6 +54,11 @@ static void update(Map* this, LinkedList* inputBuffer) {
             }
         }
     }
+}
+
+static void update(Map* this, Controler* controler) {
+    updatePlayer(this, controler->inputBuffer);
+    updateEnemies(this);
 }
 
 static void loadChunks(Map* this, unsigned int chunkSize) {

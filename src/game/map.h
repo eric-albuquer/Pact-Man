@@ -4,6 +4,7 @@
 #include "player.h"
 #include "hashtable.h"
 #include "linkedlist.h"
+#include "controler.h"
 
 typedef struct {
     bool isWall;
@@ -23,7 +24,7 @@ typedef struct Map {
 
     Player* player;
 
-    void (*update)(struct Map*, LinkedList*);
+    void (*update)(struct Map*, Controler*);
     void (*free)(struct Map*);
 } Map;
 

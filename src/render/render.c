@@ -61,9 +61,20 @@ static void drawMap(Render* this, Map* map) {
                 int x = this->offsetHalfX + (e->x - px) * this->cellSize;
                 int y = this->offsetHalfY + (e->y - py) * this->cellSize;
 
-                DrawRectangle(x, y, this->cellSize, this->cellSize, (Color){255, 255, 0, 255});
+                DrawRectangle(x, y, this->cellSize, this->cellSize,
+                              (Color){255, 255, 0, 255});
                 cur = cur->next;
             }
+
+            int startChunkX = this->offsetHalfX +
+                              (chunkX * map->chunkSize - px) * this->cellSize;
+            int startChunkY = this->offsetHalfY +
+                              (chunkY * map->chunkSize - py) * this->cellSize;
+            Vector2 start = {startChunkX, startChunkY};
+            Vector2 endRight = {startChunkX + this->cellSize * map->chunkSize, startChunkY};
+            Vector2 endDown = {startChunkX, startChunkY + this->cellSize * map->chunkSize};
+            DrawLineEx(start, endRight, 5, GREEN);
+            DrawLineEx(start, endDown, 5, GREEN);
         }
     }
 
