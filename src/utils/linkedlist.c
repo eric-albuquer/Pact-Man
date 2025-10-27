@@ -60,6 +60,18 @@ static void _free(LinkedList* this){
     free(this);
 }
 
+static void* removeNode(LinkedList* this, Node* node){
+    if (node->prev) node->prev->next = node->next;
+    else this->head = node->next;
+    if (node->next) node->next->prev = node->prev;
+    else this->tail = node->prev;
+
+    this->length--;
+    void *data = node->data;
+    free(node);
+    return data;
+}
+
 LinkedList* new_LinkedList(){
     LinkedList* this = malloc(sizeof(LinkedList));
     this->head = this->tail = NULL;
@@ -69,6 +81,8 @@ LinkedList* new_LinkedList(){
     this->addLast = addLast;
     this->removeFirst = removeFirst;
     this->removeLast = removeLast;
+
+    this->removeNode = removeNode;
 
     this->free = _free;
     return this;

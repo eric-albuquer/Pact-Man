@@ -1,13 +1,16 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <stdbool.h>
+
 typedef struct Player {
     int x;
     int y;
 
-    int lastX;
-    int lastY;
+    int chunkX;
+    int chunkY;
 
+    bool (*updateChunk)(struct Player*, int);
     void (*free)(struct Player*);
 } Player;
 

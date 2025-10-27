@@ -1,10 +1,16 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+#include <stdbool.h>
+
 typedef struct Enemy {
     int x;
     int y;
 
+    int chunkX;
+    int chunkY;
+
+    bool (*updateChunk)(struct Enemy*, int);
     void (*free)(struct Enemy*);
 } Enemy;
 

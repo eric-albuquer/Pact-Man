@@ -1,11 +1,16 @@
 #include "render.h"
+
 #include <raylib.h>
+#include <stdio.h>
 #include <stdlib.h>
+
+#include "enemy.h"
 
 static void drawMap(Render* this, Map* map) {
     ClearBackground(RAYWHITE);
     int px = map->player->x;
     int py = map->player->y;
+    static char buffer[100];
 
     static const Color colors[4] = {
         (Color){100, 0, 0, 255},
@@ -25,40 +30,50 @@ static void drawMap(Render* this, Map* map) {
             int biomeType = map->matrix[yIdx][xIdx].biomeType;
             Color color = colors[biomeType - 1];
 
-            if (map->matrix[yIdx][xIdx].isWall){
+            if (map->matrix[yIdx][xIdx].isWall) {
                 color.r += 50;
                 color.g += 50;
                 color.b += 50;
-            } else if (map->matrix[yIdx][xIdx].hasEnemy){
-                color.r = 255;
-                color.g = 255;
-                color.b = 0;
             }
 
-            DrawRectangle(
-                this->offsetHalfX + j * this->cellSize,
-                this->offsetHalfY + i * this->cellSize,
-                this->cellSize,
-                this->cellSize,
-                color
-            );
+            int x = this->offsetHalfX + j * this->cellSize;
+            int y = this->offsetHalfY + i * this->cellSize;
+
+            DrawRectangle(x, y, this->cellSize, this->cellSize, color);
+
+            sprintf(buffer, "%d", map->matrix[yIdx][xIdx].distance);
+            DrawText(buffer, x + 5, y + 5, 20, (Color){255, 255, 255, 255});
+        }
+    }
+
+    HashTable* chunks = map->chunks;
+    for (int i = -1; i < 2; i++) {
+        int chunkY = map->player->chunkY + i;
+        if (chunkY < 0 || chunkY >= map->chunkRows) continue;
+        for (int j = -1; j < 2; j++) {
+            int chunkX = map->player->chunkX + j;
+            if (chunkX < 0 || chunkX >= map->chunkCols) continue;
+            sprintf(buffer, "%d,%d", chunkY, chunkX);
+            LinkedList* enemies = chunks->get(chunks, buffer);
+            Node* cur = enemies->head;
+            while (cur != NULL) {
+                Enemy* e = cur->data;
+                int x = this->offsetHalfX + (e->x - px) * this->cellSize;
+                int y = this->offsetHalfY + (e->y - py) * this->cellSize;
+
+                DrawRectangle(x, y, this->cellSize, this->cellSize, (Color){255, 255, 0, 255});
+                cur = cur->next;
+            }
         }
     }
 
     // desenha o player fixo no centro
-    DrawRectangle(
-        this->offsetHalfX,
-        this->offsetHalfY,
-        this->cellSize,
-        this->cellSize,
-        (Color){255, 255, 255, 255}
-    );
+    DrawRectangle(this->offsetHalfX, this->offsetHalfY, this->cellSize,
+                  this->cellSize, (Color){255, 255, 255, 255});
     this->frameCount++;
 }
 
-void _free(Render* this){
-    free(this);
-}
+void _free(Render* this) { free(this); }
 
 Render* new_Render(int width, int height, int cellSize) {
     Render* render = malloc(sizeof(Render));

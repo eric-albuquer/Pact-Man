@@ -8,6 +8,7 @@
 #include "controler.h"
 #include "enemy.h"
 #include "linkedlist.h"
+#include "pathfinding.h"
 
 static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
@@ -19,25 +20,41 @@ static void update(Map* this, LinkedList* inputBuffer) {
         free(input);
         if (nx >= 0 && nx < this->cols && ny >= 0 && ny < this->rows &&
             !this->matrix[ny][nx].isWall) {
-            this->player->lastX = this->player->x;
-            this->player->lastY = this->player->y;
             this->player->x = nx;
             this->player->y = ny;
+            this->player->updateChunk(this->player, this->chunkSize);
             break;
         }
     };
 
-    int chunkX = this->player->x / this->chunkSize;
-    int chunkY = this->player->y / this->chunkSize;
+    mapDistancePlayer(this, this->chunkSize << 1);
     static char key[100];
-    sprintf(key, "%d,%d", chunkY, chunkX);
     HashTable* chunks = this->chunks;
-    LinkedList* enemies = chunks->get(chunks, key);
-    Node* cur = enemies->head;
-    while (cur != NULL) {
-        Enemy* e = cur->data;
-        // path finder aqui
-        cur = cur->next;
+
+    for (int i = -1; i < 2; i++) {
+        int chunkY = this->player->chunkY + i;
+        if (chunkY < 0 || chunkY >= this->chunkRows) continue;
+        for (int j = -1; j < 2; j++) {
+            int chunkX = this->player->chunkX + j;
+            if (chunkX < 0 || chunkX >= this->chunkCols) continue;
+            sprintf(key, "%d,%d", chunkY, chunkX);
+            
+            LinkedList* enemies = chunks->get(chunks, key);
+            Node* cur = enemies->head;
+            while (cur != NULL) {
+                Node* next = cur->next;
+                Enemy* e = cur->data;
+                if (enemyStepTowardsPlayer(this, e) &&
+                    e->updateChunk(e, this->chunkSize)) {
+                    enemies->removeNode(enemies, cur);
+                    printf("Mudando de chunk\n");
+                    sprintf(key, "%d,%d", e->chunkY, e->chunkX);
+                    LinkedList* enemies2 = chunks->get(chunks, key);
+                    enemies2->addFirst(enemies2, e);
+                }
+                cur = next;
+            }
+        }
     }
 }
 
@@ -114,8 +131,8 @@ static void biomeGen(Map* this) {
                 int y = ((rand() % range) * 2) + i * this->chunkSize + 1;
                 if (x >= this->cols || y >= this->rows) continue;
                 Enemy* e = new_Enemy(x, y);
+                e->updateChunk(e, this->chunkSize);
                 enemies->addFirst(enemies, e);
-                matrix[y][x].hasEnemy = 1;
             }
         }
     }
@@ -160,7 +177,8 @@ Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
     mazeGen(this);
     biomeGen(this);
 
-    this->player = new_Player(10, 10);
+    this->player = new_Player(11, 11);
+    this->player->updateChunk(this->player, chunkSize);
     this->update = update;
     this->free = _free;
     return this;

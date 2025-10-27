@@ -7,15 +7,14 @@
 
 typedef struct {
     bool isWall;
-    bool hasEnemy;
     unsigned int biomeType;
+    int distance;
 } Cell;
 
 typedef struct Map {
     unsigned int rows;
     unsigned int cols;
     Cell **matrix;
-    int **dist;
 
     HashTable* chunks;
     int chunkRows;

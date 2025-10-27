@@ -2,6 +2,7 @@
 
 #include "pathfinding.h"
 #include "linkedlist.h"
+#include <stdio.h>
 
 struct QNode { int x, y, d; };
 typedef struct QNode QNode;
@@ -17,12 +18,12 @@ static inline int passable(Map* map, int x, int y) {
 void mapDistancePlayer(Map *map, int max_distance) {
     if (!map || !map->player) return;
 
-    int **dist = map->dist;
+    Cell** matrix = map->matrix;
     const int ROWS = map->rows, COLUMNS = map->cols;
 
     for (int y = 0; y < ROWS; y++) {
         for (int x = 0 ; x < COLUMNS; x++) {
-            dist[y][x] = -1;
+            matrix[y][x].distance = -1;
         }
     }
 
@@ -40,7 +41,7 @@ void mapDistancePlayer(Map *map, int max_distance) {
     }
 
     BFSQueue->addLast(BFSQueue, start);
-    dist[start->y][start->x] = 0;
+    matrix[start->y][start->x].distance = 0;
 
     static const int DX[4] = { 1, -1, 0, 0 };
     static const int DY[4] = { 0, 0, 1, -1 };
@@ -55,9 +56,9 @@ void mapDistancePlayer(Map *map, int max_distance) {
 
             if (!inBounds(map, neighborX, neighborY)) continue;
             if (!passable(map, neighborX, neighborY)) continue;
-            if (dist[neighborY][neighborX] != -1) continue;
+            if (matrix[neighborY][neighborX].distance != -1) continue;
 
-            dist[neighborY][neighborX] = curr->d + 1;
+            matrix[neighborY][neighborX].distance = curr->d + 1;
             QNode *neighborNew = malloc(sizeof(*neighborNew));
             neighborNew->x = neighborX; neighborNew->y = neighborY; neighborNew->d = curr->d + 1;
             BFSQueue->addLast(BFSQueue, neighborNew);
@@ -70,16 +71,16 @@ void mapDistancePlayer(Map *map, int max_distance) {
 int enemyStepTowardsPlayer(Map *map, Enemy *e) {
     if (!map || !e) return 0;
 
-    int **dist = map->dist;
+    Cell** matrix = map->matrix;
     int enemyPosX = e->x, enemyPosY = e->y;
     
     if (!inBounds(map, enemyPosX, enemyPosY)) return 0;
-    if (dist[enemyPosY][enemyPosX] <= 0) return 0;
+    if (matrix[enemyPosY][enemyPosX].distance <= 0) return 0;
 
     static const int DX[4] = { 0, 1, 0, -1};
     static const int DY[4] = { -1, 0, 1, 0};
 
-    int bestDistX = 0, bestDistY = 0, bestVal = dist[enemyPosY][enemyPosX];
+    int bestDistX = 0, bestDistY = 0, bestVal = matrix[enemyPosY][enemyPosX].distance;
 
     for (int i = 0; i < 4; i++) {
         int neighborX = enemyPosX + DX[i];
@@ -88,7 +89,7 @@ int enemyStepTowardsPlayer(Map *map, Enemy *e) {
         if (!inBounds(map, neighborX, neighborY)) continue;
         if (!passable(map, neighborX, neighborY)) continue;
 
-        int value = dist[neighborY][neighborX];
+        int value = matrix[neighborY][neighborX].distance;
 
         if (value >= 0 && value < bestVal) {
             bestVal = value;
@@ -97,7 +98,7 @@ int enemyStepTowardsPlayer(Map *map, Enemy *e) {
         }
     }
 
-    if (bestVal < dist[enemyPosY][enemyPosX]) {
+    if (bestVal < matrix[enemyPosY][enemyPosX].distance) {
         e->x = enemyPosX + bestDistX;
         e->y = enemyPosY + bestDistY;
         return 1;
