@@ -3,7 +3,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "enemy.h"
 #include "pathfinding.h"
@@ -83,8 +82,6 @@ static void mazeGen(Map* map) {
     unsigned int rows = map->rows;
     unsigned int cols = map->cols;
 
-    srand(time(NULL));
-
     for (unsigned int y = 0; y < rows; y++) {
         for (unsigned int x = 0; x < cols; x++) {
             bool evenAndEven = (y % 2 == 0) || (x % 2 == 0);
@@ -133,7 +130,8 @@ static void biomeGen(Map* this) {
                 int x = ((rand() % range) * 2) + j * this->chunkSize + 1;
                 int y = ((rand() % range) * 2) + i * this->chunkSize + 1;
                 if (x >= this->cols || y >= this->rows) continue;
-                Enemy* e = new_Enemy(x, y);
+                int biomeType = matrix[y][x].biomeType;
+                Enemy* e = new_Enemy(x, y, biomeType);
                 e->updateChunk(e, this->chunkSize);
                 enemies->addFirst(enemies, e);
             }
@@ -180,7 +178,7 @@ Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
     mazeGen(this);
     biomeGen(this);
 
-    this->player = new_Player(11, 11);
+    this->player = new_Player(51, 51);
     this->player->updateChunk(this->player, chunkSize);
     this->update = update;
     this->free = _free;

@@ -16,10 +16,15 @@ static void _free(Enemy* this){
     free(this);
 }
 
-Enemy* new_Enemy(int x, int y){
+Enemy* new_Enemy(int x, int y, int biomeType){
     Enemy* this = malloc(sizeof(Enemy));
     this->x = x;
     this->y = y;
+    
+    this->spawnX = x;
+    this->spawnY = y;
+
+    this->biomeType = biomeType;
 
     this->updateChunk = updateChunk;
     this->free = _free;

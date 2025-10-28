@@ -9,14 +9,15 @@ typedef struct Render {
 
     int cellSize;
 
-    int renderDist;
+    int renderDistX;
+    int renderDistY;
 
     int offsetHalfX;
     int offsetHalfY;
 
     unsigned int frameCount;
 
-    void (*drawMap)(struct Render*, Map*);
+    void (*drawMapDebug)(struct Render*, Map*);
     void (*free)(struct Render*);
 } Render;
 

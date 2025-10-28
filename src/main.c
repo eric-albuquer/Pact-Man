@@ -2,14 +2,18 @@
 #include "map.h"
 #include "raylib.h"
 #include "render.h"
+#include "time.h"
+#include <stdlib.h>
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
     SetTargetFPS(60);
 
+    srand(time(NULL));
+
     Render* render = new_Render(1920, 1080, 35);
     Controler* controler = new_Controler();
-    Map* map = new_Map(100, 200, 20);
+    Map* map = new_Map(301, 301, 20);
 
     float lastTime = 0;
 
@@ -23,7 +27,7 @@ int main(void) {
             controler->reset(controler);
         }
         BeginDrawing();
-        render->drawMap(render, map);
+        render->drawMapDebug(render, map);
         EndDrawing();
     }
 

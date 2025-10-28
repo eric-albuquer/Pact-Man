@@ -2,7 +2,7 @@
 
 #include "pathfinding.h"
 #include "linkedlist.h"
-#include <stdio.h>
+#include <math.h>
 
 struct QNode { int x, y, d; };
 typedef struct QNode QNode;
@@ -15,14 +15,26 @@ static inline int passable(Map* map, int x, int y) {
     return !map->matrix[y][x].isWall;
 }
 
+static inline int max(int a, int b){
+    return a > b ? a : b;
+}
+
+static inline int min(int a, int b){
+    return a < b ? a : b;
+}
+
 void mapDistancePlayer(Map *map, int max_distance) {
     if (!map || !map->player) return;
 
     Cell** matrix = map->matrix;
     const int ROWS = map->rows, COLUMNS = map->cols;
 
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0 ; x < COLUMNS; x++) {
+    int minY = max(map->player->y - max_distance - 1, 0);
+    int maxY = min(map->player->y + max_distance + 1, ROWS - 1);
+    int minX = max(map->player->x - max_distance - 1, 0);
+    int maxX = min(map->player->x + max_distance + 1, COLUMNS - 1);
+    for (int y = minY; y < maxY; y++) {
+        for (int x = minX ; x < maxX; x++) {
             matrix[y][x].distance = -1;
         }
     }
@@ -68,7 +80,7 @@ void mapDistancePlayer(Map *map, int max_distance) {
     BFSQueue->free(BFSQueue);
 }
 
-int enemyStepTowardsPlayer(Map *map, Enemy *e) {
+bool enemyStepTowardsPlayer(Map *map, Enemy *e) {
     if (!map || !e) return 0;
 
     Cell** matrix = map->matrix;
@@ -98,9 +110,23 @@ int enemyStepTowardsPlayer(Map *map, Enemy *e) {
         }
     }
 
+    int nx = enemyPosX + bestDistX;
+    int ny = enemyPosY + bestDistY;
+
+    if (matrix[ny][nx].biomeType != e->biomeType) return false;
+
+    int dx = nx - e->spawnX;
+    int dy = ny - e->spawnY;
+
+    float dist = hypotf(dx, dy);
+    if (dist > MAX_PERSUIT_RADIUS) return false;
+
+    float random = rand() / (float)RAND_MAX;
+    if (random > BEST_PATH_PROBABILITY) return false;
+
     if (bestVal < matrix[enemyPosY][enemyPosX].distance) {
-        e->x = enemyPosX + bestDistX;
-        e->y = enemyPosY + bestDistY;
+        e->x = nx;
+        e->y = ny;
         return 1;
     }
     return 0;

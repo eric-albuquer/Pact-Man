@@ -6,34 +6,104 @@
 
 #include "enemy.h"
 
-static void drawMap(Render* this, Map* map) {
-    ClearBackground(RAYWHITE);
+static const Color CELL_COLORS[4] = {
+    {100, 0, 0, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
+
+static void drawMinimapDebug(Render* this, Map* map, int x0, int y0, int size,
+                             int zoom) {
+    int cellSize = size / (zoom);
+    DrawRectangle(x0 - 5, y0 - 5, size + 10, size + 10, BLACK);
+    for (int y = 0; y < zoom; y++) {
+        int py = map->player->y + y - (zoom >> 1);
+        if (py < 0 || py >= map->rows) continue;
+        for (int x = 0; x < zoom; x++) {
+            int px = map->player->x + x - (zoom >> 1);
+            if (px < 0 || px >= map->cols) continue;
+
+            int biomeType = map->matrix[py][px].biomeType;
+            Color color = CELL_COLORS[biomeType - 1];
+
+            if (map->matrix[py][px].isWall) {
+                color.r += 70;
+                color.g += 70;
+                color.b += 70;
+            }
+
+            DrawRectangle(x0 + x * cellSize, y0 + y * cellSize, cellSize,
+                          cellSize, color);
+        }
+    }
+
+    int offset = (zoom * cellSize) >> 1;
+    static char key[100];
+    HashTable* chunks = map->chunks;
+    for (int i = -1; i < 2; i++) {
+        int chunkY = map->player->chunkY + i;
+        if (chunkY < 0 || chunkY >= map->chunkRows) continue;
+        for (int j = -1; j < 2; j++) {
+            int chunkX = map->player->chunkX + j;
+            if (chunkX < 0 || chunkX >= map->chunkCols) continue;
+            sprintf(key, "%d,%d", chunkY, chunkX);
+            LinkedList* enemies = chunks->get(chunks, key);
+            Node* cur = enemies->head;
+            while (cur != NULL) {
+                Enemy* e = cur->data;
+                int x = (e->x - map->player->x) * cellSize;
+                int y = (e->y - map->player->y) * cellSize;
+
+                DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize,
+                              cellSize, (Color){255, 255, 0, 255});
+                cur = cur->next;
+            }
+
+            int startChunkX =
+                x0 + offset +
+                (chunkX * map->chunkSize - map->player->x) * cellSize;
+            int startChunkY =
+                y0 + offset +
+                (chunkY * map->chunkSize - map->player->y) * cellSize;
+            DrawRectangleLinesEx((Rectangle){startChunkX, startChunkY,
+                                             cellSize * map->chunkSize + 3,
+                                             cellSize * map->chunkSize + 3},
+                                 3, GREEN);
+        }
+    }
+    DrawRectangle(x0 + offset, y0 + offset, cellSize,
+                              cellSize, WHITE);
+}
+
+static void drawHudDebug(Render* this, Map* map){
+    static char buffer[100];
+    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d", map->player->chunkX, map->player->chunkY, map->player->x, map->player->y);
+
+    DrawRectangle(this->width - 400, 0, 400,
+                              400, (Color){0, 0, 0, 200});
+    DrawText(buffer, this->width - 300, 50, 30, (Color){0, 255, 0, 255});
+
+    drawMinimapDebug(this, map, 20, 20, 500, 100);
+}
+
+static void drawMapDebug(Render* this, Map* map) {
+    ClearBackground(BLACK);
     int px = map->player->x;
     int py = map->player->y;
     static char buffer[100];
 
-    static const Color colors[4] = {
-        (Color){100, 0, 0, 255},
-        (Color){160, 0, 0, 255},
-        (Color){0, 100, 0, 255},
-        (Color){0, 0, 150, 255},
-    };
-
-    for (int i = -this->renderDist; i <= this->renderDist; i++) {
+    for (int i = -this->renderDistY; i <= this->renderDistY; i++) {
         int yIdx = i + py;
         if (yIdx < 0 || yIdx >= map->rows) continue;
 
-        for (int j = -this->renderDist; j <= this->renderDist; j++) {
+        for (int j = -this->renderDistX; j <= this->renderDistX; j++) {
             int xIdx = j + px;
             if (xIdx < 0 || xIdx >= map->cols) continue;
 
             int biomeType = map->matrix[yIdx][xIdx].biomeType;
-            Color color = colors[biomeType - 1];
+            Color color = CELL_COLORS[biomeType - 1];
 
             if (map->matrix[yIdx][xIdx].isWall) {
-                color.r += 50;
-                color.g += 50;
-                color.b += 50;
+                color.r += 70;
+                color.g += 70;
+                color.b += 70;
             }
 
             int x = this->offsetHalfX + j * this->cellSize;
@@ -70,17 +140,19 @@ static void drawMap(Render* this, Map* map) {
                               (chunkX * map->chunkSize - px) * this->cellSize;
             int startChunkY = this->offsetHalfY +
                               (chunkY * map->chunkSize - py) * this->cellSize;
-            Vector2 start = {startChunkX, startChunkY};
-            Vector2 endRight = {startChunkX + this->cellSize * map->chunkSize, startChunkY};
-            Vector2 endDown = {startChunkX, startChunkY + this->cellSize * map->chunkSize};
-            DrawLineEx(start, endRight, 5, GREEN);
-            DrawLineEx(start, endDown, 5, GREEN);
+            DrawRectangleLinesEx(
+                (Rectangle){startChunkX, startChunkY,
+                            this->cellSize * map->chunkSize + 5,
+                            this->cellSize * map->chunkSize + 5},
+                5, GREEN);
         }
     }
 
     // desenha o player fixo no centro
     DrawRectangle(this->offsetHalfX, this->offsetHalfY, this->cellSize,
                   this->cellSize, (Color){255, 255, 255, 255});
+
+    drawHudDebug(this, map);
     this->frameCount++;
 }
 
@@ -91,13 +163,16 @@ Render* new_Render(int width, int height, int cellSize) {
     render->width = width;
     render->height = height;
     render->cellSize = cellSize;
-    render->renderDist = ((width / cellSize) >> 1) + 1;
+
+    render->renderDistX = ((width / cellSize) >> 1) + 1;
+    render->renderDistY = ((height / cellSize) >> 1) + 1;
+
     render->frameCount = 0;
 
     render->offsetHalfX = width >> 1;
     render->offsetHalfY = height >> 1;
 
-    render->drawMap = drawMap;
+    render->drawMapDebug = drawMapDebug;
     render->free = _free;
     return render;
 }
