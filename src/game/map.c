@@ -10,6 +10,8 @@
 static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
 static void updatePlayer(Map* this, LinkedList* inputBuffer) {
+    this->player->lastX = this->player->x;
+    this->player->lastY = this->player->y;
     while (inputBuffer->length > 0) {
         Input* input = inputBuffer->removeFirst(inputBuffer);
         int nx = this->player->x + input->dx;
@@ -42,6 +44,8 @@ static void updateEnemies(Map* this) {
             while (cur != NULL) {
                 Node* next = cur->next;
                 Enemy* e = cur->data;
+                e->lastX = e->x;
+                e->lastY = e->y;
                 if (enemyStepTowardsPlayer(this, e) &&
                     e->updateChunk(e, this->chunkSize)) {
                     enemies->removeNode(enemies, cur);

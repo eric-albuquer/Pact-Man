@@ -85,9 +85,23 @@ static void drawHudDebug(Render* this, Map* map){
 
 static void drawMapDebug(Render* this, Map* map) {
     ClearBackground(BLACK);
-    int px = map->player->x;
-    int py = map->player->y;
+    int px = map->player->lastX;
+    int py = map->player->lastY;
     static char buffer[100];
+
+    int animationFrame = this->frameCount - this->lastUpdate;
+
+    float t = animationFrame / (float)FRAMES_ANIMATION;
+    if (t > 1) t = 1;
+
+    int dx = map->player->lastX - map->player->x;
+    int dy = map->player->lastY - map->player->y;
+
+    float offsetHalfXAnimated = this->offsetHalfX;
+    float offsetHalfYAnimated = this->offsetHalfY;
+
+    if (dx) offsetHalfXAnimated += this->cellSize * t * dx;
+    if (dy) offsetHalfYAnimated += this->cellSize * t * dy;
 
     for (int i = -this->renderDistY; i <= this->renderDistY; i++) {
         int yIdx = i + py;
@@ -106,13 +120,13 @@ static void drawMapDebug(Render* this, Map* map) {
                 color.b += 70;
             }
 
-            int x = this->offsetHalfX + j * this->cellSize;
-            int y = this->offsetHalfY + i * this->cellSize;
+            int x = offsetHalfXAnimated + j * this->cellSize;
+            int y = offsetHalfYAnimated + i * this->cellSize;
 
             DrawRectangle(x, y, this->cellSize, this->cellSize, color);
 
             sprintf(buffer, "%d", map->matrix[yIdx][xIdx].distance);
-            DrawText(buffer, x + 5, y + 5, 20, (Color){255, 255, 255, 255});
+            DrawText(buffer, x + 10, y + 10, 20, (Color){255, 255, 255, 255});
         }
     }
 
@@ -128,17 +142,21 @@ static void drawMapDebug(Render* this, Map* map) {
             Node* cur = enemies->head;
             while (cur != NULL) {
                 Enemy* e = cur->data;
-                int x = this->offsetHalfX + (e->x - px) * this->cellSize;
-                int y = this->offsetHalfY + (e->y - py) * this->cellSize;
+                int eDx = e->lastX - e->x;
+                int eDy = e->lastY - e->y;
+                float dAnimationX = eDx * t * this->cellSize;
+                float dAnimationY = eDy * t * this->cellSize;
+                int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize - dAnimationX;
+                int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize - dAnimationY;
 
                 DrawRectangle(x, y, this->cellSize, this->cellSize,
                               (Color){255, 255, 0, 255});
                 cur = cur->next;
             }
 
-            int startChunkX = this->offsetHalfX +
+            int startChunkX = offsetHalfXAnimated +
                               (chunkX * map->chunkSize - px) * this->cellSize;
-            int startChunkY = this->offsetHalfY +
+            int startChunkY = offsetHalfYAnimated +
                               (chunkY * map->chunkSize - py) * this->cellSize;
             DrawRectangleLinesEx(
                 (Rectangle){startChunkX, startChunkY,
@@ -156,7 +174,11 @@ static void drawMapDebug(Render* this, Map* map) {
     this->frameCount++;
 }
 
-void _free(Render* this) { free(this); }
+static void saveUpdate(Render* this){
+    this->lastUpdate = this->frameCount;
+}
+
+static void _free(Render* this) { free(this); }
 
 Render* new_Render(int width, int height, int cellSize) {
     Render* render = malloc(sizeof(Render));
@@ -167,12 +189,14 @@ Render* new_Render(int width, int height, int cellSize) {
     render->renderDistX = ((width / cellSize) >> 1) + 1;
     render->renderDistY = ((height / cellSize) >> 1) + 1;
 
+    render->lastUpdate = 0;
     render->frameCount = 0;
 
     render->offsetHalfX = width >> 1;
     render->offsetHalfY = height >> 1;
 
     render->drawMapDebug = drawMapDebug;
+    render->saveUpdate = saveUpdate;
     render->free = _free;
     return render;
 }

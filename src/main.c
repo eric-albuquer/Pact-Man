@@ -25,6 +25,7 @@ int main(void) {
             lastTime = 0;
             map->update(map, controler);
             controler->reset(controler);
+            render->saveUpdate(render);
         }
         BeginDrawing();
         render->drawMapDebug(render, map);

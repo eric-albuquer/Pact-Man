@@ -7,6 +7,9 @@ typedef struct Enemy {
     int x;
     int y;
 
+    int lastX;
+    int lastY;
+
     int spawnX;
     int spawnY;
 

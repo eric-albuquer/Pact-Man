@@ -20,7 +20,10 @@ Enemy* new_Enemy(int x, int y, int biomeType){
     Enemy* this = malloc(sizeof(Enemy));
     this->x = x;
     this->y = y;
-    
+
+    this->lastX = x;
+    this->lastY = y;
+
     this->spawnX = x;
     this->spawnY = y;
 

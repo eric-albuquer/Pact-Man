@@ -3,6 +3,8 @@
 
 #include "map.h"
 
+#define FRAMES_ANIMATION 8.0f
+
 typedef struct Render {
     int width;
     int height;
@@ -15,9 +17,11 @@ typedef struct Render {
     int offsetHalfX;
     int offsetHalfY;
 
+    unsigned int lastUpdate;
     unsigned int frameCount;
 
     void (*drawMapDebug)(struct Render*, Map*);
+    void (*saveUpdate)(struct Render*);
     void (*free)(struct Render*);
 } Render;
 

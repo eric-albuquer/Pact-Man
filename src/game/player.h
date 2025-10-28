@@ -7,6 +7,9 @@ typedef struct Player {
     int x;
     int y;
 
+    int lastX;
+    int lastY;
+
     int chunkX;
     int chunkY;
 
