@@ -9,44 +9,41 @@
 
 static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
-static bool movePlayer(Map* this, int dx, int dy){
-    if (dx == 0 && dy == 0) return false;
+static bool movePlayer(Map* this, Input input) {
+    if (input.dx == 0 && input.dy == 0) return false;
 
     Player* p = this->player;
-    int playerNextX = p->x + dx;
-    int playerNextY = p->y + dy;
+    int playerNextX = p->x + input.dx;
+    int playerNextY = p->y + input.dy;
 
-    if (playerNextX >= 0 && playerNextX < this->cols && playerNextY >= 0 && playerNextY < this->rows &&
-            !this->matrix[playerNextY][playerNextX].isWall) {
-            p->x = playerNextX;
-            p->y = playerNextY;
-            p->updateChunk(p, this->chunkSize);
-            p->updateDirection(p);
-            return true;
-        }
-    return false;       
+    if (playerNextX >= 0 && playerNextX < this->cols && playerNextY >= 0 &&
+        playerNextY < this->rows &&
+        !this->matrix[playerNextY][playerNextX].isWall) {
+        p->x = playerNextX;
+        p->y = playerNextY;
+        p->updateChunk(p, this->chunkSize);
+        p->updateDirection(p);
+        return true;
+    }
+    return false;
 }
 
 static void updatePlayer(Map* this, Input input) {
-    printf("%d %d\n", input.dx, input.dy);
     Player* p = this->player;
-    int playerDirX = p->x - p->lastX;
-    int playerDirY = p->y - p->lastY;
 
     p->lastX = p->x;
     p->lastY = p->y;
 
-
-    if (playerDirX != 0){
-        if (!movePlayer(this, 0, input.dy)) movePlayer(this, input.dx, 0);
-    
-    } else if (playerDirY != 0){
-        if (!movePlayer(this, input.dx, 0)) movePlayer(this, 0, input.dy);
-
-    } else {
-        if (!movePlayer(this, input.dx, 0)) movePlayer(this, 0, input.dy);
+    Input first = (Input){0, input.dy};
+    Input second = (Input){input.dx, 0};
+    if (p->y - p->lastY != 0) {
+        first = (Input){input.dx, 0};
+        second = (Input){0, input.dy};
     }
-    
+
+    if (!movePlayer(this, first)) {
+        movePlayer(this, second);
+    }
 }
 
 static void updateEnemies(Map* this) {
@@ -89,7 +86,7 @@ static void updateEnemies(Map* this) {
         }
     }
 
-    for (unsigned int i = 0; i < nearEnemies->length; i++){
+    for (unsigned int i = 0; i < nearEnemies->length; i++) {
         Enemy* e = nearEnemies->data[i];
         e->updated = false;
     }
