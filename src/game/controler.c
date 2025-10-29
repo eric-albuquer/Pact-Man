@@ -27,16 +27,16 @@ static void addInput(Controler* this, int dx, int dy) {
 }
 
 static void getInputs(Controler* this) {
-    if (IsKeyDown(KEY_W)){
+    if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)){
         addInput(this, 0, -1);
     }
-    if (IsKeyDown(KEY_S)){
+    if (IsKeyDown(KEY_S)|| IsKeyDown(KEY_DOWN)){
         addInput(this, 0, 1);
     }
-    if (IsKeyDown(KEY_A)){
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)){
         addInput(this, -1, 0);
     }
-    else if (IsKeyDown(KEY_D)){
+    else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)){
         addInput(this, 1, 0);
     }
 }

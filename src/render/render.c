@@ -111,9 +111,9 @@ static void drawMapDebug(Render* this, Map* map) {
             Color color = CELL_COLORS[biomeType - 1];
 
             if (map->matrix[yIdx][xIdx].isWall) {
-                color.r += 70;
-                color.g += 70;
-                color.b += 70;
+                color.r += 100;
+                color.g += 100;
+                color.b += 100;
             }
 
             int x = offsetHalfXAnimated + j * this->cellSize;
