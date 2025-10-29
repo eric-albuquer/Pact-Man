@@ -50,20 +50,28 @@ static void updateEnemies(Map* this) {
             while (cur != NULL) {
                 Node* next = cur->next;
                 Enemy* e = cur->data;
-                e->lastX = e->x;
-                e->lastY = e->y;
-                if (enemyStepTowardsPlayer(this, e) &&
-                    e->updateChunk(e, this->chunkSize)) {
-                    enemies->removeNode(enemies, cur);
-                    sprintf(key, "%d,%d", e->chunkY, e->chunkX);
-                    LinkedList* newChunk = chunks->get(chunks, key);
-                    newChunk->addFirst(newChunk, e);
+                if (!e->updated) {
+                    e->updated = true;
+                    e->lastX = e->x;
+                    e->lastY = e->y;
+                    if (enemyStepTowardsPlayer(this, e) &&
+                        e->updateChunk(e, this->chunkSize)) {
+                        enemies->removeNode(enemies, cur);
+                        sprintf(key, "%d,%d", e->chunkY, e->chunkX);
+                        LinkedList* newChunk = chunks->get(chunks, key);
+                        newChunk->addFirst(newChunk, e);
+                    }
+                    e->updateDirection(e);
+                    nearEnemies->push(nearEnemies, e);
                 }
-                e->updateDirection(e);
-                nearEnemies->push(nearEnemies, e);
                 cur = next;
             }
         }
+    }
+
+    for (unsigned int i = 0; i < nearEnemies->length; i++){
+        Enemy* e = nearEnemies->data[i];
+        e->updated = false;
     }
 }
 

@@ -36,7 +36,7 @@ static void getInputs(Controler* this) {
     if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)){
         addInput(this, -1, 0);
     }
-    else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)){
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)){
         addInput(this, 1, 0);
     }
 }

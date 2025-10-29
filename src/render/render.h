@@ -4,7 +4,7 @@
 #include "map.h"
 #include <raylib.h>
 
-#define FRAMES_ANIMATION 9.0f
+#define FRAMES_ANIMATION 10.0f
 
 typedef struct Render {
     int width;

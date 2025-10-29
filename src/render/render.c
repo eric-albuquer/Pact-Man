@@ -88,9 +88,9 @@ static void drawMapDebug(Render* this, Map* map) {
 
     int animationFrame = this->frameCount - this->lastUpdate;
 
-    float t = animationFrame / (float)FRAMES_ANIMATION;
+    float t = animationFrame / FRAMES_ANIMATION;
     if (t > 1) t = 1;
-
+    
     int dx = p->lastX - p->x;
     int dy = p->lastY - p->y;
 
@@ -140,7 +140,8 @@ static void drawMapDebug(Render* this, Map* map) {
                 dAnimationY;
 
         int offsetTexture = 8;
-        if (e->dir == RIGHT) offsetTexture = 8;
+        if (e->dir == RIGHT)
+            offsetTexture = 8;
         else if (e->dir == DOWN)
             offsetTexture = 10;
         else if (e->dir == LEFT)

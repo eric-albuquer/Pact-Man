@@ -17,6 +17,8 @@ typedef struct Enemy {
     int chunkX;
     int chunkY;
 
+    bool updated;
+
     Direction dir;
 
     int biomeType;
