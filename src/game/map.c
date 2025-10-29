@@ -10,21 +10,23 @@
 static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
 static void updatePlayer(Map* this, LinkedList* inputBuffer) {
-    this->player->lastX = this->player->x;
-    this->player->lastY = this->player->y;
+    Player* p = this->player;
+    p->lastX = p->x;
+    p->lastY = p->y;
     while (inputBuffer->length > 0) {
         Input* input = inputBuffer->removeFirst(inputBuffer);
-        int nx = this->player->x + input->dx;
-        int ny = this->player->y + input->dy;
+        int nx = p->x + input->dx;
+        int ny = p->y + input->dy;
         free(input);
         if (nx >= 0 && nx < this->cols && ny >= 0 && ny < this->rows &&
             !this->matrix[ny][nx].isWall) {
-            this->player->x = nx;
-            this->player->y = ny;
-            this->player->updateChunk(this->player, this->chunkSize);
+            p->x = nx;
+            p->y = ny;
+            p->updateChunk(p, this->chunkSize);
             break;
         }
     };
+    p->updateDirection(p);
 }
 
 static void updateEnemies(Map* this) {
@@ -57,6 +59,7 @@ static void updateEnemies(Map* this) {
                     LinkedList* newChunk = chunks->get(chunks, key);
                     newChunk->addFirst(newChunk, e);
                 }
+                e->updateDirection(e);
                 nearEnemies->push(nearEnemies, e);
                 cur = next;
             }

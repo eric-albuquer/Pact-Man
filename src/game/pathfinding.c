@@ -28,10 +28,6 @@ static inline bool farAway(Map* map, Enemy* e){
     return distToSpawn > MAX_PERSUIT_RADIUS;
 }
 
-static inline int max(int a, int b) { return a > b ? a : b; }
-
-static inline int min(int a, int b) { return a < b ? a : b; }
-
 void mapDistancePlayer(Map* map, int max_distance) {
     if (!map || !map->player || max_distance < 1) return;
 

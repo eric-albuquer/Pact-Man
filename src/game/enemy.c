@@ -12,6 +12,15 @@ static bool updateChunk(Enemy* this, int chunkSize) {
     return false;
 }
 
+static void updateDirection(Enemy* this){
+    int dx = this->x - this->lastX;
+    int dy = this->y - this->lastY;
+    if (dx == 1) this->dir = RIGHT;
+    else if (dx == -1) this->dir = LEFT;
+    else if (dy == 1) this->dir = DOWN;
+    else if (dy == -1) this->dir = UP;
+}
+
 static void _free(Enemy* this){
     free(this);
 }
@@ -32,6 +41,7 @@ Enemy* new_Enemy(int x, int y, int biomeType){
     this->biomeType = biomeType;
 
     this->updateChunk = updateChunk;
+    this->updateDirection = updateDirection;
     this->free = _free;
     return this;
 }

@@ -20,14 +20,17 @@ typedef struct Render {
 
     unsigned int lastUpdate;
     unsigned int frameCount;
+    unsigned int updateCount;
 
-    Texture2D sprites[10];
+    Texture2D* sprites;
+    unsigned int totalSprites;
 
     void (*drawMapDebug)(struct Render*, Map*);
     void (*saveUpdate)(struct Render*);
     void (*free)(struct Render*);
 } Render;
 
-Render* new_Render(int width, int height, int cellSize);
+Render* new_Render(int width, int height, int cellSize, const char** SPRITES,
+                   int total);
 
 #endif

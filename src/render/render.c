@@ -81,8 +81,9 @@ static void drawHudDebug(Render* this, Map* map) {
 
 static void drawMapDebug(Render* this, Map* map) {
     ClearBackground(BLACK);
-    int px = map->player->lastX;
-    int py = map->player->lastY;
+    Player* p = map->player;
+    int px = p->lastX;
+    int py = p->lastY;
     static char buffer[100];
 
     int animationFrame = this->frameCount - this->lastUpdate;
@@ -90,8 +91,8 @@ static void drawMapDebug(Render* this, Map* map) {
     float t = animationFrame / (float)FRAMES_ANIMATION;
     if (t > 1) t = 1;
 
-    int dx = map->player->lastX - map->player->x;
-    int dy = map->player->lastY - map->player->y;
+    int dx = p->lastX - p->x;
+    int dy = p->lastY - p->y;
 
     float offsetHalfXAnimated = this->offsetHalfX;
     float offsetHalfYAnimated = this->offsetHalfY;
@@ -111,9 +112,9 @@ static void drawMapDebug(Render* this, Map* map) {
             Color color = CELL_COLORS[biomeType - 1];
 
             if (map->matrix[yIdx][xIdx].isWall) {
-                color.r += 100;
-                color.g += 100;
-                color.b += 100;
+                color.r = color.r + 70;
+                color.g = color.g + 70;
+                color.b = color.b + 70;
             }
 
             int x = offsetHalfXAnimated + j * this->cellSize;
@@ -138,8 +139,18 @@ static void drawMapDebug(Render* this, Map* map) {
         int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize -
                 dAnimationY;
 
-        DrawRectangle(x, y, this->cellSize, this->cellSize,
-                      (Color){255, 255, 0, 255});
+        int offsetTexture = 8;
+        if (e->dir == RIGHT) offsetTexture = 8;
+        else if (e->dir == DOWN)
+            offsetTexture = 10;
+        else if (e->dir == LEFT)
+            offsetTexture = 12;
+        else if (e->dir == UP)
+            offsetTexture = 14;
+
+        Texture2D enemyTexture =
+            this->sprites[(this->updateCount % 2) + offsetTexture];
+        DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
     }
 
     for (int i = -1; i < 2; i++) {
@@ -164,39 +175,73 @@ static void drawMapDebug(Render* this, Map* map) {
     // desenha o player fixo no centro
     // DrawRectangle(this->offsetHalfX, this->offsetHalfY, this->cellSize,
     //               this->cellSize, (Color){255, 255, 255, 255});
-    DrawTexture(this->sprites[0], this->offsetHalfX, this->offsetHalfY, (Color){255, 255, 255, 255});
+    int offsetTexture = 0;
+    if (p->dir == RIGHT)
+        offsetTexture = 0;
+    else if (p->dir == DOWN)
+        offsetTexture = 2;
+    else if (p->dir == LEFT)
+        offsetTexture = 4;
+    else if (p->dir == UP)
+        offsetTexture = 6;
+
+    Texture2D playerTexture =
+        this->sprites[(this->updateCount % 2) + offsetTexture];
+    DrawTexture(playerTexture, this->offsetHalfX, this->offsetHalfY,
+                (Color){255, 255, 255, 255});
 
     drawHudDebug(this, map);
     this->frameCount++;
 }
 
-static void saveUpdate(Render* this) { this->lastUpdate = this->frameCount; }
+static void loadSprites(Render* this, const char** paths, int total) {
+    this->sprites = malloc(sizeof(Texture2D) * total);
+    this->totalSprites = total;
 
-static void _free(Render* this) { free(this); }
+    for (int i = 0; i < total; i++) {
+        Image img = LoadImage(paths[i]);
+        ImageResize(&img, this->cellSize, this->cellSize);
+        Texture2D spriteTexture = LoadTextureFromImage(img);
+        this->sprites[i] = spriteTexture;
+        UnloadImage(img);
+    }
+}
 
-Render* new_Render(int width, int height, int cellSize) {
-    Render* render = malloc(sizeof(Render));
-    render->width = width;
-    render->height = height;
-    render->cellSize = cellSize;
+static void saveUpdate(Render* this) {
+    this->lastUpdate = this->frameCount;
+    this->updateCount++;
+}
 
-    render->renderDistX = ((width / cellSize) >> 1) + 1;
-    render->renderDistY = ((height / cellSize) >> 1) + 1;
+static void _free(Render* this) {
+    Texture2D* sprites = this->sprites;
+    for (unsigned int i = 0; i < this->totalSprites; i++) {
+        Texture2D spriteTexture = sprites[i];
+        UnloadTexture(spriteTexture);
+    }
+    free(this->sprites);
+    free(this);
+}
 
-    render->lastUpdate = 0;
-    render->frameCount = 0;
+Render* new_Render(int width, int height, int cellSize, const char** SPRITES,
+                   int total) {
+    Render* this = malloc(sizeof(Render));
+    this->width = width;
+    this->height = height;
+    this->cellSize = cellSize;
 
-    render->offsetHalfX = width >> 1;
-    render->offsetHalfY = height >> 1;
+    this->renderDistX = ((width / cellSize) >> 1) + 1;
+    this->renderDistY = ((height / cellSize) >> 1) + 1;
 
-    Texture2D *sprites = render->sprites;
-    Image img = LoadImage("assets/sprites/fantasma1.png");
-    ImageResize(&img, cellSize, cellSize);
-    sprites[0] = LoadTextureFromImage(img);
-    UnloadImage(img);
+    this->lastUpdate = 0;
+    this->frameCount = 0;
 
-    render->drawMapDebug = drawMapDebug;
-    render->saveUpdate = saveUpdate;
-    render->free = _free;
-    return render;
+    this->offsetHalfX = width >> 1;
+    this->offsetHalfY = height >> 1;
+
+    loadSprites(this, SPRITES, total);
+
+    this->drawMapDebug = drawMapDebug;
+    this->saveUpdate = saveUpdate;
+    this->free = _free;
+    return this;
 }

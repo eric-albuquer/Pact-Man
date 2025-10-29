@@ -22,6 +22,7 @@ typedef struct Enemy {
     int biomeType;
 
     bool (*updateChunk)(struct Enemy*, int);
+    void (*updateDirection)(struct Enemy*);
     void (*free)(struct Enemy*);
 } Enemy;
 
