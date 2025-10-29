@@ -14,6 +14,7 @@ typedef struct ArrayList {
     void (*sort)(struct ArrayList*, int(*cmp)(const void*, const void*));
     int (*binarySearch)(struct ArrayList*, const void*, int(*cmp)(const void*, const void*));
 
+    void (*clear)(struct ArrayList*);
     void (*free)(struct ArrayList*);
 } ArrayList;
 

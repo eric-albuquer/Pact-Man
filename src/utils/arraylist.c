@@ -66,6 +66,10 @@ static int binarySearch(ArrayList* this, const void* data, int (*cmp)(const void
     return bSearch(this, 0, this->length - 1, data, cmp);
 }
 
+static void clear(ArrayList* this){
+    this->length = 0;
+}
+
 static void _free(ArrayList* this){
     free(this);
 }
@@ -82,6 +86,7 @@ ArrayList* new_ArrayList() {
     arr->binarySearch = binarySearch;
     arr->indexOf = indexOf;
 
+    arr->clear = clear;
     arr->free = _free;
     return arr;
 }

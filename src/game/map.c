@@ -28,7 +28,11 @@ static void updatePlayer(Map* this, LinkedList* inputBuffer) {
 }
 
 static void updateEnemies(Map* this) {
+    ArrayList* nearEnemies = this->nearEnemies;
+    nearEnemies->clear(nearEnemies);
+
     mapDistancePlayer(this, this->chunkSize << 1);
+
     static char key[100];
     HashTable* chunks = this->chunks;
 
@@ -50,9 +54,10 @@ static void updateEnemies(Map* this) {
                     e->updateChunk(e, this->chunkSize)) {
                     enemies->removeNode(enemies, cur);
                     sprintf(key, "%d,%d", e->chunkY, e->chunkX);
-                    LinkedList* enemies2 = chunks->get(chunks, key);
-                    enemies2->addFirst(enemies2, e);
+                    LinkedList* newChunk = chunks->get(chunks, key);
+                    newChunk->addFirst(newChunk, e);
                 }
+                nearEnemies->push(nearEnemies, e);
                 cur = next;
             }
         }
@@ -161,6 +166,8 @@ static void _free(Map* this) {
     HashTable* h = this->chunks;
     h->free(h);
 
+    this->nearEnemies->free(this->nearEnemies);
+
     for (unsigned int i = 0; i < this->rows; i++) {
         free(this->matrix[i]);
     }
@@ -177,6 +184,7 @@ Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
     for (unsigned int i = 0; i < rows; i++) {
         this->matrix[i] = malloc(sizeof(Cell) * cols);
     }
+    this->nearEnemies = new_ArrayList();
 
     loadChunks(this, chunkSize);
     mazeGen(this);

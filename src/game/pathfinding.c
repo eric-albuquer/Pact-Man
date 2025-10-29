@@ -33,7 +33,7 @@ static inline int max(int a, int b) { return a > b ? a : b; }
 static inline int min(int a, int b) { return a < b ? a : b; }
 
 void mapDistancePlayer(Map* map, int max_distance) {
-    if (!map || !map->player) return;
+    if (!map || !map->player || max_distance < 1) return;
 
     Cell** matrix = map->matrix;
     const int ROWS = map->rows, COLUMNS = map->cols;
@@ -70,7 +70,7 @@ void mapDistancePlayer(Map* map, int max_distance) {
 
     while (BFSQueue->length) {
         QNode* curr = BFSQueue->removeFirst(BFSQueue);
-        if (max_distance > 0 && curr->d >= max_distance) {
+        if (curr->d >= max_distance) {
             free(curr);
             continue;
         }
@@ -110,9 +110,6 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
     static QNode moves[4];
     int length = 0;
 
-    // int bestDistX = 0, bestDistY = 0, bestVal =
-    // matrix[enemyPosY][enemyPosX].distance;
-
     for (int i = 0; i < 4; i++) {
         int neighborX = enemyPosX + DX[i];
         int neighborY = enemyPosY + DY[i];
@@ -120,16 +117,12 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
         if (!inBounds(map, neighborX, neighborY)) continue;
         if (!passable(map, neighborX, neighborY)) continue;
         if (!sameBiome(map, neighborX, neighborY, e)) continue;
+
         int dist = matrix[neighborY][neighborX].distance;
         moves[length++] = (QNode){neighborX, neighborY, dist};
-
-        // if (value >= 0 && value < bestVal) {
-        //     bestVal = value;
-        //     bestDistX = DX[i];
-        //     bestDistY = DY[i];
-        // }
     }
 
+    // ordenando direções
     for (int i = 0; i < length; i++) {
         for (int j = i + 1; j < length; j++) {
             if (moves[i].d > moves[j].d) {
@@ -140,6 +133,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
         }
     }
 
+    // Indo para a pior direção
     if (farAway(map, e)){
         e->x = moves[length - 1].x;
         e->y = moves[length - 1].y;
@@ -149,6 +143,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
     int nx = moves[0].x;
     int ny = moves[0].y;
 
+    // probabilidade de seguir melhor caminho ou um aleatório
     float random = rand() / (float)RAND_MAX;
     if (random > BEST_PATH_PROBABILITY) {
         int idx = rand() % length;

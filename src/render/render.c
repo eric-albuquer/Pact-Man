@@ -35,27 +35,23 @@ static void drawMinimapDebug(Render* this, Map* map, int x0, int y0, int size,
     }
 
     int offset = (zoom * cellSize) >> 1;
-    static char key[100];
-    HashTable* chunks = map->chunks;
+
+    ArrayList* nearEnemies = map->nearEnemies;
+    for (int i = 0; i < map->nearEnemies->length; i++) {
+        Enemy* e = nearEnemies->data[i];
+        int x = (e->x - map->player->x) * cellSize;
+        int y = (e->y - map->player->y) * cellSize;
+
+        DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize,
+                      (Color){255, 255, 0, 255});
+    }
+
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
         if (chunkY < 0 || chunkY >= map->chunkRows) continue;
         for (int j = -1; j < 2; j++) {
             int chunkX = map->player->chunkX + j;
             if (chunkX < 0 || chunkX >= map->chunkCols) continue;
-            sprintf(key, "%d,%d", chunkY, chunkX);
-            LinkedList* enemies = chunks->get(chunks, key);
-            Node* cur = enemies->head;
-            while (cur != NULL) {
-                Enemy* e = cur->data;
-                int x = (e->x - map->player->x) * cellSize;
-                int y = (e->y - map->player->y) * cellSize;
-
-                DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize,
-                              cellSize, (Color){255, 255, 0, 255});
-                cur = cur->next;
-            }
-
             int startChunkX =
                 x0 + offset +
                 (chunkX * map->chunkSize - map->player->x) * cellSize;
@@ -68,16 +64,16 @@ static void drawMinimapDebug(Render* this, Map* map, int x0, int y0, int size,
                                  3, GREEN);
         }
     }
-    DrawRectangle(x0 + offset, y0 + offset, cellSize,
-                              cellSize, WHITE);
+
+    DrawRectangle(x0 + offset, y0 + offset, cellSize, cellSize, WHITE);
 }
 
-static void drawHudDebug(Render* this, Map* map){
+static void drawHudDebug(Render* this, Map* map) {
     static char buffer[100];
-    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d", map->player->chunkX, map->player->chunkY, map->player->x, map->player->y);
+    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d", map->player->chunkX,
+            map->player->chunkY, map->player->x, map->player->y);
 
-    DrawRectangle(this->width - 400, 0, 400,
-                              400, (Color){0, 0, 0, 200});
+    DrawRectangle(this->width - 400, 0, 400, 400, (Color){0, 0, 0, 200});
     DrawText(buffer, this->width - 300, 50, 30, (Color){0, 255, 0, 255});
 
     drawMinimapDebug(this, map, 20, 20, 500, 100);
@@ -130,29 +126,28 @@ static void drawMapDebug(Render* this, Map* map) {
         }
     }
 
-    HashTable* chunks = map->chunks;
+    ArrayList* nearEnemies = map->nearEnemies;
+    for (int i = 0; i < map->nearEnemies->length; i++) {
+        Enemy* e = nearEnemies->data[i];
+        int eDx = e->lastX - e->x;
+        int eDy = e->lastY - e->y;
+        float dAnimationX = eDx * t * this->cellSize;
+        float dAnimationY = eDy * t * this->cellSize;
+        int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize -
+                dAnimationX;
+        int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize -
+                dAnimationY;
+
+        DrawRectangle(x, y, this->cellSize, this->cellSize,
+                      (Color){255, 255, 0, 255});
+    }
+
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
         if (chunkY < 0 || chunkY >= map->chunkRows) continue;
         for (int j = -1; j < 2; j++) {
             int chunkX = map->player->chunkX + j;
             if (chunkX < 0 || chunkX >= map->chunkCols) continue;
-            sprintf(buffer, "%d,%d", chunkY, chunkX);
-            LinkedList* enemies = chunks->get(chunks, buffer);
-            Node* cur = enemies->head;
-            while (cur != NULL) {
-                Enemy* e = cur->data;
-                int eDx = e->lastX - e->x;
-                int eDy = e->lastY - e->y;
-                float dAnimationX = eDx * t * this->cellSize;
-                float dAnimationY = eDy * t * this->cellSize;
-                int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize - dAnimationX;
-                int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize - dAnimationY;
-
-                DrawRectangle(x, y, this->cellSize, this->cellSize,
-                              (Color){255, 255, 0, 255});
-                cur = cur->next;
-            }
 
             int startChunkX = offsetHalfXAnimated +
                               (chunkX * map->chunkSize - px) * this->cellSize;
@@ -174,9 +169,7 @@ static void drawMapDebug(Render* this, Map* map) {
     this->frameCount++;
 }
 
-static void saveUpdate(Render* this){
-    this->lastUpdate = this->frameCount;
-}
+static void saveUpdate(Render* this) { this->lastUpdate = this->frameCount; }
 
 static void _free(Render* this) { free(this); }
 

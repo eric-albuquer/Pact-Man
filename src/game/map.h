@@ -4,6 +4,7 @@
 #include "player.h"
 #include "hashtable.h"
 #include "linkedlist.h"
+#include "arraylist.h"
 #include "controler.h"
 
 typedef struct {
@@ -17,6 +18,7 @@ typedef struct Map {
     unsigned int cols;
     Cell **matrix;
 
+    ArrayList* nearEnemies;
     HashTable* chunks;
     int chunkRows;
     int chunkCols;
