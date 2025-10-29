@@ -22,6 +22,8 @@ Player* new_Player(int x, int y) {
     this->lastX = x;
     this->lastY = y;
 
+    this->dir = RIGHT;
+
     this->updateChunk = updateChunk;
     this->free = _free;
     return this;

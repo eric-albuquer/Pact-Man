@@ -27,6 +27,8 @@ Enemy* new_Enemy(int x, int y, int biomeType){
     this->spawnX = x;
     this->spawnY = y;
 
+    this->dir = RIGHT;
+
     this->biomeType = biomeType;
 
     this->updateChunk = updateChunk;

@@ -9,6 +9,8 @@ int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
     SetTargetFPS(60);
 
+    ChangeDirectory(GetApplicationDirectory());
+
     srand(time(NULL));
 
     Render* render = new_Render(1920, 1080, 35);

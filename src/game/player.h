@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include <stdbool.h>
+#include "common.h"
 
 typedef struct Player {
     int x;
@@ -12,6 +13,8 @@ typedef struct Player {
 
     int chunkX;
     int chunkY;
+
+    Direction dir;
 
     bool (*updateChunk)(struct Player*, int);
     void (*free)(struct Player*);

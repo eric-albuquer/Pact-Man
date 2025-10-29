@@ -2,6 +2,7 @@
 #define ENEMY_H
 
 #include <stdbool.h>
+#include "common.h"
 
 typedef struct Enemy {
     int x;
@@ -15,6 +16,8 @@ typedef struct Enemy {
 
     int chunkX;
     int chunkY;
+
+    Direction dir;
 
     int biomeType;
 

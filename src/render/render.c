@@ -162,8 +162,9 @@ static void drawMapDebug(Render* this, Map* map) {
     }
 
     // desenha o player fixo no centro
-    DrawRectangle(this->offsetHalfX, this->offsetHalfY, this->cellSize,
-                  this->cellSize, (Color){255, 255, 255, 255});
+    // DrawRectangle(this->offsetHalfX, this->offsetHalfY, this->cellSize,
+    //               this->cellSize, (Color){255, 255, 255, 255});
+    DrawTexture(this->sprites[0], this->offsetHalfX, this->offsetHalfY, (Color){255, 255, 255, 255});
 
     drawHudDebug(this, map);
     this->frameCount++;
@@ -187,6 +188,12 @@ Render* new_Render(int width, int height, int cellSize) {
 
     render->offsetHalfX = width >> 1;
     render->offsetHalfY = height >> 1;
+
+    Texture2D *sprites = render->sprites;
+    Image img = LoadImage("assets/sprites/fantasma1.png");
+    ImageResize(&img, cellSize, cellSize);
+    sprites[0] = LoadTextureFromImage(img);
+    UnloadImage(img);
 
     render->drawMapDebug = drawMapDebug;
     render->saveUpdate = saveUpdate;
