@@ -9,24 +9,44 @@
 
 static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
-static void updatePlayer(Map* this, LinkedList* inputBuffer) {
+static bool movePlayer(Map* this, int dx, int dy){
+    if (dx == 0 && dy == 0) return false;
+
     Player* p = this->player;
+    int playerNextX = p->x + dx;
+    int playerNextY = p->y + dy;
+
+    if (playerNextX >= 0 && playerNextX < this->cols && playerNextY >= 0 && playerNextY < this->rows &&
+            !this->matrix[playerNextY][playerNextX].isWall) {
+            p->x = playerNextX;
+            p->y = playerNextY;
+            p->updateChunk(p, this->chunkSize);
+            p->updateDirection(p);
+            return true;
+        }
+    return false;       
+}
+
+static void updatePlayer(Map* this, Input input) {
+    printf("%d %d\n", input.dx, input.dy);
+    Player* p = this->player;
+    int playerDirX = p->x - p->lastX;
+    int playerDirY = p->y - p->lastY;
+
     p->lastX = p->x;
     p->lastY = p->y;
-    while (inputBuffer->length > 0) {
-        Input* input = inputBuffer->removeFirst(inputBuffer);
-        int nx = p->x + input->dx;
-        int ny = p->y + input->dy;
-        free(input);
-        if (nx >= 0 && nx < this->cols && ny >= 0 && ny < this->rows &&
-            !this->matrix[ny][nx].isWall) {
-            p->x = nx;
-            p->y = ny;
-            p->updateChunk(p, this->chunkSize);
-            break;
-        }
-    };
-    p->updateDirection(p);
+
+
+    if (playerDirX != 0){
+        if (!movePlayer(this, 0, input.dy)) movePlayer(this, input.dx, 0);
+    
+    } else if (playerDirY != 0){
+        if (!movePlayer(this, input.dx, 0)) movePlayer(this, 0, input.dy);
+
+    } else {
+        if (!movePlayer(this, input.dx, 0)) movePlayer(this, 0, input.dy);
+    }
+    
 }
 
 static void updateEnemies(Map* this) {
@@ -51,11 +71,11 @@ static void updateEnemies(Map* this) {
                 Node* next = cur->next;
                 Enemy* e = cur->data;
                 if (!e->updated) {
-                    e->updated = true;
                     e->lastX = e->x;
                     e->lastY = e->y;
                     if (enemyStepTowardsPlayer(this, e) &&
                         e->updateChunk(e, this->chunkSize)) {
+                        e->updated = true;
                         enemies->removeNode(enemies, cur);
                         sprintf(key, "%d,%d", e->chunkY, e->chunkX);
                         LinkedList* newChunk = chunks->get(chunks, key);
@@ -76,7 +96,7 @@ static void updateEnemies(Map* this) {
 }
 
 static void update(Map* this, Controler* controler) {
-    updatePlayer(this, controler->inputBuffer);
+    updatePlayer(this, controler->input);
     updateEnemies(this);
 }
 
@@ -88,10 +108,10 @@ static void loadChunks(Map* this, unsigned int chunkSize) {
     HashTable* chunks = new_HashTable(totalChunks);
     this->chunks = chunks;
 
+    static char key[100];
     for (int i = 0; i < this->chunkRows; i++) {
         for (int j = 0; j < this->chunkCols; j++) {
             LinkedList* list = new_LinkedList();
-            char key[100];
             sprintf(key, "%d,%d", i, j);
             chunks->set(chunks, key, list);
         }

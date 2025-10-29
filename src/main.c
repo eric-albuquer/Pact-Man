@@ -33,7 +33,7 @@ int main(void) {
 
     srand(time(NULL));
 
-    Render* render = new_Render(1920, 1080, 35, SPRITES, 16);
+    Render* render = new_Render(1920, 1080, 50, SPRITES, 16);
 
     Controler* controler = new_Controler();
     Map* map = new_Map(301, 301, 20);
@@ -43,9 +43,9 @@ int main(void) {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         lastTime += dt;
-        controler->getInputs(controler);
         if (lastTime >= 0.15) {
             lastTime = 0;
+            controler->getInputs(controler);
             map->update(map, controler);
             controler->reset(controler);
             render->saveUpdate(render);
