@@ -31,15 +31,15 @@ static bool movePlayer(Map* this, Input input) {
 static void updatePlayer(Map* this, Input input) {
     Player* p = this->player;
 
-    p->lastX = p->x;
-    p->lastY = p->y;
-
     Input first = (Input){0, input.dy};
     Input second = (Input){input.dx, 0};
     if (p->y - p->lastY != 0) {
         first = (Input){input.dx, 0};
         second = (Input){0, input.dy};
     }
+
+    p->lastX = p->x;
+    p->lastY = p->y;
 
     if (!movePlayer(this, first)) {
         movePlayer(this, second);
