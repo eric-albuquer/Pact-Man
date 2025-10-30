@@ -1,11 +1,42 @@
+#include <stdlib.h>
+
 #include "controler.h"
 #include "map.h"
 #include "raylib.h"
 #include "render.h"
 #include "time.h"
-#include <stdlib.h>
+#include "common.h"
 
 #define UPDATE_TIME 0.20f
+
+GameState state = MENU;
+Controler* controler;
+Map* map;
+Render* render;
+
+void updateGame() {
+    static float lastTime = 0;
+    lastTime += GetFrameTime();
+    controler->getInputs(controler);
+    if (lastTime >= UPDATE_TIME) {
+        lastTime = 0;
+        map->update(map, controler);
+        controler->reset(controler);
+        render->updateGame(render);
+    }
+
+    BeginDrawing();
+    render->drawGame(render);
+    EndDrawing();
+}
+
+void updateMenu() {
+    render->updateMenu(render);
+
+    BeginDrawing();
+    render->drawMenu(render);
+    EndDrawing();
+}
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
@@ -15,26 +46,13 @@ int main(void) {
 
     srand(time(NULL));
 
-    Render* render = new_Render(1920, 1080, 50);
-
-    Controler* controler = new_Controler();
-    Map* map = new_Map(299, 299, 20);
-
-    float lastTime = 0;
+    controler = new_Controler();
+    map = new_Map(299, 299, 20);
+    render = new_Render(1920, 1080, 50, map);
 
     while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
-        lastTime += dt;
-        controler->getInputs(controler);
-        if (lastTime >= UPDATE_TIME) {
-            lastTime = 0;
-            map->update(map, controler);
-            controler->reset(controler);
-            render->updateGame(render);
-        }
-        BeginDrawing();
-        render->drawGame(render, map);
-        EndDrawing();
+        if (state == GAME) updateGame();
+        else updateMenu();
     }
 
     map->free(map);

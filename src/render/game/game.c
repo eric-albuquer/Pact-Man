@@ -19,8 +19,9 @@ static const char* SPRITES[] = {
 static const Color CELL_COLORS[4] = {
     {100, 0, 0, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
 
-static void drawMinimapDebug(Game* this, Map* map, int x0, int y0, int size,
+static void drawMinimapDebug(Game* this, int x0, int y0, int size,
                              int zoom) {
+    Map* map = this->map;
     int cellSize = size / (zoom);
     DrawRectangle(x0 - 5, y0 - 5, size + 10, size + 10, BLACK);
     for (int y = 0; y < zoom; y++) {
@@ -78,7 +79,8 @@ static void drawMinimapDebug(Game* this, Map* map, int x0, int y0, int size,
     DrawRectangle(x0 + offset, y0 + offset, cellSize, cellSize, WHITE);
 }
 
-static void drawHudDebug(Game* this, Map* map) {
+static void drawHudDebug(Game* this) {
+    Map* map = this->map;
     static char buffer[100];
     sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d", map->player->chunkX,
             map->player->chunkY, map->player->x, map->player->y);
@@ -86,10 +88,11 @@ static void drawHudDebug(Game* this, Map* map) {
     DrawRectangle(this->width - 400, 0, 400, 400, (Color){0, 0, 0, 200});
     DrawText(buffer, this->width - 300, 50, 30, (Color){0, 255, 0, 255});
 
-    drawMinimapDebug(this, map, 20, 20, 500, 100);
+    drawMinimapDebug(this, 20, 20, 500, 100);
 }
 
-static void drawMapDebug(Game* this, Map* map) {
+static void drawMapDebug(Game* this) {
+    Map* map = this->map;
     ClearBackground(BLACK);
     Player* p = map->player;
     int px = p->lastX;
@@ -201,7 +204,7 @@ static void drawMapDebug(Game* this, Map* map) {
     DrawTexture(playerTexture, this->offsetHalfX, this->offsetHalfY,
                 (Color){255, 255, 255, 255});
 
-    drawHudDebug(this, map);
+    drawHudDebug(this);
     this->frameCount++;
 }
 
@@ -233,7 +236,7 @@ static void _free(Game* this) {
     free(this);
 }
 
-Game* new_Game(int width, int height, int cellSize) {
+Game* new_Game(int width, int height, int cellSize, Map* map) {
     Game* this = malloc(sizeof(Game));
     this->width = width;
     this->height = height;
@@ -247,6 +250,8 @@ Game* new_Game(int width, int height, int cellSize) {
 
     this->offsetHalfX = width >> 1;
     this->offsetHalfY = height >> 1;
+
+    this->map = map;
 
     loadSprites(this, SPRITES, 16);
 

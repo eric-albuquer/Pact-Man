@@ -6,8 +6,8 @@ void freeButton(Button* this){
     free(this);
 }
 
-bool isInside(Button* this, int x, int y){
-    return x > this->x && x < this->x + this->width && y > this->y && y < this->y + this->height;
+bool isInside(Button* this, Vector2 pos){
+    return pos.x > this->x && pos.x < this->x + this->width && pos.y > this->y && pos.y < this->y + this->height;
 }
 
 void drawButton(Button* this){

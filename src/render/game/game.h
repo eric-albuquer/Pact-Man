@@ -22,14 +22,16 @@ typedef struct Game {
     unsigned int frameCount;
     unsigned int updateCount;
 
+    Map* map;
+
     Texture2D* sprites;
     unsigned int totalSprites;
 
-    void (*drawMapDebug)(struct Game*, Map*);
+    void (*drawMapDebug)(struct Game*);
     void (*saveUpdate)(struct Game*);
     void (*free)(struct Game*);
 } Game;
 
-Game* new_Game(int width, int height, int cellSize);
+Game* new_Game(int width, int height, int cellSize, Map* map);
 
 #endif

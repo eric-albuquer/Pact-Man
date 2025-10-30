@@ -18,7 +18,7 @@ typedef struct Button {
     bool selected;
     bool hovered;
 
-    bool (*isInside)(struct Button*, int, int);
+    bool (*isInside)(struct Button*, Vector2);
     void (*action)(struct Button*);
 
     void (*draw)(struct Button*);
