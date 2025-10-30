@@ -30,10 +30,10 @@ int main(void) {
             lastTime = 0;
             map->update(map, controler);
             controler->reset(controler);
-            render->saveUpdate(render);
+            render->updateGame(render);
         }
         BeginDrawing();
-        render->drawMapDebug(render, map);
+        render->drawGame(render, map);
         EndDrawing();
     }
 

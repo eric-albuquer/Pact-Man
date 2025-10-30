@@ -134,13 +134,15 @@ static void mazeGen(Map* map) {
     unsigned int rows = map->rows;
     unsigned int cols = map->cols;
 
+    #pragma omp parallel for
     for (unsigned int y = 0; y < rows; y++) {
         for (unsigned int x = 0; x < cols; x++) {
-            bool evenAndEven = (y % 2 == 0) || (x % 2 == 0);
-            map->matrix[y][x] = createCell(evenAndEven);
+            bool evenOrEven = (y % 2 == 0) || (x % 2 == 0);
+            map->matrix[y][x] = createCell(evenOrEven);
         }
     }
 
+    #pragma omp parallel for
     for (unsigned int y = 1; y < rows - 1; y++) {
         for (unsigned int x = 1; x < cols - 1; x++) {
             if ((y % 2 == 0) && (x % 2 == 0)) continue;
@@ -163,6 +165,7 @@ static void biomeGen(Map* this) {
         }
     }
 
+    #pragma omp parallel for
     for (int y = 0; y < this->rows; y++) {
         for (int x = this->cols - 1; x >= 0 && matrix[y][x].biomeType == 0;
              x--) {
