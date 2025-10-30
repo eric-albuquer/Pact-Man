@@ -5,7 +5,7 @@
 #include "enemy.h"
 
 #define MAX_PERSUIT_RADIUS 30
-#define BEST_PATH_PROBABILITY 0.5f
+#define BEST_PATH_PROBABILITY 0.65f
 
 void mapDistancePlayer(Map *map, int max_distance);
 

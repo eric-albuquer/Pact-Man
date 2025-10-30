@@ -2,6 +2,7 @@
 #define ENEMY_H
 
 #include <stdbool.h>
+
 #include "common.h"
 
 typedef struct Enemy {
@@ -17,7 +18,7 @@ typedef struct Enemy {
     int chunkX;
     int chunkY;
 
-    bool updated;
+    bool changedChunk;
 
     Direction dir;
 

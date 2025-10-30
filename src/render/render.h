@@ -1,10 +1,11 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include "map.h"
 #include <raylib.h>
 
-#define FRAMES_ANIMATION 10.0f
+#include "map.h"
+
+#define FRAMES_ANIMATION 12.0f
 
 typedef struct Render {
     int width;
@@ -30,7 +31,6 @@ typedef struct Render {
     void (*free)(struct Render*);
 } Render;
 
-Render* new_Render(int width, int height, int cellSize, const char** SPRITES,
-                   int total);
+Render* new_Render(int width, int height, int cellSize);
 
 #endif

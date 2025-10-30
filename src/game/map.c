@@ -9,12 +9,10 @@
 
 static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
 
-static bool movePlayer(Map* this, Input input) {
-    if (input.dx == 0 && input.dy == 0) return false;
-
+static bool movePlayer(Map* this, VecInt2 newDir) {
     Player* p = this->player;
-    int playerNextX = p->x + input.dx;
-    int playerNextY = p->y + input.dy;
+    int playerNextX = p->x + newDir.x;
+    int playerNextY = p->y + newDir.y;
 
     if (playerNextX >= 0 && playerNextX < this->cols && playerNextY >= 0 &&
         playerNextY < this->rows &&
@@ -31,18 +29,36 @@ static bool movePlayer(Map* this, Input input) {
 static void updatePlayer(Map* this, Input input) {
     Player* p = this->player;
 
-    Input first = (Input){0, input.dy};
-    Input second = (Input){input.dx, 0};
-    if (p->y - p->lastY != 0) {
-        first = (Input){input.dx, 0};
-        second = (Input){0, input.dy};
+    static VecInt2 dir[4];
+    int length = 0;
+
+    if (p->dir == RIGHT) {
+        if (input.left) dir[length++] = (VecInt2){-1, 0};
+        if (input.up) dir[length++] = (VecInt2){0, -1};
+        if (input.down) dir[length++] = (VecInt2){0, 1};
+        if (input.right) dir[length++] = (VecInt2){1, 0};
+    } else if (p->dir == LEFT) {
+        if (input.right) dir[length++] = (VecInt2){1, 0};
+        if (input.up) dir[length++] = (VecInt2){0, -1};
+        if (input.down) dir[length++] = (VecInt2){0, 1};
+        if (input.left) dir[length++] = (VecInt2){-1, 0};
+    } else if (p->dir == UP) {
+        if (input.down) dir[length++] = (VecInt2){0, 1};
+        if (input.right) dir[length++] = (VecInt2){1, 0};
+        if (input.left) dir[length++] = (VecInt2){-1, 0};
+        if (input.up) dir[length++] = (VecInt2){0, -1};
+    } else if (p->dir == DOWN) {
+        if (input.up) dir[length++] = (VecInt2){0, -1};
+        if (input.right) dir[length++] = (VecInt2){1, 0};
+        if (input.left) dir[length++] = (VecInt2){-1, 0};
+        if (input.down) dir[length++] = (VecInt2){0, 1};
     }
 
     p->lastX = p->x;
     p->lastY = p->y;
 
-    if (!movePlayer(this, first)) {
-        movePlayer(this, second);
+    for (int i = 0; i < length; i++) {
+        if (movePlayer(this, dir[i])) break;
     }
 }
 
@@ -65,30 +81,29 @@ static void updateEnemies(Map* this) {
             LinkedList* enemies = chunks->get(chunks, key);
             Node* cur = enemies->head;
             while (cur != NULL) {
-                Node* next = cur->next;
                 Enemy* e = cur->data;
-                if (!e->updated) {
-                    e->lastX = e->x;
-                    e->lastY = e->y;
-                    if (enemyStepTowardsPlayer(this, e) &&
-                        e->updateChunk(e, this->chunkSize)) {
-                        e->updated = true;
+                if (e->changedChunk) break;
+                e->lastX = e->x;
+                e->lastY = e->y;
+                if (enemyStepTowardsPlayer(this, e)) {
+                    if (e->updateChunk(e, this->chunkSize)) {
+                        e->changedChunk = true;
                         enemies->removeNode(enemies, cur);
                         sprintf(key, "%d,%d", e->chunkY, e->chunkX);
                         LinkedList* newChunk = chunks->get(chunks, key);
-                        newChunk->addFirst(newChunk, e);
+                        newChunk->addLast(newChunk, e);
                     }
                     e->updateDirection(e);
-                    nearEnemies->push(nearEnemies, e);
                 }
-                cur = next;
+                nearEnemies->push(nearEnemies, e);
+                cur = cur->next;
             }
         }
     }
 
     for (unsigned int i = 0; i < nearEnemies->length; i++) {
         Enemy* e = nearEnemies->data[i];
-        e->updated = false;
+        e->changedChunk = false;
     }
 }
 
@@ -218,7 +233,7 @@ Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
     mazeGen(this);
     biomeGen(this);
 
-    this->player = new_Player(51, 51);
+    this->player = new_Player(11, 11);
     this->player->updateChunk(this->player, chunkSize);
     this->update = update;
     this->free = _free;

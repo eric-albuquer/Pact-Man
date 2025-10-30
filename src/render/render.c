@@ -6,6 +6,26 @@
 
 #include "enemy.h"
 
+static const char* SPRITES[] = {
+    "assets/sprites/ghostRight1.png",
+    "assets/sprites/ghostRight2.png",
+    "assets/sprites/ghostDown1.png",
+    "assets/sprites/ghostDown2.png",
+    "assets/sprites/ghostLeft1.png",
+    "assets/sprites/ghostLeft2.png",
+    "assets/sprites/ghostUp1.png",
+    "assets/sprites/ghostUp2.png",
+    
+    "assets/sprites/pacmanRight1.png",
+    "assets/sprites/pacmanRight2.png",
+    "assets/sprites/pacmanDown1.png",
+    "assets/sprites/pacmanDown2.png",
+    "assets/sprites/pacmanLeft1.png",
+    "assets/sprites/pacmanLeft2.png",
+    "assets/sprites/pacmanUp1.png",
+    "assets/sprites/pacmanUp2.png",
+};
+
 static const Color CELL_COLORS[4] = {
     {100, 0, 0, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
 
@@ -123,7 +143,7 @@ static void drawMapDebug(Render* this, Map* map) {
             DrawRectangle(x, y, this->cellSize, this->cellSize, color);
 
             sprintf(buffer, "%d", map->matrix[yIdx][xIdx].distance);
-            DrawText(buffer, x + 10, y + 10, 20, (Color){255, 255, 255, 255});
+            DrawText(buffer, x + 15, y + 15, 20, (Color){255, 255, 255, 255});
         }
     }
 
@@ -223,8 +243,7 @@ static void _free(Render* this) {
     free(this);
 }
 
-Render* new_Render(int width, int height, int cellSize, const char** SPRITES,
-                   int total) {
+Render* new_Render(int width, int height, int cellSize) {
     Render* this = malloc(sizeof(Render));
     this->width = width;
     this->height = height;
@@ -239,7 +258,7 @@ Render* new_Render(int width, int height, int cellSize, const char** SPRITES,
     this->offsetHalfX = width >> 1;
     this->offsetHalfY = height >> 1;
 
-    loadSprites(this, SPRITES, total);
+    loadSprites(this, SPRITES, 16);
 
     this->drawMapDebug = drawMapDebug;
     this->saveUpdate = saveUpdate;

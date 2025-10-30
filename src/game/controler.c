@@ -2,29 +2,24 @@
 
 #include <stdlib.h>
 
-static void reset(Controler* this) {
-    this->input.dx = 0;
-    this->input.dy = 0;
-}
+static void reset(Controler* this) { this->input = (Input){0}; }
 
 static void getInputs(Controler* this) {
-    if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)){
-        this->input.dy = -1;
-    } 
-    else if (IsKeyDown(KEY_S)|| IsKeyDown(KEY_DOWN)){
-        this->input.dy = 1;
+    if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
+        this->input.up = 1;
     }
-    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)){
-        this->input.dx = -1;
+    if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
+        this->input.down = 1;
     }
-    else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)){
-        this->input.dx = 1;
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
+        this->input.left = 1;
+    }
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
+        this->input.right = 1;
     }
 }
 
-static void _free(Controler* this) {
-    free(this);
-}
+static void _free(Controler* this) { free(this); }
 
 Controler* new_Controler() {
     Controler* this = malloc(sizeof(Controler));

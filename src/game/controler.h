@@ -5,8 +5,10 @@
 #include "linkedlist.h"
 
 typedef struct Input {
-    int dx;
-    int dy;
+    unsigned right: 1;
+    unsigned left: 1;
+    unsigned up: 1;
+    unsigned down: 1;
 } Input;
 
 typedef struct Controler {
