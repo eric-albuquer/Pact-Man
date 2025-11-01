@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <raylib.h>
+
 #include "map.h"
 
 #define FRAMES_ANIMATION 12.0f
@@ -23,6 +24,7 @@ typedef struct Game {
     unsigned int updateCount;
 
     Map* map;
+    Chunk* visibleChunks[49];
 
     Texture2D* sprites;
     unsigned int totalSprites;

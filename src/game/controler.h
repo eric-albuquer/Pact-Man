@@ -2,7 +2,6 @@
 #define CONTROLER_H
 
 #include "raylib.h"
-#include "linkedlist.h"
 
 typedef struct Input {
     unsigned right: 1;

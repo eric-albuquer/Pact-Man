@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "common.h"
+#include "chunk.h"
 
 typedef struct Player {
     int x;

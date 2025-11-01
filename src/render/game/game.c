@@ -1,7 +1,9 @@
 #include "game.h"
+
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "enemy.h"
 
 static const char* SPRITES[] = {
@@ -19,22 +21,49 @@ static const char* SPRITES[] = {
 static const Color CELL_COLORS[4] = {
     {100, 0, 0, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
 
-static void drawMinimapDebug(Game* this, int x0, int y0, int size,
-                             int zoom) {
+static void loadVisibleChunks(Game* this) {
+    Map* map = this->map;
+    Player* p = map->player;
+    Chunk** visibleChunks = this->visibleChunks;
+    int idx = 0;
+    for (int i = -3; i < 4; i++) {
+        int cy = i + p->chunkY;
+        for (int j = -3; j < 4; j++) {
+            int cx = j + p->chunkX;
+            visibleChunks[idx++] = map->getChunk(map, cx, cy);
+        }
+    }
+}
+
+static Cell* getVisibleCell(Game* this, int x, int y) {
+    if (x < 0 || y < 0) return NULL;
+    Map* map = this->map;
+    int chunkX = (x / CHUNK_SIZE) - map->player->chunkX + 3;
+    int chunkY = (y / CHUNK_SIZE) - map->player->chunkY + 3;
+
+    if (chunkX < 0 || chunkX > 6 || chunkY < 0 || chunkY > 6) return NULL;
+
+    Chunk* chunk = this->visibleChunks[chunkY * 7 + chunkX];
+    if (chunk == NULL) return NULL;
+    Cell* cells = chunk->cells;
+    return &cells[(x % CHUNK_SIZE) + (y % CHUNK_SIZE) * CHUNK_SIZE];
+}
+
+static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
     int cellSize = size / (zoom);
     DrawRectangle(x0 - 5, y0 - 5, size + 10, size + 10, BLACK);
     for (int y = 0; y < zoom; y++) {
         int py = map->player->y + y - (zoom >> 1);
-        if (py < 0 || py >= map->rows) continue;
         for (int x = 0; x < zoom; x++) {
             int px = map->player->x + x - (zoom >> 1);
-            if (px < 0 || px >= map->cols) continue;
 
-            int biomeType = map->matrix[py][px].biomeType;
+            Cell* cell = getVisibleCell(this, px, py);
+            if (!cell) continue;
+            int biomeType = cell->biomeType;
             Color color = CELL_COLORS[biomeType - 1];
 
-            if (map->matrix[py][px].isWall) {
+            if (cell->isWall) {
                 color.r += 70;
                 color.g += 70;
                 color.b += 70;
@@ -47,14 +76,19 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size,
 
     int offset = (zoom * cellSize) >> 1;
 
-    ArrayList* nearEnemies = map->nearEnemies;
-    for (int i = 0; i < map->nearEnemies->length; i++) {
-        Enemy* e = nearEnemies->data[i];
-        int x = (e->x - map->player->x) * cellSize;
-        int y = (e->y - map->player->y) * cellSize;
+    for (int i = 0; i < 9; i++) {
+        Chunk* chunk = map->nearChunks[i];
+        if (!chunk) continue;
+        Node* cur = chunk->enemies->head;
+        while (cur != NULL) {
+            Enemy* e = cur->data;
+            int x = (e->x - map->player->x) * cellSize;
+            int y = (e->y - map->player->y) * cellSize;
 
-        DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize,
-                      (Color){255, 255, 0, 255});
+            DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize,
+                          (Color){255, 255, 0, 255});
+            cur = cur->next;
+        }
     }
 
     for (int i = -1; i < 2; i++) {
@@ -64,15 +98,13 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size,
             int chunkX = map->player->chunkX + j;
             if (chunkX < 0 || chunkX >= map->chunkCols) continue;
             int startChunkX =
-                x0 + offset +
-                (chunkX * map->chunkSize - map->player->x) * cellSize;
+                x0 + offset + (chunkX * CHUNK_SIZE - map->player->x) * cellSize;
             int startChunkY =
-                y0 + offset +
-                (chunkY * map->chunkSize - map->player->y) * cellSize;
-            DrawRectangleLinesEx((Rectangle){startChunkX, startChunkY,
-                                             cellSize * map->chunkSize + 3,
-                                             cellSize * map->chunkSize + 3},
-                                 3, GREEN);
+                y0 + offset + (chunkY * CHUNK_SIZE - map->player->y) * cellSize;
+            DrawRectangleLinesEx(
+                (Rectangle){startChunkX, startChunkY, cellSize * CHUNK_SIZE + 3,
+                            cellSize * CHUNK_SIZE + 3},
+                3, GREEN);
         }
     }
 
@@ -115,16 +147,16 @@ static void drawMapDebug(Game* this) {
 
     for (int i = -this->renderDistY; i <= this->renderDistY; i++) {
         int yIdx = i + py;
-        if (yIdx < 0 || yIdx >= map->rows) continue;
 
         for (int j = -this->renderDistX; j <= this->renderDistX; j++) {
             int xIdx = j + px;
-            if (xIdx < 0 || xIdx >= map->cols) continue;
 
-            int biomeType = map->matrix[yIdx][xIdx].biomeType;
+            Cell* cell = getVisibleCell(this, xIdx, yIdx);
+            if (!cell) continue;
+            int biomeType = cell->biomeType;
             Color color = CELL_COLORS[biomeType - 1];
 
-            if (map->matrix[yIdx][xIdx].isWall) {
+            if (cell->isWall) {
                 color.r = color.r + 70;
                 color.g = color.g + 70;
                 color.b = color.b + 70;
@@ -135,36 +167,41 @@ static void drawMapDebug(Game* this) {
 
             DrawRectangle(x, y, this->cellSize, this->cellSize, color);
 
-            sprintf(buffer, "%d", map->matrix[yIdx][xIdx].distance);
+            sprintf(buffer, "%d", cell->distance);
             DrawText(buffer, x + 15, y + 15, 20, (Color){255, 255, 255, 255});
         }
     }
 
-    ArrayList* nearEnemies = map->nearEnemies;
-    for (int i = 0; i < map->nearEnemies->length; i++) {
-        Enemy* e = nearEnemies->data[i];
-        int eDx = e->lastX - e->x;
-        int eDy = e->lastY - e->y;
-        float dAnimationX = eDx * t * this->cellSize;
-        float dAnimationY = eDy * t * this->cellSize;
-        int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize -
-                dAnimationX;
-        int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize -
-                dAnimationY;
+    for (int i = 0; i < 9; i++) {
+        Chunk* chunk = map->nearChunks[i];
+        if (!chunk) continue;
+        Node* cur = chunk->enemies->head;
+        while (cur != NULL) {
+            Enemy* e = cur->data;
+            int eDx = e->lastX - e->x;
+            int eDy = e->lastY - e->y;
+            float dAnimationX = eDx * t * this->cellSize;
+            float dAnimationY = eDy * t * this->cellSize;
+            int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize -
+                    dAnimationX;
+            int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize -
+                    dAnimationY;
 
-        int offsetTexture = 8;
-        if (e->dir == RIGHT)
-            offsetTexture = 8;
-        else if (e->dir == DOWN)
-            offsetTexture = 10;
-        else if (e->dir == LEFT)
-            offsetTexture = 12;
-        else if (e->dir == UP)
-            offsetTexture = 14;
+            int offsetTexture = 8;
+            if (e->dir == RIGHT)
+                offsetTexture = 8;
+            else if (e->dir == DOWN)
+                offsetTexture = 10;
+            else if (e->dir == LEFT)
+                offsetTexture = 12;
+            else if (e->dir == UP)
+                offsetTexture = 14;
 
-        Texture2D enemyTexture =
-            this->sprites[(this->updateCount % 2) + offsetTexture];
-        DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
+            Texture2D enemyTexture =
+                this->sprites[(this->updateCount % 2) + offsetTexture];
+            DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
+            cur = cur->next;
+        }
     }
 
     for (int i = -1; i < 2; i++) {
@@ -175,20 +212,16 @@ static void drawMapDebug(Game* this) {
             if (chunkX < 0 || chunkX >= map->chunkCols) continue;
 
             int startChunkX = offsetHalfXAnimated +
-                              (chunkX * map->chunkSize - px) * this->cellSize;
+                              (chunkX * CHUNK_SIZE - px) * this->cellSize;
             int startChunkY = offsetHalfYAnimated +
-                              (chunkY * map->chunkSize - py) * this->cellSize;
-            DrawRectangleLinesEx(
-                (Rectangle){startChunkX, startChunkY,
-                            this->cellSize * map->chunkSize + 5,
-                            this->cellSize * map->chunkSize + 5},
-                5, GREEN);
+                              (chunkY * CHUNK_SIZE - py) * this->cellSize;
+            DrawRectangleLinesEx((Rectangle){startChunkX, startChunkY,
+                                             this->cellSize * CHUNK_SIZE + 5,
+                                             this->cellSize * CHUNK_SIZE + 5},
+                                 5, GREEN);
         }
     }
 
-    // desenha o player fixo no centro
-    // DrawRectangle(this->offsetHalfX, this->offsetHalfY, this->cellSize,
-    //               this->cellSize, (Color){255, 255, 255, 255});
     int offsetTexture = 0;
     if (p->dir == RIGHT)
         offsetTexture = 0;
@@ -222,6 +255,11 @@ static void loadSprites(Game* this, const char** paths, int total) {
 }
 
 static void saveUpdate(Game* this) {
+    if (this->map->changedChunk) {
+        loadVisibleChunks(this);
+        this->map->changedChunk = false;
+    }
+
     this->lastUpdate = this->frameCount;
     this->updateCount++;
 }
@@ -252,6 +290,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->offsetHalfY = height >> 1;
 
     this->map = map;
+    loadVisibleChunks(this);
 
     loadSprites(this, SPRITES, 16);
 

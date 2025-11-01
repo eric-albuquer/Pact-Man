@@ -4,26 +4,69 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "chunk.h"
 #include "enemy.h"
 #include "pathfinding.h"
 
-static Cell createCell(bool isWall) { return (Cell){isWall, 0, 0}; }
+static char key[100];
+
+static Cell* getLoadedCell(Map* this, int x, int y) {
+    if (x < 0 || y < 0) return NULL;
+    int chunkX = (x / CHUNK_SIZE) - this->player->chunkX + 1;
+    int chunkY = (y / CHUNK_SIZE) - this->player->chunkY + 1;
+
+    if (chunkX < 0 || chunkX > 2 || chunkY < 0 || chunkY > 2) return NULL;
+
+    Chunk* chunk = this->nearChunks[chunkY * 3 + chunkX];
+    if (chunk == NULL) return NULL;
+    Cell* cells = chunk->cells;
+    return &cells[(x % CHUNK_SIZE) + (y % CHUNK_SIZE) * CHUNK_SIZE];
+}
+
+static Chunk* getChunk(Map* this, int x, int y) {
+    if (x < 0 || x >= this->chunkCols || y < 0 || y > this->chunkRows)
+        return NULL;
+    sprintf(key, "%d,%d", y, x);
+    return this->chunks->get(this->chunks, key);
+}
+
+static void loadChunks(Map* this) {
+    Player* p = this->player;
+    HashTable* chunks = this->chunks;
+    Chunk** nearChunks = this->nearChunks;
+    int idx = 0;
+    for (int i = -1; i < 2; i++) {
+        int cy = i + p->chunkY;
+        for (int j = -1; j < 2; j++) {
+            int cx = j + p->chunkX;
+            Chunk* chunk = getChunk(this, cx, cy);
+            if (cx >= 0 && cx < this->chunkCols && cy >= 0 &&
+                cy < this->chunkRows && !chunk) {
+                chunk = new_Chunk(cx, cy);
+                chunks->set(chunks, key, chunk);
+            }
+            nearChunks[idx++] = chunk;
+        }
+    }
+}
+
+typedef struct {
+    int x;
+    int y;
+} VecInt2;
 
 static bool movePlayer(Map* this, VecInt2 newDir) {
     Player* p = this->player;
     int playerNextX = p->x + newDir.x;
     int playerNextY = p->y + newDir.y;
+    Cell* cell = this->getLoadedCell(this, playerNextX, playerNextY);
+    if (cell == NULL || cell->isWall) return false;
 
-    if (playerNextX >= 0 && playerNextX < this->cols && playerNextY >= 0 &&
-        playerNextY < this->rows &&
-        !this->matrix[playerNextY][playerNextX].isWall) {
-        p->x = playerNextX;
-        p->y = playerNextY;
-        p->updateChunk(p, this->chunkSize);
-        p->updateDirection(p);
-        return true;
-    }
-    return false;
+    p->x = playerNextX;
+    p->y = playerNextY;
+    if (p->updateChunk(p, CHUNK_SIZE)) this->changedChunk = true;
+    p->updateDirection(p);
+    return true;
 }
 
 static void updatePlayer(Map* this, Input input) {
@@ -63,181 +106,85 @@ static void updatePlayer(Map* this, Input input) {
 }
 
 static void updateEnemies(Map* this) {
-    ArrayList* nearEnemies = this->nearEnemies;
-    nearEnemies->clear(nearEnemies);
+    static Enemy* changed[100];
+    int changedLength = 0;
 
-    mapDistancePlayer(this, this->chunkSize << 1);
+    mapDistancePlayer(this);
 
-    static char key[100];
     HashTable* chunks = this->chunks;
+    Chunk** nearChunks = this->nearChunks;
 
-    for (int i = -1; i < 2; i++) {
-        int chunkY = this->player->chunkY + i;
-        if (chunkY < 0 || chunkY >= this->chunkRows) continue;
-        for (int j = -1; j < 2; j++) {
-            int chunkX = this->player->chunkX + j;
-            if (chunkX < 0 || chunkX >= this->chunkCols) continue;
-            sprintf(key, "%d,%d", chunkY, chunkX);
-            LinkedList* enemies = chunks->get(chunks, key);
-            Node* cur = enemies->head;
-            while (cur != NULL) {
-                Enemy* e = cur->data;
-                if (e->changedChunk) break;
-                e->lastX = e->x;
-                e->lastY = e->y;
-                if (enemyStepTowardsPlayer(this, e)) {
-                    if (e->updateChunk(e, this->chunkSize)) {
-                        e->changedChunk = true;
-                        enemies->removeNode(enemies, cur);
-                        sprintf(key, "%d,%d", e->chunkY, e->chunkX);
-                        LinkedList* newChunk = chunks->get(chunks, key);
-                        newChunk->addLast(newChunk, e);
+    for (int i = 0; i < 9; i++) {
+        Chunk* chunk = nearChunks[i];
+        if (!chunk) continue;
+        LinkedList* enemies = chunk->enemies;
+        Node* cur = enemies->head;
+        while (cur != NULL) {
+            Node* next = cur->next;
+            Enemy* e = cur->data;
+            if (e->changedChunk) break;
+            e->lastX = e->x;
+            e->lastY = e->y;
+            if (enemyStepTowardsPlayer(this, e)) {
+                if (e->updateChunk(e, CHUNK_SIZE)) {
+                    e->changedChunk = true;
+                    changed[changedLength++] = e;
+                    enemies->removeNode(enemies, cur);
+                    Chunk* newChunk = getChunk(this, e->chunkX, e->chunkY);
+                    if (!newChunk) {
+                        newChunk = new_Chunk(e->chunkX, e->chunkY);
+                        chunks->set(chunks, key, newChunk);
                     }
-                    e->updateDirection(e);
+                    LinkedList* newEnemies = newChunk->enemies;
+                    newEnemies->addLast(newEnemies, e);
                 }
-                nearEnemies->push(nearEnemies, e);
-                cur = cur->next;
+                e->updateDirection(e);
             }
+            cur = next;
         }
     }
 
-    for (unsigned int i = 0; i < nearEnemies->length; i++) {
-        Enemy* e = nearEnemies->data[i];
+    for (int i = 0; i < changedLength; i++) {
+        Enemy* e = changed[i];
         e->changedChunk = false;
     }
 }
 
 static void update(Map* this, Controler* controler) {
+    this->changedChunk = false;
     updatePlayer(this, controler->input);
+    if (this->changedChunk) loadChunks(this);
     updateEnemies(this);
-}
-
-static void loadChunks(Map* this, unsigned int chunkSize) {
-    this->chunkRows = ceil(this->rows / (float)chunkSize);
-    this->chunkCols = ceil(this->cols / (float)chunkSize);
-    this->chunkSize = chunkSize;
-    int totalChunks = this->chunkRows * this->chunkCols;
-    HashTable* chunks = new_HashTable(totalChunks);
-    this->chunks = chunks;
-
-    static char key[100];
-    for (int i = 0; i < this->chunkRows; i++) {
-        for (int j = 0; j < this->chunkCols; j++) {
-            LinkedList* list = new_LinkedList();
-            sprintf(key, "%d,%d", i, j);
-            chunks->set(chunks, key, list);
-        }
-    }
-}
-
-static void mazeGen(Map* map) {
-    unsigned int rows = map->rows;
-    unsigned int cols = map->cols;
-
-    #pragma omp parallel for
-    for (unsigned int y = 0; y < rows; y++) {
-        for (unsigned int x = 0; x < cols; x++) {
-            bool evenOrEven = (y % 2 == 0) || (x % 2 == 0);
-            map->matrix[y][x] = createCell(evenOrEven);
-        }
-    }
-
-    #pragma omp parallel for
-    for (unsigned int y = 1; y < rows - 1; y++) {
-        for (unsigned int x = 1; x < cols - 1; x++) {
-            if ((y % 2 == 0) && (x % 2 == 0)) continue;
-            if (rand() % 100 <= 65) map->matrix[y][x].isWall = 0;
-        }
-    }
-}
-
-static void biomeGen(Map* this) {
-    const int totalBiomes = 4;
-    const int deltaX = this->cols / totalBiomes;
-    Cell** matrix = this->matrix;
-    for (int i = 1; i < totalBiomes; i++) {
-        int dx = deltaX * i;
-        for (int y = 0; y < this->rows; y++) {
-            dx += (rand() % 5) - 2;
-            for (int x = dx; x >= 0 && matrix[y][x].biomeType == 0; x--) {
-                matrix[y][x].biomeType = i;
-            }
-        }
-    }
-
-    #pragma omp parallel for
-    for (int y = 0; y < this->rows; y++) {
-        for (int x = this->cols - 1; x >= 0 && matrix[y][x].biomeType == 0;
-             x--) {
-            matrix[y][x].biomeType = totalBiomes;
-        }
-    }
-
-    const int range = this->chunkSize >> 1;
-    static char key[100];
-    HashTable* chunks = this->chunks;
-    for (int i = 0; i < this->chunkRows; i++) {
-        for (int j = 0; j < this->chunkCols; j++) {
-            sprintf(key, "%d,%d", i, j);
-            LinkedList* enemies = chunks->get(chunks, key);
-            int count = rand() % 3;
-            for (int k = 0; k < count; k++) {
-                int x = ((rand() % range) * 2) + j * this->chunkSize + 1;
-                int y = ((rand() % range) * 2) + i * this->chunkSize + 1;
-                if (x >= this->cols || y >= this->rows) continue;
-                int biomeType = matrix[y][x].biomeType;
-                Enemy* e = new_Enemy(x, y, biomeType);
-                e->updateChunk(e, this->chunkSize);
-                enemies->addFirst(enemies, e);
-            }
-        }
-    }
 }
 
 static void _free(Map* this) {
     HashNode* cur = this->chunks->keys->head;
     while (cur != NULL) {
-        LinkedList* list = cur->data;
-        Node* curList = list->head;
-        Node* temp;
-        while (curList != NULL) {
-            temp = curList;
-            curList = curList->next;
-            Enemy* e = temp->data;
-            e->free(e);
-            free(temp);
-        }
+        Chunk* chunk = cur->data;
+        chunk->free(chunk);
         cur = cur->nextKey;
     }
     HashTable* h = this->chunks;
     h->free(h);
 
-    this->nearEnemies->free(this->nearEnemies);
-
-    for (unsigned int i = 0; i < this->rows; i++) {
-        free(this->matrix[i]);
-    }
-    free(this->matrix);
     Player* p = this->player;
     p->free(p);
+    free(this);
 }
 
-Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize) {
+Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
-    this->rows = rows;
-    this->cols = cols;
-    this->matrix = malloc(sizeof(Cell*) * rows);
-    for (unsigned int i = 0; i < rows; i++) {
-        this->matrix[i] = malloc(sizeof(Cell) * cols);
-    }
-    this->nearEnemies = new_ArrayList();
-
-    loadChunks(this, chunkSize);
-    mazeGen(this);
-    biomeGen(this);
+    this->chunkCols = chunkCols;
+    this->chunkRows = chunkRows;
+    this->chunks = new_HashTable(chunkCols * chunkRows);
 
     this->player = new_Player(11, 11);
-    this->player->updateChunk(this->player, chunkSize);
+    this->player->updateChunk(this->player, CHUNK_SIZE);
+    loadChunks(this);
+    this->changedChunk = false;
+
+    this->getLoadedCell = getLoadedCell;
+    this->getChunk = getChunk;
     this->update = update;
     this->free = _free;
     return this;

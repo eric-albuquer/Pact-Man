@@ -5,11 +5,6 @@ typedef enum { RIGHT, LEFT, UP, DOWN } Direction;
 
 typedef enum { MENU, GAME } GameState;
 
-typedef struct {
-    int x;
-    int y;
-} VecInt2;
-
 extern GameState state;
 
 static inline int max(int a, int b) { return (a > b) ? a : b; }

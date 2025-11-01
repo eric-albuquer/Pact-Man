@@ -6,6 +6,7 @@
 #include "render.h"
 #include "time.h"
 #include "common.h"
+#include <stdio.h>
 
 #define UPDATE_TIME 0.20f
 
@@ -18,6 +19,7 @@ void updateGame() {
     static float lastTime = 0;
     lastTime += GetFrameTime();
     controler->getInputs(controler);
+
     if (lastTime >= UPDATE_TIME) {
         lastTime = 0;
         map->update(map, controler);
@@ -47,7 +49,7 @@ int main(void) {
     srand(time(NULL));
 
     controler = new_Controler();
-    map = new_Map(299, 299, 20);
+    map = new_Map(30, 10);
     render = new_Render(1920, 1080, 50, map);
 
     while (!WindowShouldClose()) {

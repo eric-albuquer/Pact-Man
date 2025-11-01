@@ -1,35 +1,28 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "player.h"
-#include "hashtable.h"
-#include "linkedlist.h"
 #include "arraylist.h"
 #include "controler.h"
-
-typedef struct {
-    bool isWall;
-    unsigned int biomeType;
-    int distance;
-} Cell;
+#include "hashtable.h"
+#include "linkedlist.h"
+#include "player.h"
 
 typedef struct Map {
-    unsigned int rows;
-    unsigned int cols;
-    Cell **matrix;
-
-    ArrayList* nearEnemies;
+    Chunk* nearChunks[9];
     HashTable* chunks;
+
     int chunkRows;
     int chunkCols;
-    int chunkSize;
 
     Player* player;
+    bool changedChunk;
 
+    Cell* (*getLoadedCell)(struct Map*, int, int);
+    Chunk* (*getChunk)(struct Map*, int, int);
     void (*update)(struct Map*, Controler*);
     void (*free)(struct Map*);
 } Map;
 
-Map* new_Map(unsigned int rows, unsigned int cols, unsigned int chunkSize);
+Map* new_Map(int chunkCols, int chunkRows);
 
 #endif

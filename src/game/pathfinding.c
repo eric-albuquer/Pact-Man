@@ -1,8 +1,10 @@
 #include "pathfinding.h"
 
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 
+#include "chunk.h"
 #include "linkedlist.h"
 
 struct QNode {
@@ -10,38 +12,20 @@ struct QNode {
 };
 typedef struct QNode QNode;
 
-static inline int inBounds(Map* map, int x, int y) {
-    return x >= 0 && y >= 0 && x < map->cols && y < map->rows;
-}
-
-static inline int passable(Map* map, int x, int y) {
-    return !map->matrix[y][x].isWall;
-}
-
-static inline int sameBiome(Map* map, int x, int y, Enemy* e){
-    return map->matrix[y][x].biomeType == e->biomeType;
-}
-
-static inline bool farAway(Map* map, Enemy* e){
-    float distToSpawn = hypotf(map->player->x - e->spawnX, map->player->y - e->spawnY);
+static inline bool farAway(Player* p, Enemy* e) {
+    float distToSpawn = hypotf(p->x - e->spawnX, p->y - e->spawnY);
 
     return distToSpawn > MAX_PERSUIT_RADIUS;
 }
 
-void mapDistancePlayer(Map* map, int max_distance) {
-    if (!map || !map->player || max_distance < 1) return;
+void mapDistancePlayer(Map* map) {
+    if (!map) return;
 
-    Cell** matrix = map->matrix;
-    const int ROWS = map->rows, COLUMNS = map->cols;
+    Chunk** nearChunks = map->nearChunks;
 
-    int minY = max(map->player->y - max_distance - 1, 0);
-    int maxY = min(map->player->y + max_distance + 1, ROWS - 1);
-    int minX = max(map->player->x - max_distance - 1, 0);
-    int maxX = min(map->player->x + max_distance + 1, COLUMNS - 1);
-    for (int y = minY; y < maxY; y++) {
-        for (int x = minX; x < maxX; x++) {
-            matrix[y][x].distance = -1;
-        }
+    for (int i = 0; i < 9; i++) {
+        Chunk* chunk = nearChunks[i];
+        if (chunk) chunk->resetDistance(chunk);
     }
 
     LinkedList* BFSQueue = new_LinkedList();
@@ -51,35 +35,23 @@ void mapDistancePlayer(Map* map, int max_distance) {
     start->y = map->player->y;
     start->d = 0;
 
-    if (!inBounds(map, start->x, start->y) ||
-        !passable(map, start->x, start->y)) {
-        free(start);
-        BFSQueue->free(BFSQueue);
-        return;
-    }
-
     BFSQueue->addLast(BFSQueue, start);
-    matrix[start->y][start->x].distance = 0;
+    Cell* cell = map->getLoadedCell(map, start->x, start->y);
+    cell->distance = 0;
 
     static const int DX[4] = {1, -1, 0, 0};
     static const int DY[4] = {0, 0, 1, -1};
 
-    while (BFSQueue->length) {
+    while (BFSQueue->length > 0) {
         QNode* curr = BFSQueue->removeFirst(BFSQueue);
-        if (curr->d >= max_distance) {
-            free(curr);
-            continue;
-        }
-
         for (int i = 0; i < 4; i++) {
             int neighborX = curr->x + DX[i];
             int neighborY = curr->y + DY[i];
 
-            if (!inBounds(map, neighborX, neighborY)) continue;
-            if (!passable(map, neighborX, neighborY)) continue;
-            if (matrix[neighborY][neighborX].distance != -1) continue;
+            Cell* next = map->getLoadedCell(map, neighborX, neighborY);
+            if (!next || next->isWall || next->distance != -1) continue;
 
-            matrix[neighborY][neighborX].distance = curr->d + 1;
+            next->distance = curr->d + 1;
             QNode* neighborNew = malloc(sizeof(*neighborNew));
             neighborNew->x = neighborX;
             neighborNew->y = neighborY;
@@ -92,13 +64,12 @@ void mapDistancePlayer(Map* map, int max_distance) {
 }
 
 bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
-    if (!map || !e) return 0;
+    if (!map || !e) return false;
 
-    Cell** matrix = map->matrix;
     int enemyPosX = e->x, enemyPosY = e->y;
 
-    if (!inBounds(map, enemyPosX, enemyPosY)) return 0;
-    if (matrix[enemyPosY][enemyPosX].distance <= 0) return 0;
+    Cell* cell = map->getLoadedCell(map, enemyPosX, enemyPosY);
+    if (!cell || cell->distance <= 0) return false;
 
     static const int DX[4] = {0, 1, 0, -1};
     static const int DY[4] = {-1, 0, 1, 0};
@@ -110,12 +81,10 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
         int neighborX = enemyPosX + DX[i];
         int neighborY = enemyPosY + DY[i];
 
-        if (!inBounds(map, neighborX, neighborY)) continue;
-        if (!passable(map, neighborX, neighborY)) continue;
-        if (!sameBiome(map, neighborX, neighborY, e)) continue;
+        Cell* next = map->getLoadedCell(map, neighborX, neighborY);
+        if (!next || next->isWall || next->biomeType != e->biomeType) continue;
 
-        int dist = matrix[neighborY][neighborX].distance;
-        moves[length++] = (QNode){neighborX, neighborY, dist};
+        moves[length++] = (QNode){neighborX, neighborY, next->distance};
     }
 
     // ordenando direções
@@ -130,7 +99,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
     }
 
     // Indo para a pior direção
-    if (farAway(map, e)){
+    if (farAway(map->player, e)) {
         e->x = moves[length - 1].x;
         e->y = moves[length - 1].y;
         return true;

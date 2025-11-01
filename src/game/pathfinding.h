@@ -1,14 +1,14 @@
 #ifndef PATHFINDING_H
 #define PATHFINDING_H
 
-#include "map.h"
 #include "enemy.h"
+#include "map.h"
 
 #define MAX_PERSUIT_RADIUS 30
 #define BEST_PATH_PROBABILITY 0.65f
 
-void mapDistancePlayer(Map *map, int max_distance);
+void mapDistancePlayer(Map* map);
 
-bool enemyStepTowardsPlayer(Map *map, Enemy *e);
+bool enemyStepTowardsPlayer(Map* map, Enemy* e);
 
 #endif
