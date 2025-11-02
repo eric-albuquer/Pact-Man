@@ -17,7 +17,7 @@ typedef struct Player {
 
     Direction dir;
 
-    bool (*updateChunk)(struct Player*, int);
+    bool (*updateChunk)(struct Player*);
     void (*updateDirection)(struct Player*);
     void (*free)(struct Player*);
 } Player;

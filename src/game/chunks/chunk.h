@@ -5,8 +5,10 @@
 #include <stdbool.h>
 
 #define MAX_ENIMIES_PER_CHUNK 2
+#define CHUNK_SHIFT 4
 #define CHUNK_SIZE 16
-#define CELLS_PER_CHUNK (CHUNK_SIZE * CHUNK_SIZE)
+#define CHUNK_MASK 0xf
+#define CELLS_PER_CHUNK 256
 
 typedef struct {
     bool isWall;
@@ -18,12 +20,12 @@ typedef struct Chunk {
     int x;
     int y;
     LinkedList* enemies;
-    Cell* cells;
+    Cell cells[CELLS_PER_CHUNK];
 
     void (*resetDistance)(struct Chunk*);
     void (*free)(struct Chunk*);
 } Chunk;
 
-Chunk* new_Chunk(int x, int y);
+Chunk* new_Chunk(int x, int y, int seed);
 
 #endif

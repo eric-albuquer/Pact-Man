@@ -1,12 +1,12 @@
 #include "player.h"
 #include <stdlib.h>
 
-static bool updateChunk(Player* this, int chunkSize) {
-    int newChunkX = this->x / chunkSize;
-    int newChunkY = this->y / chunkSize;
+static bool updateChunk(Player* this) {
+    int newChunkX = this->x >> CHUNK_SHIFT;
+    int newChunkY = this->y >> CHUNK_SHIFT;
     if (newChunkX != this->chunkX || newChunkY != this->chunkY) {
-        this->chunkX = this->x / chunkSize;
-        this->chunkY = this->y / chunkSize;
+        this->chunkX = newChunkX;
+        this->chunkY = newChunkY;
         return true;
     }
     return false;

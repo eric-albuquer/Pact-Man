@@ -2,7 +2,7 @@
 #define ENEMY_H
 
 #include <stdbool.h>
-
+#include "chunk.h"
 #include "common.h"
 
 typedef struct Enemy {
@@ -24,7 +24,7 @@ typedef struct Enemy {
 
     int biomeType;
 
-    bool (*updateChunk)(struct Enemy*, int);
+    bool (*updateChunk)(struct Enemy*);
     void (*updateDirection)(struct Enemy*);
     void (*free)(struct Enemy*);
 } Enemy;

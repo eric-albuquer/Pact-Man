@@ -21,36 +21,9 @@ static const char* SPRITES[] = {
 static const Color CELL_COLORS[4] = {
     {100, 0, 0, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
 
-static void loadVisibleChunks(Game* this) {
-    Map* map = this->map;
-    Player* p = map->player;
-    Chunk** visibleChunks = this->visibleChunks;
-    int idx = 0;
-    for (int i = -3; i < 4; i++) {
-        int cy = i + p->chunkY;
-        for (int j = -3; j < 4; j++) {
-            int cx = j + p->chunkX;
-            visibleChunks[idx++] = map->getChunk(map, cx, cy);
-        }
-    }
-}
-
-static Cell* getVisibleCell(Game* this, int x, int y) {
-    if (x < 0 || y < 0) return NULL;
-    Map* map = this->map;
-    int chunkX = (x / CHUNK_SIZE) - map->player->chunkX + 3;
-    int chunkY = (y / CHUNK_SIZE) - map->player->chunkY + 3;
-
-    if (chunkX < 0 || chunkX > 6 || chunkY < 0 || chunkY > 6) return NULL;
-
-    Chunk* chunk = this->visibleChunks[chunkY * 7 + chunkX];
-    if (chunk == NULL) return NULL;
-    Cell* cells = chunk->cells;
-    return &cells[(x % CHUNK_SIZE) + (y % CHUNK_SIZE) * CHUNK_SIZE];
-}
-
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
+    ChunkManager* cm = map->manager;
     int cellSize = size / (zoom);
     DrawRectangle(x0 - 5, y0 - 5, size + 10, size + 10, BLACK);
     for (int y = 0; y < zoom; y++) {
@@ -58,7 +31,7 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
         for (int x = 0; x < zoom; x++) {
             int px = map->player->x + x - (zoom >> 1);
 
-            Cell* cell = getVisibleCell(this, px, py);
+            Cell* cell = cm->getLoadedCell(cm, px, py);
             if (!cell) continue;
             int biomeType = cell->biomeType;
             Color color = CELL_COLORS[biomeType - 1];
@@ -77,7 +50,8 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
     int offset = (zoom * cellSize) >> 1;
 
     for (int i = 0; i < 9; i++) {
-        Chunk* chunk = map->nearChunks[i];
+        int idx = CLOSER_IDX[i];
+        Chunk* chunk = cm->adjacents[idx];
         if (!chunk) continue;
         Node* cur = chunk->enemies->head;
         while (cur != NULL) {
@@ -93,10 +67,10 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
-        if (chunkY < 0 || chunkY >= map->chunkRows) continue;
+        if (chunkY < 0 || chunkY >= map->manager->rows) continue;
         for (int j = -1; j < 2; j++) {
             int chunkX = map->player->chunkX + j;
-            if (chunkX < 0 || chunkX >= map->chunkCols) continue;
+            if (chunkX < 0 || chunkX >= map->manager->cols) continue;
             int startChunkX =
                 x0 + offset + (chunkX * CHUNK_SIZE - map->player->x) * cellSize;
             int startChunkY =
@@ -125,6 +99,7 @@ static void drawHudDebug(Game* this) {
 
 static void drawMapDebug(Game* this) {
     Map* map = this->map;
+    ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
     int px = p->lastX;
@@ -151,7 +126,7 @@ static void drawMapDebug(Game* this) {
         for (int j = -this->renderDistX; j <= this->renderDistX; j++) {
             int xIdx = j + px;
 
-            Cell* cell = getVisibleCell(this, xIdx, yIdx);
+            Cell* cell = cm->getLoadedCell(cm, xIdx, yIdx);
             if (!cell) continue;
             int biomeType = cell->biomeType;
             Color color = CELL_COLORS[biomeType - 1];
@@ -173,7 +148,8 @@ static void drawMapDebug(Game* this) {
     }
 
     for (int i = 0; i < 9; i++) {
-        Chunk* chunk = map->nearChunks[i];
+        int idx = CLOSER_IDX[i];
+        Chunk* chunk = cm->adjacents[idx];
         if (!chunk) continue;
         Node* cur = chunk->enemies->head;
         while (cur != NULL) {
@@ -206,10 +182,10 @@ static void drawMapDebug(Game* this) {
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
-        if (chunkY < 0 || chunkY >= map->chunkRows) continue;
+        if (chunkY < 0 || chunkY >= map->manager->rows) continue;
         for (int j = -1; j < 2; j++) {
             int chunkX = map->player->chunkX + j;
-            if (chunkX < 0 || chunkX >= map->chunkCols) continue;
+            if (chunkX < 0 || chunkX >= map->manager->cols) continue;
 
             int startChunkX = offsetHalfXAnimated +
                               (chunkX * CHUNK_SIZE - px) * this->cellSize;
@@ -256,8 +232,7 @@ static void loadSprites(Game* this, const char** paths, int total) {
 
 static void saveUpdate(Game* this) {
     if (this->map->changedChunk) {
-        loadVisibleChunks(this);
-        this->map->changedChunk = false;
+        this->map->manager->changedChunk = false;
     }
 
     this->lastUpdate = this->frameCount;
@@ -290,7 +265,6 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->offsetHalfY = height >> 1;
 
     this->map = map;
-    loadVisibleChunks(this);
 
     loadSprites(this, SPRITES, 16);
 

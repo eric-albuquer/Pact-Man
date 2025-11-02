@@ -41,8 +41,8 @@ static void generateMap(Chunk* this) {
     }
 }
 
-static void generateBiome(Chunk* this){
-    static const int NOISE_BASE = 112512513;
+static void generateBiome(Chunk* this, int seed){
+    const int NOISE_BASE = 112512513 ^ seed;
     static const int BASE_X = CHUNK_SIZE * 3;
     int dx0 = ((this->y * NOISE_BASE) % 11) - 5;
     int x0 = BASE_X + dx0;
@@ -65,8 +65,8 @@ static void generateBiome(Chunk* this){
     }
 }
 
-static void generate(Chunk* this) {
-    generateBiome(this);
+static void generate(Chunk* this, int seed) {
+    generateBiome(this, seed);
     generateEnemies(this);
     generateMap(this);
 }
@@ -82,17 +82,15 @@ static void _free(Chunk* this) {
         free(temp);
     }
     free(this->enemies);
-    free(this->cells);
     free(this);
 }
 
-Chunk* new_Chunk(int x, int y) {
+Chunk* new_Chunk(int x, int y, int seed) {
     Chunk* this = malloc(sizeof(Chunk));
     this->x = x;
     this->y = y;
     this->enemies = new_LinkedList();
-    this->cells = malloc(sizeof(Cell) * CELLS_PER_CHUNK);
-    generate(this);
+    generate(this, seed);
 
     this->resetDistance = resetDistance;
     this->free = _free;

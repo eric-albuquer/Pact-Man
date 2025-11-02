@@ -21,10 +21,12 @@ static inline bool farAway(Player* p, Enemy* e) {
 void mapDistancePlayer(Map* map) {
     if (!map) return;
 
-    Chunk** nearChunks = map->nearChunks;
+    ChunkManager* cm = map->manager;
+    Chunk** adjacents = cm->adjacents;
 
     for (int i = 0; i < 9; i++) {
-        Chunk* chunk = nearChunks[i];
+        int idx = CLOSER_IDX[i];
+        Chunk* chunk = adjacents[idx];
         if (chunk) chunk->resetDistance(chunk);
     }
 
@@ -36,7 +38,7 @@ void mapDistancePlayer(Map* map) {
     start->d = 0;
 
     BFSQueue->addLast(BFSQueue, start);
-    Cell* cell = map->getLoadedCell(map, start->x, start->y);
+    Cell* cell = cm->getUpdatedCell(cm, start->x, start->y);
     cell->distance = 0;
 
     static const int DX[4] = {1, -1, 0, 0};
@@ -48,7 +50,7 @@ void mapDistancePlayer(Map* map) {
             int neighborX = curr->x + DX[i];
             int neighborY = curr->y + DY[i];
 
-            Cell* next = map->getLoadedCell(map, neighborX, neighborY);
+            Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
             if (!next || next->isWall || next->distance != -1) continue;
 
             next->distance = curr->d + 1;
@@ -65,10 +67,11 @@ void mapDistancePlayer(Map* map) {
 
 bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
     if (!map || !e) return false;
+    ChunkManager* cm = map->manager;
 
     int enemyPosX = e->x, enemyPosY = e->y;
 
-    Cell* cell = map->getLoadedCell(map, enemyPosX, enemyPosY);
+    Cell* cell = cm->getUpdatedCell(cm, enemyPosX, enemyPosY);
     if (!cell || cell->distance <= 0) return false;
 
     static const int DX[4] = {0, 1, 0, -1};
@@ -81,7 +84,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
         int neighborX = enemyPosX + DX[i];
         int neighborY = enemyPosY + DY[i];
 
-        Cell* next = map->getLoadedCell(map, neighborX, neighborY);
+        Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
         if (!next || next->isWall || next->biomeType != e->biomeType) continue;
 
         moves[length++] = (QNode){neighborX, neighborY, next->distance};

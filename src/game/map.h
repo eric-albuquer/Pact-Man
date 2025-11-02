@@ -6,23 +6,18 @@
 #include "hashtable.h"
 #include "linkedlist.h"
 #include "player.h"
+#include "chunk_manager.h"
 
 typedef struct Map {
-    Chunk* nearChunks[9];
-    HashTable* chunks;
-
-    int chunkRows;
-    int chunkCols;
+    ChunkManager* manager;
 
     Player* player;
     bool changedChunk;
 
-    Cell* (*getLoadedCell)(struct Map*, int, int);
-    Chunk* (*getChunk)(struct Map*, int, int);
     void (*update)(struct Map*, Controler*);
     void (*free)(struct Map*);
 } Map;
 
-Map* new_Map(int chunkCols, int chunkRows);
+Map* new_Map(int chunkCols, int chunkRows, int seed);
 
 #endif
