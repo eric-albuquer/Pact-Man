@@ -10,12 +10,14 @@
 #define CHUNK_MASK 0xf
 #define CELLS_PER_CHUNK 256
 
-#define BIOME_WIDTH_CHUNKS 3
+#define BIOME_WIDTH_CHUNKS 5
+#define HALF_WIDTH_CHUNKS (BIOME_WIDTH_CHUNKS >> 1)
 
 #define SEED 2312512515
 
 typedef struct {
-    bool isWall;
+    unsigned isWall : 1;
+    unsigned isBoss : 1;
     int biomeType;
     int distance;
 } Cell;

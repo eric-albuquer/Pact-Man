@@ -7,6 +7,26 @@
 static const int BASE_X[4] = {0 * BIOME_WIDTH_CHUNKS, 1 * BIOME_WIDTH_CHUNKS,
                               2 * BIOME_WIDTH_CHUNKS, 3 * BIOME_WIDTH_CHUNKS};
 
+static const int BOSS_BASE[4][2] = {
+    {HALF_WIDTH_CHUNKS, 1},
+    {BIOME_WIDTH_CHUNKS + HALF_WIDTH_CHUNKS, 5},
+    {BIOME_WIDTH_CHUNKS * 2 + HALF_WIDTH_CHUNKS, 7},
+    {BIOME_WIDTH_CHUNKS * 3 + HALF_WIDTH_CHUNKS, 3}};
+
+static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+    1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+    1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+};
+
 static void resetDistance(Chunk* this) {
     Cell* cells = this->cells;
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
@@ -30,19 +50,24 @@ static void generateEnemies(Chunk* this) {
 }
 
 static void generateWalls(Chunk* this) {
+    srand(this->x + this->y * SEED);
     for (int y = 0; y < CHUNK_SIZE; y++) {
         int yIdx = y << CHUNK_SHIFT;
         for (int x = 0; x < CHUNK_SIZE; x++) {
             bool evenOrEven = ((y & 1) == 0 || (x & 1) == 0);
-            this->cells[yIdx | x].isWall = evenOrEven;
+            Cell* cell = &this->cells[yIdx | x];
+            cell->isBoss = 0;
+            cell->isWall = evenOrEven;
             if ((y & 1) == 0 && (x & 1) == 0) continue;
-            if (rand() % 100 <= 65) this->cells[yIdx | x].isWall = 0;
+            if (rand() % 100 <= 65) cell->isWall = 0;
         }
     }
 }
 
 static void generateBiome(Chunk* this) {
     int idx = this->x / BIOME_WIDTH_CHUNKS;
+
+    if (idx > 3) idx = 3;
 
     bool isTransition = false;
     int x0, x1, delta;
@@ -78,9 +103,27 @@ static void generateBiome(Chunk* this) {
     }
 }
 
+static void generateStructures(Chunk* this) {
+    int idx = this->x / BIOME_WIDTH_CHUNKS;
+    bool isBossTemple =
+        BOSS_BASE[idx][0] == this->x && BOSS_BASE[idx][1] == this->y;
+    if (!isBossTemple) return;
+
+    for (int i = 0; i < CHUNK_SIZE; i++) {
+        int y = i << CHUNK_SHIFT;
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            int idx = y | x;
+            Cell* cell = &this->cells[y | x];
+            cell->isWall = TEMPLE_MATRIX[idx];
+            cell->isBoss = 1;
+        }
+    }
+}
+
 static void generate(Chunk* this) {
     generateWalls(this);
     generateBiome(this);
+    generateStructures(this);
     generateEnemies(this);
 }
 

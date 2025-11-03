@@ -42,6 +42,12 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
                 color.b += 70;
             }
 
+            if (cell->isBoss){
+                color.r *= 0.3;
+                color.g *= 0.3;
+                color.b *= 0.3;
+            }
+
             DrawRectangle(x0 + x * cellSize, y0 + y * cellSize, cellSize,
                           cellSize, color);
         }
@@ -135,6 +141,11 @@ static void drawMapDebug(Game* this) {
                 color.r = color.r + 70;
                 color.g = color.g + 70;
                 color.b = color.b + 70;
+            }
+            if (cell->isBoss){
+                color.r *= 0.3;
+                color.g *= 0.3;
+                color.b *= 0.3;
             }
 
             int x = offsetHalfXAnimated + j * this->cellSize;

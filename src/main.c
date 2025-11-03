@@ -47,7 +47,7 @@ int main(void) {
     ChangeDirectory(GetApplicationDirectory());
 
     controler = new_Controler();
-    map = new_Map(30, 10);
+    map = new_Map(30, 20);
     render = new_Render(1920, 1080, 50, map);
 
     while (!WindowShouldClose()) {
