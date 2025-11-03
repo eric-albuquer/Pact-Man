@@ -1,8 +1,9 @@
 #include "chunk_map.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 static size_t chunkKey(int cx, int cy) {
-    return ((size_t)(cx) << 32) | (cy & 0xffffffff);
+    return ((size_t)(cx) << 32) | (cy & 0xFFFFFFFF);
 }
 
 static int hashCode(size_t key) {
@@ -65,7 +66,7 @@ static Chunk* get(ChunkMap* map, int cx, int cy) {
     return NULL;
 }
 
-static bool remove(ChunkMap* map, Chunk* chunk) {
+static bool delete(ChunkMap* map, Chunk* chunk) {
     size_t key = chunkKey(chunk->x, chunk->y);
     int idx = hashCode(key) & map->mask;
     while (map->used[idx] != EMPTY) {
@@ -98,7 +99,7 @@ ChunkMap* new_ChunkMap() {
 
     this->add = add;
     this->get = get;
-    this->remove = remove;
+    this->remove = delete;
     this->free = _free;
     return this;
 }

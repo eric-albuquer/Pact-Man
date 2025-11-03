@@ -90,7 +90,7 @@ static void updateEnemies(Map* this) {
                     e->changedChunk = true;
                     changed[changedLength++] = e;
                     enemies->removeNode(enemies, cur);
-                    Chunk* newChunk = cm->getChunk(cm, e->chunkX, e->chunkY);
+                    Chunk* newChunk = cm->getLoadedChunk(cm, e->chunkX, e->chunkY);
                     LinkedList* newEnemies = newChunk->enemies;
                     newEnemies->addLast(newEnemies, e);
                 }
@@ -120,12 +120,12 @@ static void _free(Map* this) {
     free(this);
 }
 
-Map* new_Map(int chunkCols, int chunkRows, int seed) {
+Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
-
+    
     this->player = new_Player(11, 11);
 
-    this->manager = new_ChunkManager(chunkCols, chunkRows, this->player, seed);
+    this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 
     this->update = update;
     this->free = _free;

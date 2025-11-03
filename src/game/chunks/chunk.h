@@ -10,6 +10,10 @@
 #define CHUNK_MASK 0xf
 #define CELLS_PER_CHUNK 256
 
+#define BIOME_WIDTH_CHUNKS 3
+
+#define SEED 2312512515
+
 typedef struct {
     bool isWall;
     int biomeType;
@@ -19,6 +23,7 @@ typedef struct {
 typedef struct Chunk {
     int x;
     int y;
+
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];
 
@@ -26,6 +31,6 @@ typedef struct Chunk {
     void (*free)(struct Chunk*);
 } Chunk;
 
-Chunk* new_Chunk(int x, int y, int seed);
+Chunk* new_Chunk(int x, int y);
 
 #endif

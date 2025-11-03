@@ -18,6 +18,6 @@ typedef struct Map {
     void (*free)(struct Map*);
 } Map;
 
-Map* new_Map(int chunkCols, int chunkRows, int seed);
+Map* new_Map(int chunkCols, int chunkRows);
 
 #endif

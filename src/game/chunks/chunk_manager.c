@@ -15,7 +15,7 @@ static void loadAdjacents(ChunkManager* this){
             int chunkX = cx + j;
             Chunk* chunk = chunks->get(chunks, chunkX, chunkY);
             if (chunkX >= 0 && chunkX < this->cols && chunkY >= 0 && chunkY < this->rows && !chunk && abs(i) < 2 && abs(j) < 2){
-                chunk = new_Chunk(chunkX, chunkY, this->seed);
+                chunk = new_Chunk(chunkX, chunkY);
                 chunks->add(chunks, chunk);
             }
             this->adjacents[idx++] = chunk;
@@ -32,7 +32,7 @@ static Cell* getLoadedCell(ChunkManager* this, int x, int y){
     Chunk* chunk = this->adjacents[cy * 7 + cx];
     if (chunk == NULL) return NULL;
     Cell* cells = chunk->cells;
-    return &cells[(x & CHUNK_MASK) + ((y & CHUNK_MASK) << CHUNK_SHIFT)];
+    return &cells[(x & CHUNK_MASK) | ((y & CHUNK_MASK) << CHUNK_SHIFT)];
 }
 
 static Cell* getUpdatedCell(ChunkManager* this, int x, int y){
@@ -44,11 +44,19 @@ static Cell* getUpdatedCell(ChunkManager* this, int x, int y){
     Chunk* chunk = this->adjacents[cy * 7 + cx];
     if (chunk == NULL) return NULL;
     Cell* cells = chunk->cells;
-    return &cells[(x & CHUNK_MASK) + ((y & CHUNK_MASK) << CHUNK_SHIFT)];
+    return &cells[(x & CHUNK_MASK) | ((y & CHUNK_MASK) << CHUNK_SHIFT)];
 }
 
 static Chunk* getChunk(ChunkManager* this, int cx, int cy){
     return this->chunks->get(this->chunks, cx, cy);
+}
+
+static Chunk* getLoadedChunk(ChunkManager* this, int cx, int cy){
+    int rcx = cx - this->player->chunkX + 3;
+    int rcy = cy - this->player->chunkY + 3;
+
+    if (rcx < 0 || rcx > 6 || rcy < 0 || rcy > 6) return NULL;
+    return this->adjacents[rcy * 7 + rcx];
 }
 
 static void _free(ChunkManager* this) {
@@ -56,20 +64,20 @@ static void _free(ChunkManager* this) {
     free(this);
 }
 
-ChunkManager* new_ChunkManager(int cols, int rows, Player* p, int seed) {
+ChunkManager* new_ChunkManager(int cols, int rows, Player* p) {
     ChunkManager* this = malloc(sizeof(ChunkManager));
     this->chunks = new_ChunkMap();
     this->changedChunk = false;
     this->cols = cols;
     this->rows = rows;
     this->player = p;
-    this->seed = seed;
 
     this->player->updateChunk(this->player);
 
     loadAdjacents(this);
 
     this->getChunk = getChunk;
+    this->getLoadedChunk = getLoadedChunk;
     this->getLoadedCell = getLoadedCell;
     this->getUpdatedCell = getUpdatedCell;
     this->loadAdjacents = loadAdjacents;

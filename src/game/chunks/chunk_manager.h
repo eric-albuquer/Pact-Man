@@ -10,13 +10,12 @@ typedef struct ChunkManager {
     int rows;
     int cols;
 
-    size_t seed;
-
     Player* player;
     ChunkMap* chunks;
     Chunk* adjacents[49];
     bool changedChunk;
 
+    Chunk* (*getLoadedChunk)(struct ChunkManager*, int, int);
     Chunk* (*getChunk)(struct ChunkManager*, int, int);
     Cell* (*getLoadedCell)(struct ChunkManager*, int, int);
     Cell* (*getUpdatedCell)(struct ChunkManager*, int, int);
@@ -24,6 +23,6 @@ typedef struct ChunkManager {
     void (*free)(struct ChunkManager*);
 } ChunkManager;
 
-ChunkManager* new_ChunkManager(int cols, int rows, Player* p, int seed);
+ChunkManager* new_ChunkManager(int cols, int rows, Player* p);
 
 #endif
