@@ -13,6 +13,7 @@ typedef struct Map {
 
     Player* player;
     bool changedChunk;
+    unsigned int updateCount;
 
     void (*update)(struct Map*, Controler*);
     void (*free)(struct Map*);

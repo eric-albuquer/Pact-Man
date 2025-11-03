@@ -42,10 +42,15 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
                 color.b += 70;
             }
 
-            if (cell->isBoss){
+            if (cell->isBossTemple){
                 color.r *= 0.3;
                 color.g *= 0.3;
                 color.b *= 0.3;
+            }
+
+            if (cell->windDir > 0){
+                color.r *= 0.7;
+                color.g += 100;
             }
 
             DrawRectangle(x0 + x * cellSize, y0 + y * cellSize, cellSize,
@@ -94,8 +99,8 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
 static void drawHudDebug(Game* this) {
     Map* map = this->map;
     static char buffer[100];
-    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d", map->player->chunkX,
-            map->player->chunkY, map->player->x, map->player->y);
+    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d", map->player->chunkX,
+            map->player->chunkY, map->player->x, map->player->y, map->player->x & CHUNK_MASK, map->player->y & CHUNK_MASK);
 
     DrawRectangle(this->width - 400, 0, 400, 400, (Color){0, 0, 0, 200});
     DrawText(buffer, this->width - 300, 50, 30, (Color){0, 255, 0, 255});
@@ -142,10 +147,15 @@ static void drawMapDebug(Game* this) {
                 color.g = color.g + 70;
                 color.b = color.b + 70;
             }
-            if (cell->isBoss){
+            if (cell->isBossTemple){
                 color.r *= 0.3;
                 color.g *= 0.3;
                 color.b *= 0.3;
+            }
+
+            if (cell->windDir > 0){
+                color.r *= 0.7;
+                color.g += 100;
             }
 
             int x = offsetHalfXAnimated + j * this->cellSize;

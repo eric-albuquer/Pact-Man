@@ -35,6 +35,7 @@ static void resetDistance(Chunk* this) {
 }
 
 static void generateEnemies(Chunk* this) {
+    if (this->isTemple) return;
     int totalEnemies = rand() % (MAX_ENIMIES_PER_CHUNK + 1);
     static const int range = CHUNK_SIZE >> 1;
     LinkedList* enemies = this->enemies;
@@ -50,17 +51,26 @@ static void generateEnemies(Chunk* this) {
 }
 
 static void generateWalls(Chunk* this) {
-    srand(this->x + this->y * SEED);
+    if (this->isTemple) return;
     for (int y = 0; y < CHUNK_SIZE; y++) {
         int yIdx = y << CHUNK_SHIFT;
         for (int x = 0; x < CHUNK_SIZE; x++) {
-            bool evenOrEven = ((y & 1) == 0 || (x & 1) == 0);
             Cell* cell = &this->cells[yIdx | x];
-            cell->isBoss = 0;
+            if (cell->isWall == 2){
+                cell->isWall = 0;
+                continue;
+            }
+            bool evenOrEven = ((y & 1) == 0 || (x & 1) == 0);
             cell->isWall = evenOrEven;
             if ((y & 1) == 0 && (x & 1) == 0) continue;
             if (rand() % 100 <= 65) cell->isWall = 0;
         }
+    }
+}
+
+static void initCells(Chunk* this){
+    for (int i = 0; i < CELLS_PER_CHUNK; i++){
+        this->cells[i] = (Cell){0, 0, 0, -1, 0};   
     }
 }
 
@@ -80,6 +90,8 @@ static void generateBiome(Chunk* this) {
         delta = x1 - x0;
     }
 
+    this->isTransition = isTransition;
+
     int bx;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
@@ -95,7 +107,7 @@ static void generateBiome(Chunk* this) {
                 if (x > bx) biome++;
                 if (x - bx == 1 && x > 0 && x < 15) {
                     for (int k = -1; k < 2; k++)
-                        this->cells[y | (x + k)].isWall = 0;
+                        this->cells[y | (x + k)].isWall = 2;
                 }
             }
             this->cells[y | x].biomeType = biome;
@@ -103,11 +115,35 @@ static void generateBiome(Chunk* this) {
     }
 }
 
+static void generateWind(Chunk* this) {
+    if (this->isTransition || this->isTemple || this->cells[0].biomeType > 1) return;
+
+    bool horizontal = rand() & 1;
+    int windIdx = rand() & CHUNK_MASK;
+    int windDir;
+    if (horizontal) windDir = (rand() & 1) + 1;
+    else windDir = (rand() & 1) + 3;
+    if (horizontal) {
+        int y = windIdx << CHUNK_SHIFT;
+        for (int i = 0; i < CHUNK_SIZE; i++) {
+            Cell* cell = &this->cells[y | i];
+            cell->windDir = windDir;
+            cell->isWall = 0;
+        }
+    } else {
+        for (int i = 0; i < CHUNK_SIZE; i++) {
+            Cell* cell = &this->cells[(i << CHUNK_SHIFT) | windIdx];
+            cell->windDir = windDir;
+            cell->isWall = 0;
+        }
+    }
+}
+
 static void generateStructures(Chunk* this) {
     int idx = this->x / BIOME_WIDTH_CHUNKS;
-    bool isBossTemple =
+    this->isTemple =
         BOSS_BASE[idx][0] == this->x && BOSS_BASE[idx][1] == this->y;
-    if (!isBossTemple) return;
+    if (!this->isTemple) return;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
         int y = i << CHUNK_SHIFT;
@@ -115,15 +151,17 @@ static void generateStructures(Chunk* this) {
             int idx = y | x;
             Cell* cell = &this->cells[y | x];
             cell->isWall = TEMPLE_MATRIX[idx];
-            cell->isBoss = 1;
+            cell->isBossTemple = 1;
         }
     }
 }
 
 static void generate(Chunk* this) {
-    generateWalls(this);
+    initCells(this);
     generateBiome(this);
     generateStructures(this);
+    generateWalls(this);
+    generateWind(this);
     generateEnemies(this);
 }
 
@@ -148,7 +186,6 @@ Chunk* new_Chunk(int x, int y) {
     this->enemies = new_LinkedList();
 
     generate(this);
-    resetDistance(this);
 
     this->resetDistance = resetDistance;
     this->free = _free;

@@ -16,15 +16,19 @@
 #define SEED 2312512515
 
 typedef struct {
-    unsigned isWall : 1;
-    unsigned isBoss : 1;
-    int biomeType;
-    int distance;
+    unsigned isWall : 2;
+    unsigned isBossTemple : 1;
+    unsigned biomeType: 5;
+    signed distance: 9;
+    unsigned windDir : 3;
 } Cell;
 
 typedef struct Chunk {
     int x;
     int y;
+
+    unsigned isTransition : 1;
+    unsigned isTemple: 1;
 
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];

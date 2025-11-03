@@ -11,9 +11,11 @@
 typedef struct {
     int x;
     int y;
-} VecInt2;
+} Vec2i;
 
-static bool movePlayer(Map* this, VecInt2 newDir) {
+static const Vec2i DIR_VECTOR[4] = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
+
+static bool movePlayer(Map* this, Vec2i newDir) {
     Player* p = this->player;
     int playerNextX = p->x + newDir.x;
     int playerNextY = p->y + newDir.y;
@@ -28,32 +30,44 @@ static bool movePlayer(Map* this, VecInt2 newDir) {
     return true;
 }
 
+static void updatePlayerWind(Map* this) {
+    Player* p = this->player;
+
+    Cell* floor = this->manager->getUpdatedCell(this->manager, p->x, p->y);
+    if (floor->windDir > 0) {
+        Vec2i dir = DIR_VECTOR[floor->windDir - 1];
+        movePlayer(this, dir);
+    }
+
+    if (this->changedChunk) this->manager->loadAdjacents(this->manager);
+}
+
 static void updatePlayer(Map* this, Input input) {
     Player* p = this->player;
 
-    static VecInt2 dir[4];
+    static Vec2i dir[4];
     int length = 0;
 
     if (p->dir == RIGHT) {
-        if (input.left) dir[length++] = (VecInt2){-1, 0};
-        if (input.up) dir[length++] = (VecInt2){0, -1};
-        if (input.down) dir[length++] = (VecInt2){0, 1};
-        if (input.right) dir[length++] = (VecInt2){1, 0};
+        if (input.left) dir[length++] = (Vec2i){-1, 0};
+        if (input.up) dir[length++] = (Vec2i){0, -1};
+        if (input.down) dir[length++] = (Vec2i){0, 1};
+        if (input.right) dir[length++] = (Vec2i){1, 0};
     } else if (p->dir == LEFT) {
-        if (input.right) dir[length++] = (VecInt2){1, 0};
-        if (input.up) dir[length++] = (VecInt2){0, -1};
-        if (input.down) dir[length++] = (VecInt2){0, 1};
-        if (input.left) dir[length++] = (VecInt2){-1, 0};
+        if (input.right) dir[length++] = (Vec2i){1, 0};
+        if (input.up) dir[length++] = (Vec2i){0, -1};
+        if (input.down) dir[length++] = (Vec2i){0, 1};
+        if (input.left) dir[length++] = (Vec2i){-1, 0};
     } else if (p->dir == UP) {
-        if (input.down) dir[length++] = (VecInt2){0, 1};
-        if (input.right) dir[length++] = (VecInt2){1, 0};
-        if (input.left) dir[length++] = (VecInt2){-1, 0};
-        if (input.up) dir[length++] = (VecInt2){0, -1};
+        if (input.down) dir[length++] = (Vec2i){0, 1};
+        if (input.right) dir[length++] = (Vec2i){1, 0};
+        if (input.left) dir[length++] = (Vec2i){-1, 0};
+        if (input.up) dir[length++] = (Vec2i){0, -1};
     } else if (p->dir == DOWN) {
-        if (input.up) dir[length++] = (VecInt2){0, -1};
-        if (input.right) dir[length++] = (VecInt2){1, 0};
-        if (input.left) dir[length++] = (VecInt2){-1, 0};
-        if (input.down) dir[length++] = (VecInt2){0, 1};
+        if (input.up) dir[length++] = (Vec2i){0, -1};
+        if (input.right) dir[length++] = (Vec2i){1, 0};
+        if (input.left) dir[length++] = (Vec2i){-1, 0};
+        if (input.down) dir[length++] = (Vec2i){0, 1};
     }
 
     p->lastX = p->x;
@@ -62,6 +76,8 @@ static void updatePlayer(Map* this, Input input) {
     for (int i = 0; i < length; i++) {
         if (movePlayer(this, dir[i])) break;
     }
+
+    if (this->changedChunk) this->manager->loadAdjacents(this->manager);
 }
 
 static void updateEnemies(Map* this) {
@@ -90,7 +106,8 @@ static void updateEnemies(Map* this) {
                     e->changedChunk = true;
                     changed[changedLength++] = e;
                     enemies->removeNode(enemies, cur);
-                    Chunk* newChunk = cm->getLoadedChunk(cm, e->chunkX, e->chunkY);
+                    Chunk* newChunk =
+                        cm->getLoadedChunk(cm, e->chunkX, e->chunkY);
                     LinkedList* newEnemies = newChunk->enemies;
                     newEnemies->addLast(newEnemies, e);
                 }
@@ -109,8 +126,10 @@ static void updateEnemies(Map* this) {
 static void update(Map* this, Controler* controler) {
     this->changedChunk = false;
     updatePlayer(this, controler->input);
-    if (this->changedChunk) this->manager->loadAdjacents(this->manager);
+    if (this->updateCount & 1)
+        updatePlayerWind(this);
     updateEnemies(this);
+    this->updateCount++;
 }
 
 static void _free(Map* this) {
@@ -122,7 +141,8 @@ static void _free(Map* this) {
 
 Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
-    
+
+    this->updateCount = 0;
     this->player = new_Player(11, 11);
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
