@@ -16,7 +16,8 @@ static const char* SPRITES[] = {
     "assets/sprites/pacmanDown1.png",  "assets/sprites/pacmanDown2.png",
     "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png",
     "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
-};
+
+    "assets/sprites/coin.png"};
 
 static const Color CELL_COLORS[4] = {
     {100, 0, 0, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
@@ -34,7 +35,7 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             Cell* cell = cm->getLoadedCell(cm, px, py);
             if (!cell) continue;
             int biomeType = cell->biomeType;
-            Color color = CELL_COLORS[biomeType - 1];
+            Color color = CELL_COLORS[biomeType];
 
             if (cell->isWall) {
                 color.r += 70;
@@ -42,13 +43,13 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
                 color.b += 70;
             }
 
-            if (cell->isBossTemple){
+            if (cell->isBossTemple) {
                 color.r *= 0.3;
                 color.g *= 0.3;
                 color.b *= 0.3;
             }
 
-            if (cell->windDir > 0){
+            if (cell->windDir > 0) {
                 color.r *= 0.7;
                 color.g += 100;
             }
@@ -99,8 +100,10 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
 static void drawHudDebug(Game* this) {
     Map* map = this->map;
     static char buffer[100];
-    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d", map->player->chunkX,
-            map->player->chunkY, map->player->x, map->player->y, map->player->x & CHUNK_MASK, map->player->y & CHUNK_MASK);
+    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d",
+            map->player->chunkX, map->player->chunkY, map->player->x,
+            map->player->y, map->player->x & CHUNK_MASK,
+            map->player->y & CHUNK_MASK);
 
     DrawRectangle(this->width - 400, 0, 400, 400, (Color){0, 0, 0, 200});
     DrawText(buffer, this->width - 300, 50, 30, (Color){0, 255, 0, 255});
@@ -140,20 +143,20 @@ static void drawMapDebug(Game* this) {
             Cell* cell = cm->getLoadedCell(cm, xIdx, yIdx);
             if (!cell) continue;
             int biomeType = cell->biomeType;
-            Color color = CELL_COLORS[biomeType - 1];
+            Color color = CELL_COLORS[biomeType];
 
             if (cell->isWall) {
                 color.r = color.r + 70;
                 color.g = color.g + 70;
                 color.b = color.b + 70;
             }
-            if (cell->isBossTemple){
+            if (cell->isBossTemple) {
                 color.r *= 0.3;
                 color.g *= 0.3;
                 color.b *= 0.3;
             }
 
-            if (cell->windDir > 0){
+            if (cell->windDir > 0) {
                 color.r *= 0.7;
                 color.g += 100;
             }
@@ -162,6 +165,11 @@ static void drawMapDebug(Game* this) {
             int y = offsetHalfYAnimated + i * this->cellSize;
 
             DrawRectangle(x, y, this->cellSize, this->cellSize, color);
+
+            if (cell->coin) {
+                Texture2D enemyTexture = this->sprites[16];
+                DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
+            }
 
             sprintf(buffer, "%d", cell->distance);
             DrawText(buffer, x + 15, y + 15, 20, (Color){255, 255, 255, 255});
@@ -287,7 +295,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->map = map;
 
-    loadSprites(this, SPRITES, 16);
+    loadSprites(this, SPRITES, 17);
 
     this->drawMapDebug = drawMapDebug;
     this->saveUpdate = saveUpdate;
