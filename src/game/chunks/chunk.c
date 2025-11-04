@@ -25,13 +25,8 @@ static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
     1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
 };
 
-static const int FONT_MATRIX[25] = {
-    1, 0, 0, 0, 1,
-    0, 0, 0, 0, 0,
-    0, 0, 1, 0, 0,
-    0, 0, 0, 0, 0,
-    1, 0, 0, 0, 1
-};
+static const int FONT_MATRIX[25] = {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1};
 
 void setArgs(const int width, const int height, const int maxEnemiesPerChunk,
              const int seed) {
@@ -59,14 +54,14 @@ static void initCells(Chunk* this) {
     this->isTransition = this->x % BIOME_WIDTH_CHUNKS == 0 && this->x > 0;
     int biome = this->x / BIOME_WIDTH_CHUNKS;
     this->biome = biome < 4 ? biome : 3;
-    
+
     this->isBorder = this->y == 0 || this->y == (HEIGHT - 1);
 
-    bool isXstructure = ((this->x - BIOME_HALF_WIDTH) % BIOME_WIDTH_CHUNKS) == 0;
+    bool isXstructure =
+        ((this->x - BIOME_HALF_WIDTH) % BIOME_WIDTH_CHUNKS) == 0;
     int templeY = (((SEED * this->x * 31) & 5) + 1);
     bool isYTemple = templeY == this->y;
     this->isTemple = isXstructure && isYTemple;
-    
 
     bool isYFont = ((templeY + 3) & 5) + 1 == this->y;
     this->isFont = isXstructure && isYFont;
@@ -115,10 +110,10 @@ static void generateBiomeTransition(Chunk* this) {
             int biome = idx - 1;
             if (x > bx) biome++;
             if (x - bx == 1) {
-                for (int k = -1; k < 2; k++){
+                for (int k = -1; k < 2; k++) {
                     int nx = x + k;
                     if (nx >= 0 && nx < CHUNK_SIZE)
-                        this->cells[y | nx].isWall = 2;
+                        this->cells[y | nx].isWall = 0;
                 }
             }
             this->cells[y | x].biomeType = biome;
@@ -136,7 +131,7 @@ static void generateBiome(Chunk* this) {
     }
 }
 
-static void generateTemple(Chunk* this){
+static void generateTemple(Chunk* this) {
     if (!this->isTemple) return;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
@@ -150,14 +145,14 @@ static void generateTemple(Chunk* this){
     }
 }
 
-static void generateFont(Chunk* this){
+static void generateFont(Chunk* this) {
     if (!this->isFont) return;
     int startX = ((SEED * this->x + this->y) & CHUNK_MASK) % 10;
     int startY = ((SEED * this->y + this->x) & CHUNK_MASK) % 10;
 
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < 5; i++) {
         int y = (i + startY) << CHUNK_SHIFT;
-        for (int j = 0; j < 5; j++){
+        for (int j = 0; j < 5; j++) {
             int x = j + startX;
             this->cells[y | x].isWall = FONT_MATRIX[i * 5 + j];
             this->cells[y | x].isFont = 1;
@@ -165,8 +160,59 @@ static void generateFont(Chunk* this){
     }
 }
 
-static void generateWalls(Chunk* this) {
-    if (this->isStructure) return;
+static void generateWallsBiome2(Chunk* this) {
+    if (this->isStructure || this->biome != 1 || this->isTransition) return;
+
+    int startX = -(this->x % 3);
+    int startY = -(this->y % 3);
+
+    for (int i = startY; i < CHUNK_SIZE; i += 3) {
+        if (i < 0 || i >= CHUNK_SIZE) continue;  // evita índices negativos
+        for (int j = startX; j < CHUNK_SIZE; j += 3) {
+            if (j < 0 || j >= CHUNK_SIZE) continue;
+
+            for (int k = 0; k < 3; k++) {
+                if (j + k < CHUNK_SIZE && j + k >= 0)
+                    this->cells[i * CHUNK_SIZE + (j + k)].isWall = 1;
+
+                if (j - k >= 0 && j - k < CHUNK_SIZE)
+                    this->cells[i * CHUNK_SIZE + (j - k)].isWall = 1;
+
+                if (i + k < CHUNK_SIZE && i + k >= 0)
+                    this->cells[(i + k) * CHUNK_SIZE + j].isWall = 1;
+
+                if (i - k >= 0 && i - k < CHUNK_SIZE)
+                    this->cells[(i - k) * CHUNK_SIZE + j].isWall = 1;
+            }
+        }
+    }
+
+    for (int i = startY; i < CHUNK_SIZE; i += 3) {
+        if (i < 0 || i >= CHUNK_SIZE) continue;
+        for (int j = startX; j < CHUNK_SIZE; j += 3) {
+            if (j < 0 || j >= CHUNK_SIZE) continue;
+
+            if ((rand() % 100 < 60)) {
+                for (int k = 0; k < 2; k++) {
+                    int idx = i + k + 1;
+                    if (idx >= 0 && idx < CHUNK_SIZE)
+                        this->cells[idx * CHUNK_SIZE + j].isWall = 0;
+                }
+            }
+
+            if ((rand() % 100 < 60)) {
+                for (int k = 0; k < 2; k++) {
+                    int idx = j + k + 1;
+                    if (idx >= 0 && idx < CHUNK_SIZE)
+                        this->cells[i * CHUNK_SIZE + idx].isWall = 0;
+                }
+            }
+        }
+    }
+}
+
+static void generateWallsBiome1(Chunk* this) {
+    if (this->isStructure || this->biome != 0) return;
     for (int y = 0; y < CHUNK_SIZE; y++) {
         int yIdx = y << CHUNK_SHIFT;
         for (int x = 0; x < CHUNK_SIZE; x++) {
@@ -220,12 +266,15 @@ static void generateEnemies(Chunk* this) {
     static const int range = CHUNK_SIZE >> 1;
     LinkedList* enemies = this->enemies;
     for (int i = 0; i < totalEnemies; i++) {
-        int cx = ((rand() % range) << 1) | 1;
-        int cy = ((rand() % range) << 1) | 1;
-        int x = cx + (this->x << CHUNK_SHIFT);
-        int y = cy + (this->y << CHUNK_SHIFT);
-        Enemy* e =
-            new_Enemy(x, y, this->cells[(cy << CHUNK_SHIFT) | cx].biomeType);
+        int cx, cy, x, y;
+        do {
+            cx = ((rand() % range) << 1) | 1;
+            cy = ((rand() % range) << 1) | 1;
+            x = cx + (this->x << CHUNK_SHIFT);
+            y = cy + (this->y << CHUNK_SHIFT);
+        } while (this->cells[(cy << CHUNK_SHIFT) | cx].isWall);
+        Enemy* e = new_Enemy(
+            x, y, this->cells[(cy << CHUNK_SHIFT) | cx].biomeType);
         enemies->addLast(enemies, e);
     }
 }
@@ -237,7 +286,8 @@ static void generate(Chunk* this) {
     generateBiome(this);
     generateTemple(this);
     generateFont(this);
-    generateWalls(this);
+    generateWallsBiome1(this);
+    generateWallsBiome2(this);
     generateBorder(this);
     generateWind(this);
     generateEnemies(this);

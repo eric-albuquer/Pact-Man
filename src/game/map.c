@@ -143,7 +143,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(11, 21);
+    this->player = new_Player(91, 21);
 
     setArgs(chunkCols, chunkRows, 1, time(NULL));
 

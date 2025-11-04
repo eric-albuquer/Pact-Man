@@ -10,7 +10,7 @@
 #define CELLS_PER_CHUNK 256
 
 typedef struct {
-    unsigned isWall : 2;
+    unsigned isWall : 1;
     unsigned isBossTemple : 1;
     unsigned isFont : 1;
     unsigned biomeType: 5;
