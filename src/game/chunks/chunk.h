@@ -12,6 +12,7 @@
 typedef struct {
     unsigned isWall : 2;
     unsigned isBossTemple : 1;
+    unsigned isFont : 1;
     unsigned biomeType: 5;
     signed distance: 9;
     unsigned windDir : 3;
@@ -25,7 +26,9 @@ typedef struct Chunk {
     unsigned isTransition : 1;
     unsigned isBorder: 1;
     unsigned biome: 2;
+    unsigned isStructure: 1;
     unsigned isTemple: 1;
+    unsigned isFont: 1;
 
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];

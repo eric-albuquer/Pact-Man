@@ -3,7 +3,6 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "enemy.h"
 
 static const char* SPRITES[] = {
@@ -47,6 +46,8 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
                 color.r *= 0.3;
                 color.g *= 0.3;
                 color.b *= 0.3;
+            } else if (cell->isFont){
+                color.b += 50;
             }
 
             if (cell->windDir > 0) {
@@ -154,6 +155,8 @@ static void drawMapDebug(Game* this) {
                 color.r *= 0.3;
                 color.g *= 0.3;
                 color.b *= 0.3;
+            } else if (cell->isFont){
+                color.b += 50;
             }
 
             if (cell->windDir > 0) {
@@ -284,8 +287,8 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->height = height;
     this->cellSize = cellSize;
 
-    this->renderDistX = ((width / cellSize) >> 1) + 1;
-    this->renderDistY = ((height / cellSize) >> 1) + 1;
+    this->renderDistX = ((width / cellSize) >> 1) + 3;
+    this->renderDistY = ((height / cellSize) >> 1) + 3;
 
     this->lastUpdate = 0;
     this->frameCount = 0;

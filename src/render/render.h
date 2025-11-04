@@ -7,8 +7,6 @@
 #include "map.h"
 #include "common.h"
 
-#define FRAMES_ANIMATION 12.0f
-
 typedef struct Render {
     int width;
     int height;

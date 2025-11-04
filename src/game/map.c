@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 #include "chunk.h"
 #include "enemy.h"
 #include "pathfinding.h"
@@ -145,7 +145,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     this->updateCount = 0;
     this->player = new_Player(11, 21);
 
-    setArgs(20, 9, 2, 16161231);
+    setArgs(chunkCols, chunkRows, 1, time(NULL));
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

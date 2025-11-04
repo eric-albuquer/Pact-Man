@@ -4,11 +4,10 @@
 #include "map.h"
 #include "raylib.h"
 #include "render.h"
-#include "time.h"
 #include "common.h"
 #include <stdio.h>
 
-#define UPDATE_TIME 0.20f
+#define UPDATE_TIME 0.15f
 
 GameState state = MENU;
 Controler* controler;

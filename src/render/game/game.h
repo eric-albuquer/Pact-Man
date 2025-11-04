@@ -5,7 +5,7 @@
 
 #include "map.h"
 
-#define FRAMES_ANIMATION 12.0f
+#define FRAMES_ANIMATION 8.0f
 
 typedef struct Game {
     int width;
