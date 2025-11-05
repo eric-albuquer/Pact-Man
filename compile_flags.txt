@@ -1,0 +1,9 @@
+-std=c99
+-I./src
+-I./src/game
+-I./src/render
+-I./src/utils
+-I/opt/homebrew/include
+-I/opt/homebrew/opt/raylib/include
+-DPLATFORM_DESKTOP
+
