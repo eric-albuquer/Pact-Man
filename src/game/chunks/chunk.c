@@ -56,7 +56,8 @@ static void resetDistance(Chunk* this) {
 
 static void preLoad(Chunk* this) {
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
-        this->cells[i] = (Cell){0, 0, 0, 0, -1, 0, 0};
+        this->cells[i] = (Cell){0};
+        this->cells[i].distance = -1;
     }
 
     this->isTransition = this->x % BIOME_WIDTH_CHUNKS == 0 && this->x > 0;
@@ -74,6 +75,11 @@ static void preLoad(Chunk* this) {
     bool isYFont = ((templeY + 3) & 5) + 1 == this->y;
     this->isFont = isXstructure && isYFont;
     this->isStructure = this->isFont || this->isTemple;
+
+    int fragmentX = (hash2D_seed(this->biome, 1, SEED) % (BIOME_WIDTH_CHUNKS - 2) + 1) + BIOME_WIDTH_CHUNKS * this->biome;
+    int fragmentY = (hash2D_seed(1, this->biome, SEED) & 1) * (HEIGHT - 1);
+
+    this->fragment = this->x == fragmentX && this->y == fragmentY;
 }
 
 static void generateBorder(Chunk* this) {
@@ -370,6 +376,17 @@ static void generateCoins(Chunk* this) {
     }
 }
 
+static void generateFragement(Chunk* this){
+    if (!this->fragment) return;
+    int x, y;
+    do {
+        x = rand() & CHUNK_MASK;
+        y = rand() & CHUNK_MASK;
+    } while(this->cells[(y << CHUNK_SHIFT) | x].isWall);
+
+    this->cells[(y << CHUNK_SHIFT) | x].fragment = 1;
+}
+
 static void generateEnemies(Chunk* this) {
     if (this->isStructure || this->isBorder) return;
     int totalEnemies = rand() % (MAX_ENEMIES_PER_CHUNK + 1);
@@ -406,6 +423,7 @@ static void generate(Chunk* this) {
     generateFire(this);
     generateSpikes(this);
     generateCoins(this);
+    generateFragement(this);
     generateEnemies(this);
 }
 

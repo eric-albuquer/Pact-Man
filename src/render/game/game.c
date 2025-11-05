@@ -16,7 +16,7 @@ static const char* SPRITES[] = {
     "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png",
     "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
 
-    "assets/sprites/coin.png"};
+    "assets/sprites/coin.png", "assets/sprites/Key.png"};
 
 static const Color CELL_COLORS[4] = {
     {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
@@ -194,6 +194,12 @@ static void drawMapDebug(Game* this) {
                 color.b = 30;
             }
 
+            if (cell->spike){
+                color.r = 185;
+                color.g = 185;
+                color.b = 185;
+            }
+
             if (cell->grave){
                 color.r = 10;
                 color.g = 10;
@@ -213,6 +219,11 @@ static void drawMapDebug(Game* this) {
 
             if (cell->coin) {
                 Texture2D enemyTexture = this->sprites[16];
+                DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
+            }
+
+            if (cell->fragment){
+                Texture2D enemyTexture = this->sprites[17];
                 DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
             }
 
@@ -340,7 +351,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->map = map;
 
-    loadSprites(this, SPRITES, 17);
+    loadSprites(this, SPRITES, 18);
 
     this->drawMapDebug = drawMapDebug;
     this->saveUpdate = saveUpdate;

@@ -22,6 +22,7 @@ typedef struct {
     unsigned spike : 1;
     unsigned grave: 1;
     unsigned fire: 1;
+    unsigned fragment: 1;
 } Cell;
 
 typedef struct Chunk {
@@ -34,6 +35,7 @@ typedef struct Chunk {
     unsigned isStructure : 1;
     unsigned isTemple : 1;
     unsigned isFont : 1;
+    unsigned fragment: 1;
 
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];
