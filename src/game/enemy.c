@@ -25,7 +25,7 @@ static void _free(Enemy* this){
     free(this);
 }
 
-Enemy* new_Enemy(int x, int y, int biomeType){
+Enemy* new_Enemy(int x, int y, int biome){
     Enemy* this = malloc(sizeof(Enemy));
     this->x = x;
     this->y = y;
@@ -39,7 +39,7 @@ Enemy* new_Enemy(int x, int y, int biomeType){
     this->dir = RIGHT;
     this->changedChunk = false;
 
-    this->biomeType = biomeType;
+    this->biome = biome;
 
     this->updateChunk = updateChunk;
     this->updateDirection = updateDirection;

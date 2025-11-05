@@ -85,7 +85,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
         int neighborY = enemyPosY + DY[i];
 
         Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
-        if (!next || next->type == WALL || next->biome != e->biomeType) continue;
+        if (!next || next->type == WALL || next->biome != e->biome) continue;
 
         moves[length++] = (QNode){neighborX, neighborY, next->distance};
     }
@@ -100,6 +100,8 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
             }
         }
     }
+
+    if (length == 0) return false;
 
     // Indo para a pior direção
     if (farAway(map->player, e)) {

@@ -174,18 +174,15 @@ static void generateBiome(Chunk* this) {
 static void generateTemple(Chunk* this) {
     if (!this->isTemple) return;
 
-    for (int y = 0; y < CHUNK_SIZE; y++) {
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            Cell* cell = cellAt(this, x, y);
-            cell->type = TEMPLE_MATRIX[(y << CHUNK_SHIFT) | x];
-        }
+    for (int i = 0; i < CELLS_PER_CHUNK; i++) {
+        this->cells[i].type = TEMPLE_MATRIX[i];
     }
 }
 
 static void generateFont(Chunk* this) {
     if (!this->isFont) return;
-    int startX = hash2D(this->x, this->y, config.seed) % 10;
-    int startY = hash2D(this->y, this->x, config.seed) % 10;
+    int startX = hash2D(this->x, this->y, config.seed) % 11;
+    int startY = hash2D(this->y, this->x, config.seed) % 11;
 
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
@@ -319,10 +316,10 @@ static void generateMud(Chunk* this) {
     if (this->isTransition || this->isStructure || this->biome != 1) return;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
-        int y = i << CHUNK_SHIFT;
         for (int j = 0; j < CHUNK_SIZE; j++) {
-            if (this->cells[y | j].type == WALL) continue;
-            if (randChunk(this) % 100 < 10) this->cells[y | j].type = MUD;
+            Cell* cell = cellAt(this, j, i);
+            if (cell->type == WALL) continue;
+            if (randChunk(this) % 100 < 10) cell->type = MUD;
         }
     }
 }
@@ -331,10 +328,10 @@ static void generateGraves(Chunk* this) {
     if (this->isTransition || this->isStructure || this->biome != 2) return;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
-        int y = i << CHUNK_SHIFT;
         for (int j = 0; j < CHUNK_SIZE; j++) {
-            if (this->cells[y | j].type == WALL) continue;
-            if (randChunk(this) % 100 < 5) this->cells[y | j].type = GRAVE;
+            Cell* cell = cellAt(this, j, i);
+            if (cell->type == WALL) continue;
+            if (randChunk(this) % 100 < 5) cell->type = GRAVE;
         }
     }
 }
@@ -342,18 +339,17 @@ static void generateGraves(Chunk* this) {
 static void generateFire(Chunk* this) {
     if (this->isTransition || this->isStructure || this->biome != 2) return;
     for (int i = 0; i < CHUNK_SIZE; i += 4) {
-        int y = i << CHUNK_SHIFT;
         for (int j = 0; j < CHUNK_SIZE; j += 4) {
             if (randChunk(this) % 100 < 40 &&
-                this->cells[y | (j + 1)].type == EMPTY) {
+                cellAt(this, j + 1, i)->type == EMPTY) {
                 for (int k = 0; k < 2; k++) {
-                    this->cells[y | (j + k + 1)].type = FIRE;
+                    cellAt(this, j + 1 + k, i)->type = FIRE;
                 }
             }
             if (randChunk(this) % 100 < 40 &&
-                this->cells[((i + 1) << CHUNK_SHIFT) | j].type == EMPTY) {
+                cellAt(this, j, i + 1)->type == EMPTY) {
                 for (int k = 0; k < 2; k++) {
-                    this->cells[((i + k + 1) << CHUNK_SHIFT) | j].type = FIRE;
+                    cellAt(this, j, i + 1 + k)->type = FIRE;
                 }
             }
         }
@@ -364,10 +360,10 @@ static void generateSpikes(Chunk* this) {
     if (this->isTransition || this->isStructure || this->biome != 3) return;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
-        int y = i << CHUNK_SHIFT;
         for (int j = 0; j < CHUNK_SIZE; j++) {
-            if (this->cells[y | j].type == WALL) continue;
-            if (randChunk(this) % 100 < 5) this->cells[y | j].type = SPIKE;
+            Cell* cell = cellAt(this, j, i);
+            if (cell->type == WALL) continue;
+            if (randChunk(this) % 100 < 5) cell->type = SPIKE;
         }
     }
 }
@@ -376,10 +372,10 @@ static void generateCoins(Chunk* this) {
     if (this->isStructure) return;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
-        int y = i << CHUNK_SHIFT;
         for (int j = 0; j < CHUNK_SIZE; j++) {
-            if (this->cells[y | j].type != EMPTY) continue;
-            if (randChunk(this) & 1) this->cells[y | j].type = COIN;
+            Cell* cell = cellAt(this, j, i);
+            if (cell->type != EMPTY) continue;
+            if (randChunk(this) & 1) cell->type = COIN;
         }
     }
 }
@@ -387,29 +383,31 @@ static void generateCoins(Chunk* this) {
 static void generateFragement(Chunk* this) {
     if (!this->fragment) return;
     int x, y;
+    Cell* cell;
     do {
         x = randChunk(this) & CHUNK_MASK;
         y = randChunk(this) & CHUNK_MASK;
-    } while (this->cells[(y << CHUNK_SHIFT) | x].type == WALL);
+        cell = cellAt(this, x, y);
+    } while (cell->type == WALL);
 
-    this->cells[(y << CHUNK_SHIFT) | x].type = FRAGMENT;
+    cell->type = FRAGMENT;
 }
 
 static void generateEnemies(Chunk* this) {
     if (this->isStructure || this->isBorder) return;
     int totalEnemies = randChunk(this) % (config.maxEnemiesPerChunk + 1);
-    static const int range = CHUNK_SIZE >> 1;
     LinkedList* enemies = this->enemies;
     for (int i = 0; i < totalEnemies; i++) {
         int cx, cy, x, y;
+        Cell* cell;
         do {
-            cx = ((randChunk(this) % range) << 1) | 1;
-            cy = ((randChunk(this) % range) << 1) | 1;
+            cx = randChunk(this) & CHUNK_MASK;
+            cy = randChunk(this) & CHUNK_MASK;
             x = cx + (this->x << CHUNK_SHIFT);
             y = cy + (this->y << CHUNK_SHIFT);
-        } while (this->cells[(cy << CHUNK_SHIFT) | cx].type == WALL);
-        Enemy* e =
-            new_Enemy(x, y, this->cells[(cy << CHUNK_SHIFT) | cx].biome);
+            cell = cellAt(this, cx, cy);
+        } while (cell->type == WALL);
+        Enemy* e = new_Enemy(x, y, cell->biome);
         enemies->addLast(enemies, e);
     }
 }
