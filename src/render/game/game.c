@@ -19,7 +19,7 @@ static const char* SPRITES[] = {
     "assets/sprites/coin.png"};
 
 static const Color CELL_COLORS[4] = {
-    {100, 0, 0, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
+    {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
 
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
@@ -53,6 +53,30 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             if (cell->windDir > 0) {
                 color.r *= 0.7;
                 color.g += 100;
+            }
+
+            if (cell->mud){
+                color.r = 79;
+                color.g = 39;
+                color.b = 30;
+            }
+
+            if (cell->spike){
+                color.r = 185;
+                color.g = 185;
+                color.b = 185;
+            }
+
+            if (cell->grave){
+                color.r = 10;
+                color.g = 10;
+                color.b = 10;
+            }
+
+            if (cell->fire){
+                color.r = 255;
+                color.g = 0;
+                color.b = 0;
             }
 
             DrawRectangle(x0 + x * cellSize, y0 + y * cellSize, cellSize,
@@ -162,6 +186,24 @@ static void drawMapDebug(Game* this) {
             if (cell->windDir > 0) {
                 color.r *= 0.7;
                 color.g += 100;
+            }
+
+            if (cell->mud){
+                color.r = 79;
+                color.g = 39;
+                color.b = 30;
+            }
+
+            if (cell->grave){
+                color.r = 10;
+                color.g = 10;
+                color.b = 10;
+            }
+
+            if (cell->fire){
+                color.r = 255;
+                color.g = 0;
+                color.b = 0;
             }
 
             int x = offsetHalfXAnimated + j * this->cellSize;

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
 #include "chunk.h"
 #include "enemy.h"
 #include "pathfinding.h"
@@ -37,9 +38,8 @@ static void updatePlayerWind(Map* this) {
     if (floor->windDir > 0) {
         Vec2i dir = DIR_VECTOR[floor->windDir - 1];
         movePlayer(this, dir);
+        if (this->changedChunk) this->manager->loadAdjacents(this->manager);
     }
-
-    if (this->changedChunk) this->manager->loadAdjacents(this->manager);
 }
 
 static void updatePlayer(Map* this, Input input) {
@@ -74,10 +74,13 @@ static void updatePlayer(Map* this, Input input) {
     p->lastY = p->y;
 
     for (int i = 0; i < length; i++) {
-        if (movePlayer(this, dir[i])) break;
+        if (movePlayer(this, dir[i])) {
+            if (this->changedChunk) this->manager->loadAdjacents(this->manager);
+            break;
+        }
     }
 
-    if (this->changedChunk) this->manager->loadAdjacents(this->manager);
+    updatePlayerWind(this);
 }
 
 static void updateEnemies(Map* this) {
@@ -126,8 +129,6 @@ static void updateEnemies(Map* this) {
 static void update(Map* this, Controler* controler) {
     this->changedChunk = false;
     updatePlayer(this, controler->input);
-    //if (this->updateCount & 1)
-        updatePlayerWind(this);
     updateEnemies(this);
     this->updateCount++;
 }
@@ -143,7 +144,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(91, 21);
+    this->player = new_Player(231, 21);
 
     setArgs(chunkCols, chunkRows, 1, time(NULL));
 
