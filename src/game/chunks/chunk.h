@@ -10,20 +10,31 @@
 #define CHUNK_MASK 0xf
 #define CELLS_PER_CHUNK 256
 
+typedef enum {
+    EMPTY,
+    WALL,
+    COIN,
+    MUD,
+    GRAVE,
+    SPIKE,
+    FIRE,
+    FRAGMENT,
+    WIND_RIGHT,
+    WIND_LEFT,
+    WIND_UP,
+    WIND_DOWN
+} CellType;
+
 typedef struct {
-    unsigned isWall : 1;
-    unsigned isBossTemple : 1;
-    unsigned isFont : 1;
-    unsigned biomeType : 5;
+    unsigned type : 4;
+    unsigned biome : 2;
+
     signed distance : 9;
-    unsigned windDir : 3;
-    unsigned coin : 1;
-    unsigned mud : 1;
-    unsigned spike : 1;
-    unsigned grave: 1;
-    unsigned fire: 1;
-    unsigned fragment: 1;
 } Cell;
+
+inline bool isWind(CellType type) {
+    return type >= WIND_RIGHT && type <= WIND_DOWN;
+}
 
 typedef struct Chunk {
     int x;
@@ -35,7 +46,7 @@ typedef struct Chunk {
     unsigned isStructure : 1;
     unsigned isTemple : 1;
     unsigned isFont : 1;
-    unsigned fragment: 1;
+    unsigned fragment : 1;
 
     unsigned int randCounter;
 

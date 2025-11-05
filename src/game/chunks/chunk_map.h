@@ -4,9 +4,9 @@
 #define CHUNK_MAP_LOAD_FACTOR 0.75f
 #define CHUNK_MAP_START_CAPACITY 1024
 
-#define EMPTY 0
-#define OCCUPIED 1
-#define REMOVED 2
+#define CHUNK_MAP_EMPTY   0
+#define CHUNK_MAP_OCCUPIED 1
+#define CHUNK_MAP_REMOVED  2
 
 #include "chunk.h"
 #include <stdlib.h>

@@ -33,47 +33,39 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
 
             Cell* cell = cm->getLoadedCell(cm, px, py);
             if (!cell) continue;
-            int biomeType = cell->biomeType;
+            int biomeType = cell->biome;
             Color color = CELL_COLORS[biomeType];
 
-            if (cell->isWall) {
+            if (cell->type == WALL) {
                 color.r += 70;
                 color.g += 70;
                 color.b += 70;
             }
 
-            if (cell->isBossTemple) {
-                color.r *= 0.3;
-                color.g *= 0.3;
-                color.b *= 0.3;
-            } else if (cell->isFont){
-                color.b += 50;
-            }
-
-            if (cell->windDir > 0) {
+            else if (isWind(cell->type)) {
                 color.r *= 0.7;
                 color.g += 100;
             }
 
-            if (cell->mud){
+            else if (cell->type == MUD){
                 color.r = 79;
                 color.g = 39;
                 color.b = 30;
             }
 
-            if (cell->spike){
+            else if (cell->type == SPIKE){
                 color.r = 185;
                 color.g = 185;
                 color.b = 185;
             }
 
-            if (cell->grave){
+            else if (cell->type == GRAVE){
                 color.r = 10;
                 color.g = 10;
                 color.b = 10;
             }
 
-            if (cell->fire){
+            else if (cell->type == FIRE){
                 color.r = 255;
                 color.g = 0;
                 color.b = 0;
@@ -167,46 +159,39 @@ static void drawMapDebug(Game* this) {
 
             Cell* cell = cm->getLoadedCell(cm, xIdx, yIdx);
             if (!cell) continue;
-            int biomeType = cell->biomeType;
+            int biomeType = cell->biome;
             Color color = CELL_COLORS[biomeType];
 
-            if (cell->isWall) {
-                color.r = color.r + 70;
-                color.g = color.g + 70;
-                color.b = color.b + 70;
-            }
-            if (cell->isBossTemple) {
-                color.r *= 0.3;
-                color.g *= 0.3;
-                color.b *= 0.3;
-            } else if (cell->isFont){
-                color.b += 50;
+            if (cell->type == WALL) {
+                color.r += 70;
+                color.g += 70;
+                color.b += 70;
             }
 
-            if (cell->windDir > 0) {
+            else if (isWind(cell->type)) {
                 color.r *= 0.7;
                 color.g += 100;
             }
 
-            if (cell->mud){
+            else if (cell->type == MUD){
                 color.r = 79;
                 color.g = 39;
                 color.b = 30;
             }
 
-            if (cell->spike){
+            else if (cell->type == SPIKE){
                 color.r = 185;
                 color.g = 185;
                 color.b = 185;
             }
 
-            if (cell->grave){
+            else if (cell->type == GRAVE){
                 color.r = 10;
                 color.g = 10;
                 color.b = 10;
             }
 
-            if (cell->fire){
+            else if (cell->type == FIRE){
                 color.r = 255;
                 color.g = 0;
                 color.b = 0;
@@ -217,12 +202,12 @@ static void drawMapDebug(Game* this) {
 
             DrawRectangle(x, y, this->cellSize, this->cellSize, color);
 
-            if (cell->coin) {
+            if (cell->type == COIN) {
                 Texture2D enemyTexture = this->sprites[16];
                 DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
             }
 
-            if (cell->fragment){
+            if (cell->type == FRAGMENT){
                 Texture2D enemyTexture = this->sprites[17];
                 DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
             }

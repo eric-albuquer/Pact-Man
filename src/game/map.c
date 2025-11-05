@@ -22,7 +22,7 @@ static bool movePlayer(Map* this, Vec2i newDir) {
     int playerNextY = p->y + newDir.y;
     Cell* cell =
         this->manager->getLoadedCell(this->manager, playerNextX, playerNextY);
-    if (cell == NULL || cell->isWall) return false;
+    if (cell == NULL || cell->type == WALL) return false;
 
     p->x = playerNextX;
     p->y = playerNextY;
@@ -35,8 +35,8 @@ static void updatePlayerWind(Map* this) {
     Player* p = this->player;
 
     Cell* floor = this->manager->getUpdatedCell(this->manager, p->x, p->y);
-    if (floor->windDir > 0) {
-        Vec2i dir = DIR_VECTOR[floor->windDir - 1];
+    if (isWind(floor->type)) {
+        Vec2i dir = DIR_VECTOR[floor->type - WIND_RIGHT];
         movePlayer(this, dir);
         if (this->changedChunk) this->manager->loadAdjacents(this->manager);
     }
@@ -144,7 +144,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(321, 21);
+    this->player = new_Player(11, 21);
 
     setArgs(chunkCols, chunkRows, 1, time(NULL));
 

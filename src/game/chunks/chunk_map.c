@@ -20,14 +20,14 @@ static void rehash(ChunkMap* map) {
     char* newUsed = calloc(map->capacity, sizeof(char));
 
     for (int i = 0; i < oldCapacity; i++) {
-        if (map->used[i] == OCCUPIED) {
+        if (map->used[i] == CHUNK_MAP_OCCUPIED) {
             size_t key = map->keys[i];
             Chunk* chunk = map->chunks[i];
             int newIdx = hashCode(key) & map->mask;
-            while (newUsed[newIdx] == OCCUPIED) newIdx = (newIdx + 1) & map->mask;
+            while (newUsed[newIdx] == CHUNK_MAP_OCCUPIED) newIdx = (newIdx + 1) & map->mask;
             newKeys[newIdx] = key;
             newChunks[newIdx] = chunk;
-            newUsed[newIdx] = OCCUPIED;
+            newUsed[newIdx] = CHUNK_MAP_OCCUPIED;
         }
     }
     free(map->keys);
@@ -44,14 +44,14 @@ static void add(ChunkMap* map, Chunk* chunk) {
     int idx = hashCode(key) & map->mask;
     int firstRemoved = -1;
     while (map->used[idx] != EMPTY) {
-        if (map->used[idx] == OCCUPIED && map->keys[idx] == key) return;
-        if (map->used[idx] == REMOVED && firstRemoved == -1) firstRemoved = idx;
+        if (map->used[idx] == CHUNK_MAP_OCCUPIED && map->keys[idx] == key) return;
+        if (map->used[idx] == CHUNK_MAP_REMOVED && firstRemoved == -1) firstRemoved = idx;
         idx = (idx + 1) & map->mask;
     }
     if (firstRemoved != -1) idx = firstRemoved;
     map->keys[idx] = key;
     map->chunks[idx] = chunk;
-    map->used[idx] = OCCUPIED;
+    map->used[idx] = CHUNK_MAP_OCCUPIED;
     map->size++;
 }
 
@@ -59,7 +59,7 @@ static Chunk* get(ChunkMap* map, int cx, int cy) {
     size_t key = chunkKey(cx, cy);
     int idx = hashCode(key) & map->mask;
     while (map->used[idx] != EMPTY) {
-        if (map->used[idx] == OCCUPIED && map->keys[idx] == key)
+        if (map->used[idx] == CHUNK_MAP_OCCUPIED && map->keys[idx] == key)
             return map->chunks[idx];
         idx = (idx + 1) & map->mask;
     }
@@ -71,7 +71,7 @@ static bool delete(ChunkMap* map, Chunk* chunk) {
     int idx = hashCode(key) & map->mask;
     while (map->used[idx] != EMPTY) {
         if (map->keys[idx] == key) {
-            map->used[idx] = REMOVED;
+            map->used[idx] = CHUNK_MAP_REMOVED;
             map->size--;
             return true;
         }
