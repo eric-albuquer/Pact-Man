@@ -37,6 +37,8 @@ typedef struct Chunk {
     unsigned isFont : 1;
     unsigned fragment: 1;
 
+    unsigned int randCounter;
+
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];
 
