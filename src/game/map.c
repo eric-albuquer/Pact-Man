@@ -29,7 +29,7 @@ static bool movePlayer(Map* this, Vec2i newDir) {
     p->updateDirection(p);
 
     p->biome = cell->biome;
-    p->slowness = cell->type == CELL_MUD;
+    p->slowness = cell->type == CELL_MUD || cell->type == CELL_SPIKE;
     if (p->updateChunk(p)) this->manager->loadAdjacents(this->manager);
     return true;
 }

@@ -157,9 +157,9 @@ static void generateBiomeTransition(Chunk* this) {
         }
     }
 
-    for (int k = 0; k < 6; k++) {
-        int stoneX = 1 + (randChunk(this) % (CHUNK_SIZE - 4));
-        int stoneY = 1 + (randChunk(this) % (CHUNK_SIZE - 4));
+    for (int k = 0; k < 9; k++) {
+        int stoneX = 1 + randChunk(this) % (CHUNK_SIZE - 2);
+        int stoneY = 1 + randChunk(this) % (CHUNK_SIZE - 2);
 
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
@@ -377,7 +377,7 @@ static void generateSpikes(Chunk* this) {
 }
 
 static void generateCoins(Chunk* this) {
-    if (isStructure(this->type)) return;
+    if (this->type == CHUNK_TEMPLE) return;
 
     for (int i = 0; i < CHUNK_SIZE; i++) {
         for (int j = 0; j < CHUNK_SIZE; j++) {
@@ -410,7 +410,7 @@ static void generateFruit(Chunk* this) {
         x = randChunk(this) & CHUNK_MASK;
         y = randChunk(this) & CHUNK_MASK;
         cell = cellAt(this, x, y);
-    } while (!isPassable(cell->type));
+    } while (cell->type != CELL_EMPTY);
     cell->type = CELL_FRUIT;
 }
 
@@ -449,9 +449,9 @@ static ChunkGeneratorFn GENERATORS[] = {
     generateGraves,
     generateFire,
     generateSpikes,
-    generateCoins,
     generateFragement,
     generateFruit,
+    generateCoins,
     generateEnemies,
 };
 

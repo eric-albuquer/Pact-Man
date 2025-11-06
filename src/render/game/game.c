@@ -260,7 +260,8 @@ static void drawMapDebug(Game* this) {
         }
     }
 
-    drawHudDebug(this);
+    if (p->biome != 3)
+        drawHudDebug(this);
 
     this->frameCount++;
 }
