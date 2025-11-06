@@ -51,7 +51,7 @@ void mapDistancePlayer(Map* map) {
             int neighborY = curr->y + DY[i];
 
             Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
-            if (!next || next->type == CELL_WALL || next->distance != -1) continue;
+            if (!next || !isPassable(next->type) || next->distance != -1) continue;
 
             next->distance = curr->d + 1;
             QNode* neighborNew = malloc(sizeof(*neighborNew));
@@ -85,7 +85,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
         int neighborY = enemyPosY + DY[i];
 
         Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
-        if (!next || next->type == CELL_WALL || next->biome != e->biome) continue;
+        if (!next || !isPassable(next->type) || next->biome != e->biome) continue;
 
         moves[length++] = (QNode){neighborX, neighborY, next->distance};
     }

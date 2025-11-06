@@ -12,7 +12,6 @@ typedef struct Map {
     ChunkManager* manager;
 
     Player* player;
-    bool changedChunk;
     unsigned int updateCount;
 
     void (*update)(struct Map*, Controler*);

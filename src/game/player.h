@@ -17,6 +17,8 @@ typedef struct Player {
 
     Direction dir;
 
+    unsigned short biomeCoins;
+    unsigned short totalCoins;
     unsigned biome: 2;
 
     bool (*updateChunk)(struct Player*);

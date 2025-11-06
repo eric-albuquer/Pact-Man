@@ -19,10 +19,88 @@ static const char* SPRITES[] = {
     "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
 
     "assets/sprites/coin.png",         "assets/sprites/Key.png",
-    "assets/sprites/apple.png"};
+    "assets/sprites/apple.png" };
 
 static const Color CELL_COLORS[4] = {
-    {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
+    {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255} };
+
+static char buffer[1000];
+
+static void drawCell(Game* this, Cell* cell, int x, int y, int size,
+    bool itens) {
+    if (!cell) return;
+    Color color = CELL_COLORS[cell->biome];
+
+    if (cell->type == CELL_WALL) {
+        color.r += 70;
+        color.g += 70;
+        color.b += 70;
+    } else  if (isWind(cell->type)) {
+        color.r *= 0.7;
+        color.g += 100;
+    } else if (cell->type == CELL_MUD) {
+        color.r = 79;
+        color.g = 39;
+        color.b = 30;
+    } else if (cell->type == CELL_SPIKE) {
+        color.r = 185;
+        color.g = 185;
+        color.b = 185;
+    } else if (cell->type == CELL_GRAVE) {
+        color.r = 10;
+        color.g = 10;
+        color.b = 10;
+    } else if (cell->type == CELL_FIRE) {
+        color.r = 255;
+        color.g = 0;
+        color.b = 0;
+    }
+
+    DrawRectangle(x, y, size, size, color);
+
+    if (!itens) return;
+    Texture2D* overlap = NULL;
+
+    if (cell->type == CELL_COIN) {
+        overlap = &this->sprites[16];
+    } else if (cell->type == CELL_FRAGMENT) {
+        overlap = &this->sprites[17];
+    } else if (cell->type == CELL_FRUIT) {
+        overlap = &this->sprites[18];
+    }
+
+    if (overlap != NULL)
+        DrawTexture(*overlap, x, y, WHITE);
+
+    sprintf(buffer, "%d", cell->distance);
+    DrawText(buffer, x + 15, y + 15, 20, WHITE);
+}
+
+static Texture2D getPlayerTexture(Game* this, Player* p) {
+    int offsetTexture = 0;
+    if (p->dir == RIGHT)
+        offsetTexture = 0;
+    else if (p->dir == DOWN)
+        offsetTexture = 2;
+    else if (p->dir == LEFT)
+        offsetTexture = 4;
+    else if (p->dir == UP)
+        offsetTexture = 6;
+    return this->sprites[offsetTexture + (this->updateCount & 1)];
+}
+
+static Texture2D getEnemyTexture(Game* this, Enemy* e) {
+    int offsetTexture = 8;
+    if (e->dir == RIGHT)
+        offsetTexture = 8;
+    else if (e->dir == DOWN)
+        offsetTexture = 10;
+    else if (e->dir == LEFT)
+        offsetTexture = 12;
+    else if (e->dir == UP)
+        offsetTexture = 14;
+    return this->sprites[offsetTexture + (this->updateCount & 1)];
+}
 
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
@@ -35,47 +113,7 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             int px = map->player->x + x - (zoom >> 1);
 
             Cell* cell = cm->getLoadedCell(cm, px, py);
-            if (!cell) continue;
-            int biomeType = cell->biome;
-            Color color = CELL_COLORS[biomeType];
-
-            if (cell->type == CELL_WALL) {
-                color.r += 70;
-                color.g += 70;
-                color.b += 70;
-            }
-
-            else if (isWind(cell->type)) {
-                color.r *= 0.7;
-                color.g += 100;
-            }
-
-            else if (cell->type == CELL_MUD) {
-                color.r = 79;
-                color.g = 39;
-                color.b = 30;
-            }
-
-            else if (cell->type == CELL_SPIKE) {
-                color.r = 185;
-                color.g = 185;
-                color.b = 185;
-            }
-
-            else if (cell->type == CELL_GRAVE) {
-                color.r = 10;
-                color.g = 10;
-                color.b = 10;
-            }
-
-            else if (cell->type == CELL_FIRE) {
-                color.r = 255;
-                color.g = 0;
-                color.b = 0;
-            }
-
-            DrawRectangle(x0 + x * cellSize, y0 + y * cellSize, cellSize,
-                          cellSize, color);
+            drawCell(this, cell, x0 + x * cellSize, y0 + y * cellSize, cellSize, false);
         }
     }
 
@@ -91,8 +129,7 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             int x = (e->x - map->player->x) * cellSize;
             int y = (e->y - map->player->y) * cellSize;
 
-            DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize,
-                          (Color){255, 255, 0, 255});
+            DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize, WHITE);
             cur = cur->next;
         }
     }
@@ -107,10 +144,7 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
                 x0 + offset + (chunkX * CHUNK_SIZE - map->player->x) * cellSize;
             int startChunkY =
                 y0 + offset + (chunkY * CHUNK_SIZE - map->player->y) * cellSize;
-            DrawRectangleLinesEx(
-                (Rectangle){startChunkX, startChunkY, cellSize * CHUNK_SIZE + 3,
-                            cellSize * CHUNK_SIZE + 3},
-                3, GREEN);
+            DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, cellSize* CHUNK_SIZE + 3, cellSize* CHUNK_SIZE + 3 }, 3, GREEN);
         }
     }
 
@@ -119,15 +153,12 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
 
 static void drawHudDebug(Game* this) {
     Map* map = this->map;
-    static char buffer[1000];
     Player* p = map->player;
     sprintf(buffer,
-            "Chunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d",
-            p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK,
-            p->y & CHUNK_MASK, p->biome);
+        "Chunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d", p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, p->biome);
 
-    DrawRectangle(this->width - 400, 0, 400, 400, (Color){0, 0, 0, 200});
-    DrawText(buffer, this->width - 300, 50, 30, (Color){0, 255, 0, 255});
+    DrawRectangle(this->width - 400, 0, 400, 400, (Color) { 0, 0, 0, 200 });
+    DrawText(buffer, this->width - 300, 50, 30, GREEN);
 
     drawMinimapDebug(this, 20, 20, 500, 100);
 }
@@ -139,7 +170,6 @@ static void drawMapDebug(Game* this) {
     Player* p = map->player;
     int px = p->lastX;
     int py = p->lastY;
-    static char buffer[100];
 
     int animationFrame = this->frameCount - this->lastUpdate;
 
@@ -162,75 +192,18 @@ static void drawMapDebug(Game* this) {
             int xIdx = j + px;
 
             Cell* cell = cm->getLoadedCell(cm, xIdx, yIdx);
-            if (!cell) continue;
-            int biomeType = cell->biome;
-            Color color = CELL_COLORS[biomeType];
-
-            if (cell->type == CELL_WALL) {
-                color.r += 70;
-                color.g += 70;
-                color.b += 70;
-            }
-
-            else if (isWind(cell->type)) {
-                color.r *= 0.7;
-                color.g += 100;
-            }
-
-            else if (cell->type == CELL_MUD) {
-                color.r = 79;
-                color.g = 39;
-                color.b = 30;
-            }
-
-            else if (cell->type == CELL_SPIKE) {
-                color.r = 185;
-                color.g = 185;
-                color.b = 185;
-            }
-
-            else if (cell->type == CELL_GRAVE) {
-                color.r = 10;
-                color.g = 10;
-                color.b = 10;
-            }
-
-            else if (cell->type == CELL_FIRE) {
-                color.r = 255;
-                color.g = 0;
-                color.b = 0;
-            }
 
             int x = offsetHalfXAnimated + j * this->cellSize;
             int y = offsetHalfYAnimated + i * this->cellSize;
 
-            DrawRectangle(x, y, this->cellSize, this->cellSize, color);
-
-            if (cell->type == CELL_COIN) {
-                Texture2D enemyTexture = this->sprites[16];
-                DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
-            }
-
-            else if (cell->type == CELL_FRAGMENT) {
-                Texture2D enemyTexture = this->sprites[17];
-                DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
-            }
-
-            else if (cell->type == CELL_FRUIT) {
-                Texture2D enemyTexture = this->sprites[18];
-                DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
-            }
-
-            sprintf(buffer, "%d", cell->distance);
-            DrawText(buffer, x + 15, y + 15, 20, (Color){255, 255, 255, 255});
+            drawCell(this, cell, x, y, this->cellSize, true);
         }
     }
 
     if (p->biome == 3) {
         BeginTextureMode(this->shadowMap);
         ClearBackground(BLACK);
-        DrawCircleGradient(this->offsetHalfX, this->offsetHalfY, 400, WHITE,
-                           BLANK);
+        DrawCircleGradient(this->offsetHalfX, this->offsetHalfY, 400, WHITE, BLANK);
         EndTextureMode();
     }
 
@@ -245,20 +218,8 @@ static void drawMapDebug(Game* this) {
             int eDy = e->lastY - e->y;
             float dAnimationX = eDx * t * this->cellSize;
             float dAnimationY = eDy * t * this->cellSize;
-            int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize -
-                    dAnimationX;
-            int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize -
-                    dAnimationY;
-
-            int offsetTexture = 8;
-            if (e->dir == RIGHT)
-                offsetTexture = 8;
-            else if (e->dir == DOWN)
-                offsetTexture = 10;
-            else if (e->dir == LEFT)
-                offsetTexture = 12;
-            else if (e->dir == UP)
-                offsetTexture = 14;
+            int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize - dAnimationX;
+            int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize - dAnimationY;
 
             if (p->biome == 3) {
                 BeginTextureMode(this->shadowMap);
@@ -266,9 +227,7 @@ static void drawMapDebug(Game* this) {
                 EndTextureMode();
             }
 
-            Texture2D enemyTexture =
-                this->sprites[(this->updateCount % 2) + offsetTexture];
-            DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
+            DrawTexture(getEnemyTexture(this, e), x, y, WHITE);
 
             cur = cur->next;
         }
@@ -277,26 +236,16 @@ static void drawMapDebug(Game* this) {
     if (p->biome == 3) {
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(this->shadowMap.texture,
-                       (Rectangle){0, 0, this->shadowMap.texture.width,
-                                   -this->shadowMap.texture.height},
-                       (Vector2){0, 0}, WHITE);
+            (Rectangle) {
+            0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height
+        },
+            (Vector2) {
+            0, 0
+        }, WHITE);
         EndBlendMode();
     }
 
-    int offsetTexture = 0;
-    if (p->dir == RIGHT)
-        offsetTexture = 0;
-    else if (p->dir == DOWN)
-        offsetTexture = 2;
-    else if (p->dir == LEFT)
-        offsetTexture = 4;
-    else if (p->dir == UP)
-        offsetTexture = 6;
-
-    Texture2D playerTexture =
-        this->sprites[(this->updateCount % 2) + offsetTexture];
-    DrawTexture(playerTexture, this->offsetHalfX, this->offsetHalfY,
-                (Color){255, 255, 255, 255});
+    DrawTexture(getPlayerTexture(this, p), this->offsetHalfX, this->offsetHalfY, WHITE);
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -305,14 +254,9 @@ static void drawMapDebug(Game* this) {
             int chunkX = map->player->chunkX + j;
             if (chunkX < 0 || chunkX >= map->manager->cols) continue;
 
-            int startChunkX = offsetHalfXAnimated +
-                              (chunkX * CHUNK_SIZE - px) * this->cellSize;
-            int startChunkY = offsetHalfYAnimated +
-                              (chunkY * CHUNK_SIZE - py) * this->cellSize;
-            DrawRectangleLinesEx((Rectangle){startChunkX, startChunkY,
-                                             this->cellSize * CHUNK_SIZE + 5,
-                                             this->cellSize * CHUNK_SIZE + 5},
-                                 5, GREEN);
+            int startChunkX = offsetHalfXAnimated + (chunkX * CHUNK_SIZE - px) * this->cellSize;
+            int startChunkY = offsetHalfYAnimated + (chunkY * CHUNK_SIZE - py) * this->cellSize;
+            DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, this->cellSize* CHUNK_SIZE + 5, this->cellSize* CHUNK_SIZE + 5 }, 5, GREEN);
         }
     }
 
@@ -335,10 +279,6 @@ static void loadSprites(Game* this, const char** paths, int total) {
 }
 
 static void saveUpdate(Game* this) {
-    if (this->map->changedChunk) {
-        this->map->manager->changedChunk = false;
-    }
-
     this->lastUpdate = this->frameCount;
     this->updateCount++;
 }

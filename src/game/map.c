@@ -22,12 +22,12 @@ static bool movePlayer(Map* this, Vec2i newDir) {
     int playerNextY = p->y + newDir.y;
     Cell* cell =
         this->manager->getLoadedCell(this->manager, playerNextX, playerNextY);
-    if (cell == NULL || cell->type == CELL_WALL) return false;
+    if (cell == NULL || !isPassable(cell->type)) return false;
 
     p->x = playerNextX;
     p->y = playerNextY;
     p->biome = cell->biome;
-    if (p->updateChunk(p)) this->changedChunk = true;
+    if (p->updateChunk(p)) this->manager->loadAdjacents(this->manager);
     p->updateDirection(p);
     return true;
 }
@@ -39,7 +39,6 @@ static void updatePlayerWind(Map* this) {
     if (isWind(floor->type)) {
         Vec2i dir = DIR_VECTOR[floor->type - CELL_WIND_RIGHT];
         movePlayer(this, dir);
-        if (this->changedChunk) this->manager->loadAdjacents(this->manager);
     }
 }
 
@@ -75,10 +74,7 @@ static void updatePlayer(Map* this, Input input) {
     p->lastY = p->y;
 
     for (int i = 0; i < length; i++) {
-        if (movePlayer(this, dir[i])) {
-            if (this->changedChunk) this->manager->loadAdjacents(this->manager);
-            break;
-        }
+        if (movePlayer(this, dir[i])) break;
     }
 
     updatePlayerWind(this);
@@ -128,7 +124,6 @@ static void updateEnemies(Map* this) {
 }
 
 static void update(Map* this, Controler* controler) {
-    this->changedChunk = false;
     updatePlayer(this, controler->input);
     updateEnemies(this);
     this->updateCount++;

@@ -12,7 +12,7 @@ typedef struct {
     int seed;
 } ChunkConfig;
 
-static ChunkConfig config = {28, 9, 5, 2, 51616723};
+static ChunkConfig config = { 28, 9, 5, 2, 51616723 };
 
 static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
     1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -28,8 +28,8 @@ static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
     1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
 };
 
-static const int FONT_MATRIX[25] = {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-                                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1};
+static const int FONT_MATRIX[25] = { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+                                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1 };
 
 static inline unsigned int hash2D(int x, int y, unsigned int seed) {
     uint64_t h = (uint64_t)(x) * 0x9E3779B185EBCA87ULL;
@@ -45,8 +45,7 @@ static inline unsigned int hash2D(int x, int y, unsigned int seed) {
 
 static inline unsigned int randChunk(Chunk* this) {
     static const uint64_t A = 0x9E3779B97F4A7C15ULL;
-    uint64_t s =
-        ((uint64_t)this->x << 32) ^ this->y ^ config.seed ^ this->randCounter++;
+    uint64_t s =((uint64_t)this->x << 32) ^ this->y ^ config.seed ^ this->randCounter++;
     s += A;
     s = (s ^ (s >> 30)) * 0xBF58476D1CE4E5B9ULL;
     s = (s ^ (s >> 27)) * 0x94D049BB133111EBULL;
@@ -75,7 +74,7 @@ static void resetDistance(Chunk* this) {
 
 static void preLoad(Chunk* this) {
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
-        this->cells[i] = (Cell){0};
+        this->cells[i] = (Cell){ 0 };
         this->cells[i].distance = -1;
     }
 
@@ -92,8 +91,7 @@ static void preLoad(Chunk* this) {
     }
 
     int biomeHalfWidth = config.biomeWidthChunks >> 1;
-    bool isXstructure =
-        ((this->x - biomeHalfWidth) % config.biomeWidthChunks) == 0;
+    bool isXstructure = ((this->x - biomeHalfWidth) % config.biomeWidthChunks) == 0;
     int templeY = ((hash2D(this->x, 1, config.seed) & 5) + 1);
 
     if (isXstructure && templeY == this->y) {
@@ -107,12 +105,8 @@ static void preLoad(Chunk* this) {
         return;
     }
 
-    int fragmentX =
-        (hash2D(this->biome, 1, config.seed) % (config.biomeWidthChunks - 2) +
-         1) +
-        config.biomeWidthChunks * this->biome;
-    int fragmentY =
-        (hash2D(1, this->biome, config.seed) & 1) * (config.height - 1);
+    int fragmentX = (hash2D(this->biome, 1, config.seed) % (config.biomeWidthChunks - 2) + 1) + config.biomeWidthChunks * this->biome;
+    int fragmentY = (hash2D(1, this->biome, config.seed) & 1) * (config.height - 1);
 
     if (this->x == fragmentX && this->y == fragmentY) {
         this->type = CHUNK_FRAGMENT;
@@ -135,11 +129,10 @@ static void generateBorder(Chunk* this) {
         if (this->y == 0)
             for (int j = yLevel; j >= 0; j--) {
                 cellAt(this, i, j)->type = CELL_WALL;
-            }
-        else
-            for (int j = yLevel; j < CHUNK_SIZE; j++) {
-                cellAt(this, i, j)->type = CELL_WALL;
-            }
+            } else
+                for (int j = yLevel; j < CHUNK_SIZE; j++) {
+                    cellAt(this, i, j)->type = CELL_WALL;
+                }
     }
 }
 
@@ -214,7 +207,7 @@ static void generateWalls1x1(Chunk* this) {
             bool evenOrEven = ((y & 1) == 0 || (x & 1) == 0);
             cell->type = evenOrEven;
             if ((y & 1) == 0 && (x & 1) == 0) continue;
-            if (randChunk(this) % 100 <= 65) {
+            if (randChunk(this) % 100 <= 70) {
                 cell->type = CELL_EMPTY;
             }
         }
@@ -408,7 +401,7 @@ static void generateFragement(Chunk* this) {
     cell->type = CELL_FRAGMENT;
 }
 
-static void generateFruit(Chunk* this){
+static void generateFruit(Chunk* this) {
     if (this->type == CHUNK_TRANSITION || randChunk(this) % 100 > 8) return;
 
     int x, y;
@@ -417,7 +410,7 @@ static void generateFruit(Chunk* this){
         x = randChunk(this) & CHUNK_MASK;
         y = randChunk(this) & CHUNK_MASK;
         cell = cellAt(this, x, y);
-    } while(!isPassable(cell->type));
+    } while (!isPassable(cell->type));
     cell->type = CELL_FRUIT;
 }
 
@@ -434,7 +427,7 @@ static void generateEnemies(Chunk* this) {
             x = cx + (this->x << CHUNK_SHIFT);
             y = cy + (this->y << CHUNK_SHIFT);
             cell = cellAt(this, cx, cy);
-        } while (cell->type == CELL_WALL);
+        } while (!isPassable(cell->type));
         Enemy* e = new_Enemy(x, y, cell->biome);
         enemies->addLast(enemies, e);
     }
