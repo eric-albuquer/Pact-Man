@@ -43,7 +43,7 @@ static void add(ChunkMap* map, Chunk* chunk) {
     size_t key = chunkKey(chunk->x, chunk->y);
     int idx = hashCode(key) & map->mask;
     int firstRemoved = -1;
-    while (map->used[idx] != EMPTY) {
+    while (map->used[idx] != CHUNK_MAP_EMPTY) {
         if (map->used[idx] == CHUNK_MAP_OCCUPIED && map->keys[idx] == key) return;
         if (map->used[idx] == CHUNK_MAP_REMOVED && firstRemoved == -1) firstRemoved = idx;
         idx = (idx + 1) & map->mask;
@@ -58,7 +58,7 @@ static void add(ChunkMap* map, Chunk* chunk) {
 static Chunk* get(ChunkMap* map, int cx, int cy) {
     size_t key = chunkKey(cx, cy);
     int idx = hashCode(key) & map->mask;
-    while (map->used[idx] != EMPTY) {
+    while (map->used[idx] != CHUNK_MAP_EMPTY) {
         if (map->used[idx] == CHUNK_MAP_OCCUPIED && map->keys[idx] == key)
             return map->chunks[idx];
         idx = (idx + 1) & map->mask;
@@ -69,7 +69,7 @@ static Chunk* get(ChunkMap* map, int cx, int cy) {
 static bool delete(ChunkMap* map, Chunk* chunk) {
     size_t key = chunkKey(chunk->x, chunk->y);
     int idx = hashCode(key) & map->mask;
-    while (map->used[idx] != EMPTY) {
+    while (map->used[idx] != CHUNK_MAP_EMPTY) {
         if (map->keys[idx] == key) {
             map->used[idx] = CHUNK_MAP_REMOVED;
             map->size--;

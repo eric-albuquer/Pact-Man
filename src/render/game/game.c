@@ -18,7 +18,8 @@ static const char* SPRITES[] = {
     "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png",
     "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
 
-    "assets/sprites/coin.png",         "assets/sprites/Key.png"};
+    "assets/sprites/coin.png",         "assets/sprites/Key.png",
+    "assets/sprites/apple.png"};
 
 static const Color CELL_COLORS[4] = {
     {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
@@ -38,7 +39,7 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             int biomeType = cell->biome;
             Color color = CELL_COLORS[biomeType];
 
-            if (cell->type == WALL) {
+            if (cell->type == CELL_WALL) {
                 color.r += 70;
                 color.g += 70;
                 color.b += 70;
@@ -49,25 +50,25 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
                 color.g += 100;
             }
 
-            else if (cell->type == MUD) {
+            else if (cell->type == CELL_MUD) {
                 color.r = 79;
                 color.g = 39;
                 color.b = 30;
             }
 
-            else if (cell->type == SPIKE) {
+            else if (cell->type == CELL_SPIKE) {
                 color.r = 185;
                 color.g = 185;
                 color.b = 185;
             }
 
-            else if (cell->type == GRAVE) {
+            else if (cell->type == CELL_GRAVE) {
                 color.r = 10;
                 color.g = 10;
                 color.b = 10;
             }
 
-            else if (cell->type == FIRE) {
+            else if (cell->type == CELL_FIRE) {
                 color.r = 255;
                 color.g = 0;
                 color.b = 0;
@@ -165,7 +166,7 @@ static void drawMapDebug(Game* this) {
             int biomeType = cell->biome;
             Color color = CELL_COLORS[biomeType];
 
-            if (cell->type == WALL) {
+            if (cell->type == CELL_WALL) {
                 color.r += 70;
                 color.g += 70;
                 color.b += 70;
@@ -176,25 +177,25 @@ static void drawMapDebug(Game* this) {
                 color.g += 100;
             }
 
-            else if (cell->type == MUD) {
+            else if (cell->type == CELL_MUD) {
                 color.r = 79;
                 color.g = 39;
                 color.b = 30;
             }
 
-            else if (cell->type == SPIKE) {
+            else if (cell->type == CELL_SPIKE) {
                 color.r = 185;
                 color.g = 185;
                 color.b = 185;
             }
 
-            else if (cell->type == GRAVE) {
+            else if (cell->type == CELL_GRAVE) {
                 color.r = 10;
                 color.g = 10;
                 color.b = 10;
             }
 
-            else if (cell->type == FIRE) {
+            else if (cell->type == CELL_FIRE) {
                 color.r = 255;
                 color.g = 0;
                 color.b = 0;
@@ -205,13 +206,18 @@ static void drawMapDebug(Game* this) {
 
             DrawRectangle(x, y, this->cellSize, this->cellSize, color);
 
-            if (cell->type == COIN) {
+            if (cell->type == CELL_COIN) {
                 Texture2D enemyTexture = this->sprites[16];
                 DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
             }
 
-            if (cell->type == FRAGMENT) {
+            else if (cell->type == CELL_FRAGMENT) {
                 Texture2D enemyTexture = this->sprites[17];
+                DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
+            }
+
+            else if (cell->type == CELL_FRUIT) {
+                Texture2D enemyTexture = this->sprites[18];
                 DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
             }
 
@@ -365,7 +371,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->map = map;
 
-    loadSprites(this, SPRITES, 18);
+    loadSprites(this, SPRITES, 19);
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 
     this->drawMapDebug = drawMapDebug;

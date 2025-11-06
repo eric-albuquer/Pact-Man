@@ -11,18 +11,19 @@
 #define CELLS_PER_CHUNK 256
 
 typedef enum {
-    EMPTY,
-    WALL,
-    COIN,
-    MUD,
-    GRAVE,
-    SPIKE,
-    FIRE,
-    FRAGMENT,
-    WIND_RIGHT,
-    WIND_LEFT,
-    WIND_UP,
-    WIND_DOWN
+    CELL_EMPTY,
+    CELL_WALL,
+    CELL_COIN,
+    CELL_MUD,
+    CELL_GRAVE,
+    CELL_SPIKE,
+    CELL_FIRE,
+    CELL_FRAGMENT,
+    CELL_FRUIT,
+    CELL_WIND_RIGHT,
+    CELL_WIND_LEFT,
+    CELL_WIND_UP,
+    CELL_WIND_DOWN
 } CellType;
 
 typedef struct {
@@ -33,20 +34,36 @@ typedef struct {
 } Cell;
 
 inline bool isWind(CellType type) {
-    return type >= WIND_RIGHT && type <= WIND_DOWN;
+    return type >= CELL_WIND_RIGHT && type <= CELL_WIND_DOWN;
+}
+
+inline bool isPassable(CellType type){
+    return type != CELL_WALL && type != CELL_GRAVE;
+}
+
+inline bool isSafe(CellType type){
+    return type != CELL_FIRE && type != CELL_SPIKE;
+}
+
+typedef enum {
+    CHUNK_NORMAL,
+    CHUNK_TRANSITION,
+    CHUNK_TEMPLE,
+    CHUNK_FONT,
+    CHUNK_FRAGMENT,
+} ChunkType;
+
+inline bool isStructure(ChunkType type){
+    return type >= CHUNK_TEMPLE && type <= CHUNK_FONT;
 }
 
 typedef struct Chunk {
     int x;
     int y;
 
-    unsigned isTransition : 1;
-    unsigned isBorder : 1;
+    unsigned type: 3;
     unsigned biome : 2;
-    unsigned isStructure : 1;
-    unsigned isTemple : 1;
-    unsigned isFont : 1;
-    unsigned fragment : 1;
+    unsigned isBorder: 1;
 
     unsigned int randCounter;
 
