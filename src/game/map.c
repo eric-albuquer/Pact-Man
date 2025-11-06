@@ -8,6 +8,7 @@
 #include "chunk.h"
 #include "enemy.h"
 #include "pathfinding.h"
+#include "chunk_loader.h"
 
 typedef struct {
     int x;
@@ -149,8 +150,6 @@ Map* new_Map(int chunkCols, int chunkRows) {
 
     this->updateCount = 0;
     this->player = new_Player(301, 21);
-
-    setArgs(chunkCols, chunkRows, time(NULL));
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

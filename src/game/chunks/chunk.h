@@ -74,11 +74,10 @@ typedef struct Chunk {
 
     void (*update)(struct Chunk*);
     void (*resetDistance)(struct Chunk*);
+    Cell* (*cellAt)(struct Chunk*, int, int);
     void (*free)(struct Chunk*);
 } Chunk;
 
 Chunk* new_Chunk(int x, int y);
-
-void setArgs(const int width, const int height, const int seed);
 
 #endif

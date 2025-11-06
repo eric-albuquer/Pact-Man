@@ -3,6 +3,7 @@
 
 #include "chunk_map.h"
 #include "player.h"
+#include "chunk_loader.h"
 
 extern const int CLOSER_IDX[9];
 
@@ -12,8 +13,8 @@ typedef struct ChunkManager {
 
     Player* player;
     ChunkMap* chunks;
+    ChunkLoader* chunkLoader;
     Chunk* adjacents[49];
-    bool changedChunk;
 
     Chunk* (*getLoadedChunk)(struct ChunkManager*, int, int);
     Chunk* (*getChunk)(struct ChunkManager*, int, int);

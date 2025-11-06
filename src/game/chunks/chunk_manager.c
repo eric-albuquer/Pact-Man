@@ -1,6 +1,7 @@
 #include "chunk_manager.h"
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 const int CLOSER_IDX[9] = {16, 17, 18, 23, 24, 25, 30, 31, 32};
 
@@ -8,6 +9,7 @@ static void loadAdjacents(ChunkManager* this){
     int cx = this->player->chunkX;
     int cy = this->player->chunkY;
     ChunkMap* chunks = this->chunks;
+    ChunkLoader *cl = this->chunkLoader;
     int idx = 0;
     for (int i = -3; i < 4; i++){
         int chunkY = cy + i;
@@ -16,6 +18,7 @@ static void loadAdjacents(ChunkManager* this){
             Chunk* chunk = chunks->get(chunks, chunkX, chunkY);
             if (chunkX >= 0 && chunkX < this->cols && chunkY >= 0 && chunkY < this->rows && !chunk && abs(i) < 2 && abs(j) < 2){
                 chunk = new_Chunk(chunkX, chunkY);
+                cl->generate(cl, chunk);
                 chunks->add(chunks, chunk);
             }
             this->adjacents[idx++] = chunk;
@@ -70,13 +73,14 @@ static Chunk* getLoadedChunk(ChunkManager* this, int cx, int cy){
 
 static void _free(ChunkManager* this) {
     this->chunks->free(this->chunks);
+    this->chunkLoader->free(this->chunkLoader);
     free(this);
 }
 
 ChunkManager* new_ChunkManager(int cols, int rows, Player* p) {
     ChunkManager* this = malloc(sizeof(ChunkManager));
     this->chunks = new_ChunkMap();
-    this->changedChunk = false;
+    this->chunkLoader = new_ChunkLoader(cols, rows, time(NULL));
     this->cols = cols;
     this->rows = rows;
     this->player = p;
