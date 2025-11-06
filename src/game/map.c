@@ -131,6 +131,7 @@ static void updateEnemies(Map* this) {
 }
 
 static void update(Map* this, Controler* controler) {
+    this->manager->updateAdjacents(this->manager);
     updatePlayer(this, controler->input);
     updateEnemies(this);
     this->updateCount++;
@@ -149,7 +150,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     this->updateCount = 0;
     this->player = new_Player(301, 21);
 
-    setArgs(chunkCols, chunkRows, 1, time(NULL));
+    setArgs(chunkCols, chunkRows, time(NULL));
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

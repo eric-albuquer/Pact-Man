@@ -8,11 +8,10 @@
 typedef struct {
     int width, height;
     int biomeWidthChunks;
-    int maxEnemiesPerChunk;
     int seed;
 } ChunkConfig;
 
-static ChunkConfig config = { 28, 9, 5, 2, 51616723 };
+static ChunkConfig config = { 28, 9, 5, 51616723 };
 
 static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
     1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -31,6 +30,8 @@ static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
 static const int FONT_MATRIX[25] = { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
                                     0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1 };
 
+static const int BIOME_ENEMY_PROBABILITY[4] = { 50, 50, 50, 20 };
+
 static inline unsigned int hash2D(int x, int y, unsigned int seed) {
     uint64_t h = (uint64_t)(x) * 0x9E3779B185EBCA87ULL;
     h ^= (uint64_t)(y) * 0xC2B2AE3D27D4EB4FULL;
@@ -45,7 +46,7 @@ static inline unsigned int hash2D(int x, int y, unsigned int seed) {
 
 static inline unsigned int randChunk(Chunk* this) {
     static const uint64_t A = 0x9E3779B97F4A7C15ULL;
-    uint64_t s =((uint64_t)this->x << 32) ^ this->y ^ config.seed ^ this->randCounter++;
+    uint64_t s = ((uint64_t)this->x << 32) ^ this->y ^ config.seed ^ this->randCounter++;
     s += A;
     s = (s ^ (s >> 30)) * 0xBF58476D1CE4E5B9ULL;
     s = (s ^ (s >> 27)) * 0x94D049BB133111EBULL;
@@ -57,11 +58,10 @@ static inline Cell* cellAt(Chunk* c, int x, int y) {
     return &c->cells[(y << CHUNK_SHIFT) | x];
 }
 
-void setArgs(int width, int height, int maxEnemiesPerChunk, int seed) {
+void setArgs(int width, int height, int seed) {
     config.width = width;
     config.height = height;
     config.biomeWidthChunks = (width >> 2) | 1;
-    config.maxEnemiesPerChunk = maxEnemiesPerChunk;
     config.seed = seed;
 }
 
@@ -339,7 +339,12 @@ static void generateGraves(Chunk* this) {
         for (int j = 0; j < CHUNK_SIZE; j++) {
             Cell* cell = cellAt(this, j, i);
             if (cell->type == CELL_WALL) continue;
-            if (randChunk(this) % 100 < 5) cell->type = CELL_GRAVE;
+            if (randChunk(this) % 100 < 5) {
+                if (randChunk(this) % 100 < 5)
+                    cell->type = CELL_GRAVE_INFESTED;
+                else
+                    cell->type = CELL_GRAVE;
+            }
         }
     }
 }
@@ -351,13 +356,13 @@ static void generateFire(Chunk* this) {
             if (randChunk(this) % 100 < 40 &&
                 cellAt(this, j + 1, i)->type == CELL_EMPTY) {
                 for (int k = 0; k < 2; k++) {
-                    cellAt(this, j + 1 + k, i)->type = CELL_FIRE;
+                    cellAt(this, j + 1 + k, i)->type = CELL_FIRE_ON;
                 }
             }
             if (randChunk(this) % 100 < 40 &&
                 cellAt(this, j, i + 1)->type == CELL_EMPTY) {
                 for (int k = 0; k < 2; k++) {
-                    cellAt(this, j, i + 1 + k)->type = CELL_FIRE;
+                    cellAt(this, j, i + 1 + k)->type = CELL_FIRE_ON;
                 }
             }
         }
@@ -416,21 +421,19 @@ static void generateFruit(Chunk* this) {
 
 static void generateEnemies(Chunk* this) {
     if (isStructure(this->type) || this->isBorder) return;
-    int totalEnemies = randChunk(this) % (config.maxEnemiesPerChunk + 1);
+    if (randChunk(this) % 100 >= BIOME_ENEMY_PROBABILITY[this->biome]) return;
     LinkedList* enemies = this->enemies;
-    for (int i = 0; i < totalEnemies; i++) {
-        int cx, cy, x, y;
-        Cell* cell;
-        do {
-            cx = randChunk(this) & CHUNK_MASK;
-            cy = randChunk(this) & CHUNK_MASK;
-            x = cx + (this->x << CHUNK_SHIFT);
-            y = cy + (this->y << CHUNK_SHIFT);
-            cell = cellAt(this, cx, cy);
-        } while (!isPassable(cell->type));
-        Enemy* e = new_Enemy(x, y, cell->biome);
-        enemies->addLast(enemies, e);
-    }
+    int cx, cy, x, y;
+    Cell* cell;
+    do {
+        cx = randChunk(this) & CHUNK_MASK;
+        cy = randChunk(this) & CHUNK_MASK;
+        x = cx + (this->x << CHUNK_SHIFT);
+        y = cy + (this->y << CHUNK_SHIFT);
+        cell = cellAt(this, cx, cy);
+    } while (!isPassable(cell->type));
+    Enemy* e = new_Enemy(x, y, cell->biome);
+    enemies->addLast(enemies, e);
 }
 
 typedef void (*ChunkGeneratorFn)(Chunk*);
@@ -462,6 +465,66 @@ static void generate(Chunk* this) {
     }
 }
 
+static bool inline isFire(Cell* cell){
+    return cell->type == CELL_FIRE_OFF || cell->type == CELL_FIRE_ON;
+}
+
+static void updateFire(Chunk* this, int x, int y) {
+    Cell* cell = cellAt(this, x, y);
+    if (!isFire(cell)) return;
+    CellType switchFire = cell->type == CELL_FIRE_ON ? CELL_FIRE_OFF : CELL_FIRE_ON;
+    for (int i = -1; i < 2; i++) {
+        int nx = x + i;
+        int ny = y + i;
+        Cell* cell = cellAt(this, nx, y);
+        if (nx >= 0 && nx < CHUNK_SIZE && isFire(cell)) {
+            cell->type = switchFire;
+        }
+        if (i != 0 && ny >= 0 && ny < CHUNK_SIZE && isFire((cell = cellAt(this, x, ny)))) {
+            cellAt(this, x, ny)->type = switchFire;
+        }
+    }
+}
+
+static Node* hasEnemyInCell(Chunk* this, int x, int y) {
+    Node* cur = this->enemies->head;
+    while (cur) {
+        Enemy* e = cur->data;
+        int ex = e->x & CHUNK_MASK;
+        int ey = e->y & CHUNK_MASK;
+        if (ex == x && ey == y) return cur;
+        cur = cur->next;
+    }
+    return NULL;
+}
+
+static void updateGraveInfested(Chunk* this, int x, int y) {
+    if (this->biome != 2) return;
+    Cell* cell = cellAt(this, x, y);
+    LinkedList* enemies = this->enemies;
+    if (cell->type == CELL_GRAVE_INFESTED) {
+        cell->type = CELL_EMPTY;
+        int ex = x + (this->x << CHUNK_SHIFT);
+        int ey = y + (this->y << CHUNK_SHIFT);
+        Enemy* e = new_Enemy(ex, ey, cell->biome);
+        enemies->addLast(enemies, e);
+        return;
+    }
+    Node* node = hasEnemyInCell(this, x, y);
+    if (node == NULL) return;
+    Enemy* e = node->data;
+    enemies->removeNode(enemies, node);
+    e->free(e);
+    cell->type = CELL_GRAVE_INFESTED;
+}
+
+static void update(Chunk* this) {
+    int y = rand() & CHUNK_MASK;
+    int x = rand() & CHUNK_MASK;
+    updateFire(this, x, y);
+    updateGraveInfested(this, x, y);
+}
+
 static void _free(Chunk* this) {
     Node* cur = this->enemies->head;
     Node* temp;
@@ -486,6 +549,7 @@ Chunk* new_Chunk(int x, int y) {
 
     generate(this);
 
+    this->update = update;
     this->resetDistance = resetDistance;
     this->free = _free;
     return this;

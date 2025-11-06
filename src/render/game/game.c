@@ -50,10 +50,18 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size,
         color.r = 10;
         color.g = 10;
         color.b = 10;
-    } else if (cell->type == CELL_FIRE) {
+    } else if (cell->type == CELL_GRAVE_INFESTED) {
+        color.r = 10;
+        color.g = 10;
+        color.b = 100;
+    } else if (cell->type == CELL_FIRE_ON) {
         color.r = 255;
         color.g = 0;
         color.b = 0;
+    } else if (cell->type == CELL_FIRE_OFF){
+        color.r = 128;
+        color.g = 128;
+        color.b = 128;
     }
 
     DrawRectangle(x, y, size, size, color);

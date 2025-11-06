@@ -2,7 +2,7 @@
 #define CHUNK_H
 
 #include <stdbool.h>
-
+#include "enemy.h"
 #include "linkedlist.h"
 
 #define CHUNK_SHIFT 4
@@ -16,8 +16,10 @@ typedef enum {
     CELL_COIN,
     CELL_MUD,
     CELL_GRAVE,
+    CELL_GRAVE_INFESTED,
     CELL_SPIKE,
-    CELL_FIRE,
+    CELL_FIRE_OFF,
+    CELL_FIRE_ON,
     CELL_FRAGMENT,
     CELL_FRUIT,
     CELL_WIND_RIGHT,
@@ -37,12 +39,12 @@ inline bool isWind(CellType type) {
     return type >= CELL_WIND_RIGHT && type <= CELL_WIND_DOWN;
 }
 
-inline bool isPassable(CellType type){
-    return type != CELL_WALL && type != CELL_GRAVE;
+inline bool isPassable(CellType type) {
+    return type != CELL_WALL && type != CELL_GRAVE && type != CELL_GRAVE_INFESTED;
 }
 
-inline bool isSafe(CellType type){
-    return type != CELL_FIRE && type != CELL_SPIKE;
+inline bool isSafe(CellType type) {
+    return type != CELL_FIRE_ON && type != CELL_SPIKE;
 }
 
 typedef enum {
@@ -53,7 +55,7 @@ typedef enum {
     CHUNK_FRAGMENT,
 } ChunkType;
 
-inline bool isStructure(ChunkType type){
+inline bool isStructure(ChunkType type) {
     return type >= CHUNK_TEMPLE && type <= CHUNK_FONT;
 }
 
@@ -61,22 +63,22 @@ typedef struct Chunk {
     int x;
     int y;
 
-    unsigned type: 3;
+    unsigned type : 3;
     unsigned biome : 2;
-    unsigned isBorder: 1;
+    unsigned isBorder : 1;
 
     unsigned int randCounter;
 
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];
 
+    void (*update)(struct Chunk*);
     void (*resetDistance)(struct Chunk*);
     void (*free)(struct Chunk*);
 } Chunk;
 
 Chunk* new_Chunk(int x, int y);
 
-void setArgs(const int width, const int height, const int maxEnemiesPerChunk,
-             const int seed);
+void setArgs(const int width, const int height, const int seed);
 
 #endif

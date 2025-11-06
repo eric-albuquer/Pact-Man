@@ -19,6 +19,7 @@ typedef struct ChunkManager {
     Chunk* (*getChunk)(struct ChunkManager*, int, int);
     Cell* (*getLoadedCell)(struct ChunkManager*, int, int);
     Cell* (*getUpdatedCell)(struct ChunkManager*, int, int);
+    void (*updateAdjacents)(struct ChunkManager*);
     void (*loadAdjacents)(struct ChunkManager*);
     void (*free)(struct ChunkManager*);
 } ChunkManager;
