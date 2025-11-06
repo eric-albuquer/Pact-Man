@@ -10,6 +10,10 @@
 
 #define FIRE_DAMAGE 10
 #define SPIKE_DAMAGE 2 
+#define ENEMY_DAGAME 15
+#define FONT_HEALTH 1
+
+#define COINS_TO_FRAGMENT 100
 
 typedef struct Map {
     ChunkManager* manager;

@@ -34,6 +34,9 @@ Player* new_Player(int x, int y) {
     this->life = START_LIFE;
     this->biomeCoins = 0;
     this->totalCoins = 0;
+    this->totalFragment = 0;
+    this->biomeFragment = 0;
+    this->fragmentByCoins = false;
     this->slowness = 0;
     this->biome = 0;
 

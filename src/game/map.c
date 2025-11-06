@@ -22,20 +22,37 @@ static bool movePlayer(Map* this, Vec2i newDir) {
     int playerNextX = p->x + newDir.x;
     int playerNextY = p->y + newDir.y;
     Cell* cell = this->manager->getLoadedCell(this->manager, playerNextX, playerNextY);
-    if (cell == NULL || !isPassable(cell->type)) return false;
+
+    bool cantPassBiome = p->biomeFragment < 2 && cell->biome > p->biome;
+    if (cell == NULL || !isPassable(cell->type) || cantPassBiome || cell->biome < p->biome) return false;
 
     p->x = playerNextX;
     p->y = playerNextY;
 
     p->updateDirection(p);
 
+    if (cell->biome != p->biome){
+        p->biome = cell->biome;
+        p->biomeFragment = 0;
+        p->biomeCoins = 0;
+        p->fragmentByCoins = false;
+    }
+
     if (cell->type == CELL_COIN){
         cell->type = CELL_EMPTY;
         p->biomeCoins++;
         p->totalCoins++;
-    } 
+        if (p->fragmentByCoins == false && p->biomeCoins/COINS_TO_FRAGMENT) {
+            p->fragmentByCoins = true;
+            p->biomeFragment++;
+            p->totalFragment++;
+        }
+    } else if (cell->type == CELL_FRAGMENT){
+        cell->type = CELL_EMPTY;
+        p->totalFragment++;
+        p->biomeFragment++;
+    }
 
-    p->biome = cell->biome;
     p->slowness = cell->type == CELL_MUD || cell->type == CELL_SPIKE;
     if (p->updateChunk(p)) this->manager->loadAdjacents(this->manager);
     return true;
@@ -69,6 +86,11 @@ static void updatePlayer(Map* this, Input input) {
     p->lastX = p->x;
     p->lastY = p->y;
 
+    ChunkManager* cm = this->manager;
+    Chunk* chunk = cm->getLoadedChunk(cm, p->chunkX, p->chunkY);
+    if (chunk->type == CHUNK_FONT && p->life < START_LIFE){
+        p->life += FONT_HEALTH;
+    }
     updateDamagePlayer(this);
 
     if (p->slowness) {
@@ -109,6 +131,7 @@ static void updatePlayer(Map* this, Input input) {
 }
 
 static void updateEnemies(Map* this) {
+    Player* p = this->player;
     ChunkManager* cm = this->manager;
     static Enemy* changed[100];
     int changedLength = 0;
@@ -138,6 +161,9 @@ static void updateEnemies(Map* this) {
                         cm->getLoadedChunk(cm, e->chunkX, e->chunkY);
                     LinkedList* newEnemies = newChunk->enemies;
                     newEnemies->addLast(newEnemies, e);
+                }
+                if (e->x == p->x && e->y == p->y){
+                    p->life -= ENEMY_DAGAME;
                 }
                 e->updateDirection(e);
             }
@@ -169,7 +195,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(301, 21);
+    this->player = new_Player(11, 21);
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

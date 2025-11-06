@@ -20,6 +20,9 @@ typedef struct Player {
     Direction dir;
 
     int life;
+    int totalFragment;
+    int biomeFragment;
+    bool fragmentByCoins;
     unsigned short biomeCoins;
     unsigned short totalCoins;
     unsigned biome : 2;
