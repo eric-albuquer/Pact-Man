@@ -29,6 +29,12 @@ static bool movePlayer(Map* this, Vec2i newDir) {
 
     p->updateDirection(p);
 
+    if (cell->type == CELL_COIN){
+        cell->type = CELL_EMPTY;
+        p->biomeCoins++;
+        p->totalCoins++;
+    } 
+
     p->biome = cell->biome;
     p->slowness = cell->type == CELL_MUD || cell->type == CELL_SPIKE;
     if (p->updateChunk(p)) this->manager->loadAdjacents(this->manager);
@@ -45,11 +51,25 @@ static void updatePlayerWind(Map* this) {
     }
 }
 
+static void updateDamagePlayer(Map* this){
+    Player* p = this->player;
+
+    Cell* cell = this->manager->getUpdatedCell(this->manager, p->x, p->y);
+    
+    if (cell->type == CELL_FIRE_ON){
+        p->life -= FIRE_DAMAGE;
+    } else if (cell->type == CELL_SPIKE){
+        p->life -= SPIKE_DAMAGE;
+    }
+}
+
 static void updatePlayer(Map* this, Input input) {
     Player* p = this->player;
 
     p->lastX = p->x;
     p->lastY = p->y;
+
+    updateDamagePlayer(this);
 
     if (p->slowness) {
         p->slowness = 0;

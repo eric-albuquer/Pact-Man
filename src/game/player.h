@@ -5,6 +5,8 @@
 #include "common.h"
 #include "chunk.h"
 
+#define START_LIFE 100
+
 typedef struct Player {
     int x;
     int y;
@@ -17,6 +19,7 @@ typedef struct Player {
 
     Direction dir;
 
+    int life;
     unsigned short biomeCoins;
     unsigned short totalCoins;
     unsigned biome : 2;

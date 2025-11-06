@@ -8,6 +8,9 @@
 #include "player.h"
 #include "chunk_manager.h"
 
+#define FIRE_DAMAGE 10
+#define SPIKE_DAMAGE 2 
+
 typedef struct Map {
     ChunkManager* manager;
 
