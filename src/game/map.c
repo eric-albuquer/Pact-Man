@@ -14,21 +14,23 @@ typedef struct {
     int y;
 } Vec2i;
 
-static const Vec2i DIR_VECTOR[4] = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
+static const Vec2i DIR_VECTOR[4] = { {1, 0}, {-1, 0}, {0, -1}, {0, 1} };
 
 static bool movePlayer(Map* this, Vec2i newDir) {
     Player* p = this->player;
     int playerNextX = p->x + newDir.x;
     int playerNextY = p->y + newDir.y;
-    Cell* cell =
-        this->manager->getLoadedCell(this->manager, playerNextX, playerNextY);
+    Cell* cell = this->manager->getLoadedCell(this->manager, playerNextX, playerNextY);
     if (cell == NULL || !isPassable(cell->type)) return false;
 
     p->x = playerNextX;
     p->y = playerNextY;
-    p->biome = cell->biome;
-    if (p->updateChunk(p)) this->manager->loadAdjacents(this->manager);
+
     p->updateDirection(p);
+
+    p->biome = cell->biome;
+    p->slowness = cell->type == CELL_MUD;
+    if (p->updateChunk(p)) this->manager->loadAdjacents(this->manager);
     return true;
 }
 
@@ -45,33 +47,38 @@ static void updatePlayerWind(Map* this) {
 static void updatePlayer(Map* this, Input input) {
     Player* p = this->player;
 
+    p->lastX = p->x;
+    p->lastY = p->y;
+
+    if (p->slowness) {
+        p->slowness = 0;
+        return;
+    }
+
     static Vec2i dir[4];
     int length = 0;
 
     if (p->dir == RIGHT) {
-        if (input.left) dir[length++] = (Vec2i){-1, 0};
-        if (input.up) dir[length++] = (Vec2i){0, -1};
-        if (input.down) dir[length++] = (Vec2i){0, 1};
-        if (input.right) dir[length++] = (Vec2i){1, 0};
+        if (input.left) dir[length++] = (Vec2i){ -1, 0 };
+        if (input.up) dir[length++] = (Vec2i){ 0, -1 };
+        if (input.down) dir[length++] = (Vec2i){ 0, 1 };
+        if (input.right) dir[length++] = (Vec2i){ 1, 0 };
     } else if (p->dir == LEFT) {
-        if (input.right) dir[length++] = (Vec2i){1, 0};
-        if (input.up) dir[length++] = (Vec2i){0, -1};
-        if (input.down) dir[length++] = (Vec2i){0, 1};
-        if (input.left) dir[length++] = (Vec2i){-1, 0};
+        if (input.right) dir[length++] = (Vec2i){ 1, 0 };
+        if (input.up) dir[length++] = (Vec2i){ 0, -1 };
+        if (input.down) dir[length++] = (Vec2i){ 0, 1 };
+        if (input.left) dir[length++] = (Vec2i){ -1, 0 };
     } else if (p->dir == UP) {
-        if (input.down) dir[length++] = (Vec2i){0, 1};
-        if (input.right) dir[length++] = (Vec2i){1, 0};
-        if (input.left) dir[length++] = (Vec2i){-1, 0};
-        if (input.up) dir[length++] = (Vec2i){0, -1};
+        if (input.down) dir[length++] = (Vec2i){ 0, 1 };
+        if (input.right) dir[length++] = (Vec2i){ 1, 0 };
+        if (input.left) dir[length++] = (Vec2i){ -1, 0 };
+        if (input.up) dir[length++] = (Vec2i){ 0, -1 };
     } else if (p->dir == DOWN) {
-        if (input.up) dir[length++] = (Vec2i){0, -1};
-        if (input.right) dir[length++] = (Vec2i){1, 0};
-        if (input.left) dir[length++] = (Vec2i){-1, 0};
-        if (input.down) dir[length++] = (Vec2i){0, 1};
+        if (input.up) dir[length++] = (Vec2i){ 0, -1 };
+        if (input.right) dir[length++] = (Vec2i){ 1, 0 };
+        if (input.left) dir[length++] = (Vec2i){ -1, 0 };
+        if (input.down) dir[length++] = (Vec2i){ 0, 1 };
     }
-
-    p->lastX = p->x;
-    p->lastY = p->y;
 
     for (int i = 0; i < length; i++) {
         if (movePlayer(this, dir[i])) break;

@@ -19,7 +19,8 @@ typedef struct Player {
 
     unsigned short biomeCoins;
     unsigned short totalCoins;
-    unsigned biome: 2;
+    unsigned biome : 2;
+    unsigned slowness : 1;
 
     bool (*updateChunk)(struct Player*);
     void (*updateDirection)(struct Player*);

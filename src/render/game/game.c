@@ -129,7 +129,7 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             int x = (e->x - map->player->x) * cellSize;
             int y = (e->y - map->player->y) * cellSize;
 
-            DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize, WHITE);
+            DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize, YELLOW);
             cur = cur->next;
         }
     }

@@ -31,6 +31,10 @@ Player* new_Player(int x, int y) {
     this->lastX = x;
     this->lastY = y;
 
+    this->biomeCoins = 0;
+    this->totalCoins = 0;
+    this->slowness = 0;
+
     this->dir = RIGHT;
 
     this->updateChunk = updateChunk;
