@@ -1,8 +1,10 @@
 #include "game.h"
 
+#include <math.h>
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "enemy.h"
 
 static const char* SPRITES[] = {
@@ -16,7 +18,7 @@ static const char* SPRITES[] = {
     "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png",
     "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
 
-    "assets/sprites/coin.png", "assets/sprites/Key.png"};
+    "assets/sprites/coin.png",         "assets/sprites/Key.png"};
 
 static const Color CELL_COLORS[4] = {
     {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255}};
@@ -47,25 +49,25 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
                 color.g += 100;
             }
 
-            else if (cell->type == MUD){
+            else if (cell->type == MUD) {
                 color.r = 79;
                 color.g = 39;
                 color.b = 30;
             }
 
-            else if (cell->type == SPIKE){
+            else if (cell->type == SPIKE) {
                 color.r = 185;
                 color.g = 185;
                 color.b = 185;
             }
 
-            else if (cell->type == GRAVE){
+            else if (cell->type == GRAVE) {
                 color.r = 10;
                 color.g = 10;
                 color.b = 10;
             }
 
-            else if (cell->type == FIRE){
+            else if (cell->type == FIRE) {
                 color.r = 255;
                 color.g = 0;
                 color.b = 0;
@@ -116,11 +118,12 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
 
 static void drawHudDebug(Game* this) {
     Map* map = this->map;
-    static char buffer[100];
-    sprintf(buffer, "Chunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d",
-            map->player->chunkX, map->player->chunkY, map->player->x,
-            map->player->y, map->player->x & CHUNK_MASK,
-            map->player->y & CHUNK_MASK);
+    static char buffer[1000];
+    Player* p = map->player;
+    sprintf(buffer,
+            "Chunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d",
+            p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK,
+            p->y & CHUNK_MASK, p->biome);
 
     DrawRectangle(this->width - 400, 0, 400, 400, (Color){0, 0, 0, 200});
     DrawText(buffer, this->width - 300, 50, 30, (Color){0, 255, 0, 255});
@@ -173,25 +176,25 @@ static void drawMapDebug(Game* this) {
                 color.g += 100;
             }
 
-            else if (cell->type == MUD){
+            else if (cell->type == MUD) {
                 color.r = 79;
                 color.g = 39;
                 color.b = 30;
             }
 
-            else if (cell->type == SPIKE){
+            else if (cell->type == SPIKE) {
                 color.r = 185;
                 color.g = 185;
                 color.b = 185;
             }
 
-            else if (cell->type == GRAVE){
+            else if (cell->type == GRAVE) {
                 color.r = 10;
                 color.g = 10;
                 color.b = 10;
             }
 
-            else if (cell->type == FIRE){
+            else if (cell->type == FIRE) {
                 color.r = 255;
                 color.g = 0;
                 color.b = 0;
@@ -207,7 +210,7 @@ static void drawMapDebug(Game* this) {
                 DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
             }
 
-            if (cell->type == FRAGMENT){
+            if (cell->type == FRAGMENT) {
                 Texture2D enemyTexture = this->sprites[17];
                 DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
             }
@@ -215,6 +218,14 @@ static void drawMapDebug(Game* this) {
             sprintf(buffer, "%d", cell->distance);
             DrawText(buffer, x + 15, y + 15, 20, (Color){255, 255, 255, 255});
         }
+    }
+
+    if (p->biome == 3) {
+        BeginTextureMode(this->shadowMap);
+        ClearBackground(BLACK);
+        DrawCircleGradient(this->offsetHalfX, this->offsetHalfY, 400, WHITE,
+                           BLANK);
+        EndTextureMode();
     }
 
     for (int i = 0; i < 9; i++) {
@@ -243,12 +254,43 @@ static void drawMapDebug(Game* this) {
             else if (e->dir == UP)
                 offsetTexture = 14;
 
+            if (p->biome == 3) {
+                BeginTextureMode(this->shadowMap);
+                DrawCircleGradient(x, y, 150, WHITE, BLANK);
+                EndTextureMode();
+            }
+
             Texture2D enemyTexture =
                 this->sprites[(this->updateCount % 2) + offsetTexture];
             DrawTexture(enemyTexture, x, y, (Color){255, 255, 255, 255});
+
             cur = cur->next;
         }
     }
+
+    if (p->biome == 3) {
+        BeginBlendMode(BLEND_MULTIPLIED);
+        DrawTextureRec(this->shadowMap.texture,
+                       (Rectangle){0, 0, this->shadowMap.texture.width,
+                                   -this->shadowMap.texture.height},
+                       (Vector2){0, 0}, WHITE);
+        EndBlendMode();
+    }
+
+    int offsetTexture = 0;
+    if (p->dir == RIGHT)
+        offsetTexture = 0;
+    else if (p->dir == DOWN)
+        offsetTexture = 2;
+    else if (p->dir == LEFT)
+        offsetTexture = 4;
+    else if (p->dir == UP)
+        offsetTexture = 6;
+
+    Texture2D playerTexture =
+        this->sprites[(this->updateCount % 2) + offsetTexture];
+    DrawTexture(playerTexture, this->offsetHalfX, this->offsetHalfY,
+                (Color){255, 255, 255, 255});
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -268,22 +310,8 @@ static void drawMapDebug(Game* this) {
         }
     }
 
-    int offsetTexture = 0;
-    if (p->dir == RIGHT)
-        offsetTexture = 0;
-    else if (p->dir == DOWN)
-        offsetTexture = 2;
-    else if (p->dir == LEFT)
-        offsetTexture = 4;
-    else if (p->dir == UP)
-        offsetTexture = 6;
-
-    Texture2D playerTexture =
-        this->sprites[(this->updateCount % 2) + offsetTexture];
-    DrawTexture(playerTexture, this->offsetHalfX, this->offsetHalfY,
-                (Color){255, 255, 255, 255});
-
     drawHudDebug(this);
+
     this->frameCount++;
 }
 
@@ -315,6 +343,7 @@ static void _free(Game* this) {
         Texture2D spriteTexture = sprites[i];
         UnloadTexture(spriteTexture);
     }
+    UnloadRenderTexture(this->shadowMap);
     free(this->sprites);
     free(this);
 }
@@ -337,6 +366,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->map = map;
 
     loadSprites(this, SPRITES, 18);
+    this->shadowMap = LoadRenderTexture(this->width, this->height);
 
     this->drawMapDebug = drawMapDebug;
     this->saveUpdate = saveUpdate;

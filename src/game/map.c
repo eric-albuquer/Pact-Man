@@ -26,6 +26,7 @@ static bool movePlayer(Map* this, Vec2i newDir) {
 
     p->x = playerNextX;
     p->y = playerNextY;
+    p->biome = cell->biome;
     if (p->updateChunk(p)) this->changedChunk = true;
     p->updateDirection(p);
     return true;
@@ -144,7 +145,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(11, 21);
+    this->player = new_Player(301, 21);
 
     setArgs(chunkCols, chunkRows, 1, time(NULL));
 

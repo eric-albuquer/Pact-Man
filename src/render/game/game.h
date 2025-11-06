@@ -26,6 +26,7 @@ typedef struct Game {
     Map* map;
     Chunk* visibleChunks[49];
 
+    RenderTexture2D shadowMap;
     Texture2D* sprites;
     unsigned int totalSprites;
 

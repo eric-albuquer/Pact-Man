@@ -17,6 +17,8 @@ typedef struct Player {
 
     Direction dir;
 
+    unsigned biome: 2;
+
     bool (*updateChunk)(struct Player*);
     void (*updateDirection)(struct Player*);
     void (*free)(struct Player*);

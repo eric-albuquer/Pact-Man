@@ -3,11 +3,11 @@
 #include <stdio.h>
 
 static size_t chunkKey(int cx, int cy) {
-    return ((size_t)(cx) << 32) | (cy & 0xFFFFFFFF);
+    return ((size_t)(cy) << 32) | cx;
 }
 
 static int hashCode(size_t key) {
-    return (int)((key ^ (key >> 32)) & 0xFFFFFFFF);
+    return (int)(key ^ (key >> 32));
 }
 
 static void rehash(ChunkMap* map) {
