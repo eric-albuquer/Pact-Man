@@ -32,18 +32,25 @@ static inline void collectItens(Player* p, Cell* cell) {
 }
 
 static inline void updatePlayerEffects(Player* p, Cell* cell) {
+    static const int mudDuration = (MUD_SLOWNESS_DURATION << 1) - 1;
+    static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1) - 1;
+
+    if (cell->type == CELL_MUD && p->effects.slowness.duration < mudDuration) {
+        p->effects.slowness.duration = mudDuration;
+        return;
+    } else if (cell->type == CELL_SPIKE && p->effects.slowness.duration < spikeDuration) {
+        p->effects.slowness.duration = spikeDuration;
+        return;
+    } else if (cell->type == CELL_FRUIT) {
+        p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
+        return;
+    }
+
     if (p->effects.slowness.duration > 0) {
         p->effects.slowness.duration--;
     }
     if (p->effects.invulnerability.duration > 0) {
         p->effects.invulnerability.duration--;
-    }
-    if (cell->type == CELL_MUD) {
-        p->effects.slowness.duration = MUD_SLOWNESS_DURATION;
-    } else if (cell->type == CELL_SPIKE) {
-        p->effects.slowness.duration = SPIKE_SLOWNESS_DURATION;
-    } else if (cell->type == CELL_FRUIT) {
-        p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
     }
 }
 
@@ -142,7 +149,8 @@ static void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input 
     p->lastX = p->x;
     p->lastY = p->y;
 
-    updatePlayerByInput(cm, p, cell, input);
+    if ((p->effects.slowness.duration & 1) == 0)
+        updatePlayerByInput(cm, p, cell, input);
 
     updatePlayerWind(cm, p, cell);
 }
@@ -153,11 +161,12 @@ static void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input 
 
 static void updatePlayer(ChunkManager* cm, Player* p, Input input, unsigned int updateCount) {
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
+    
+    updatePlayerEffects(p, cell);
     updatePlayerMovement(cm, p, cell, input, updateCount);
 
     updatePlayerHealth(p, cell);
     updateDamagePlayer(p, cell);
-    updatePlayerEffects(p, cell);
     collectItens(p, cell);
 }
 
