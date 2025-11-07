@@ -163,9 +163,9 @@ static void drawHudDebug(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
     sprintf(buffer,
-        "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\n",
+        "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\n",
         p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, 
-        p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment);
+        p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration);
 
     DrawRectangle(this->width - 400, 0, 400, 400, (Color) { 0, 0, 0, 200 });
     DrawText(buffer, this->width - 300, 50, 30, GREEN);

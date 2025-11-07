@@ -28,6 +28,8 @@ static inline void collectItens(Player* p, Cell* cell) {
         cell->type = CELL_EMPTY;
         p->totalFragment++;
         p->biomeFragment++;
+    } else if (cell->type == CELL_FRUIT) {
+        cell->type = CELL_EMPTY;
     }
 }
 
