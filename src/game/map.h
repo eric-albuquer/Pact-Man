@@ -15,6 +15,10 @@
 
 #define COINS_TO_FRAGMENT 100
 
+#define MUD_SLOWNESS_DURATION 2
+#define SPIKE_SLOWNESS_DURATION 2
+#define FRUIT_INVULNERABILITY_DURATION 100
+
 typedef struct Map {
     ChunkManager* manager;
 

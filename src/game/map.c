@@ -32,11 +32,19 @@ static inline void collectItens(Player* p, Cell* cell) {
 }
 
 static inline void updatePlayerEffects(Player* p, Cell* cell) {
-    if (p->effects.slowness) {
-        p->effects.slowness = 0;
-        return;
+    if (p->effects.slowness.duration > 0) {
+        p->effects.slowness.duration--;
     }
-    p->effects.slowness = cell->type == CELL_MUD || cell->type == CELL_SPIKE;
+    if (p->effects.invulnerability.duration > 0) {
+        p->effects.invulnerability.duration--;
+    }
+    if (cell->type == CELL_MUD) {
+        p->effects.slowness.duration = MUD_SLOWNESS_DURATION;
+    } else if (cell->type == CELL_SPIKE) {
+        p->effects.slowness.duration = SPIKE_SLOWNESS_DURATION;
+    } else if (cell->type == CELL_FRUIT) {
+        p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
+    }
 }
 
 static inline void updateDamagePlayer(Player* p, Cell* cell) {
@@ -95,10 +103,7 @@ static void updatePlayerWind(ChunkManager* cm, Player* p, Cell* cell) {
     }
 }
 
-static void updatePlayerMovment(ChunkManager* cm, Player* p, Cell* cell, Input input) {
-    p->lastX = p->x;
-    p->lastY = p->y;
-
+static void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, Input input) {
     static Vec2i dir[4];
     int length = 0;
 
@@ -131,6 +136,13 @@ static void updatePlayerMovment(ChunkManager* cm, Player* p, Cell* cell, Input i
             break;
         }
     }
+}
+
+static void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input input, unsigned int updateCount) {
+    p->lastX = p->x;
+    p->lastY = p->y;
+
+    updatePlayerByInput(cm, p, cell, input);
 
     updatePlayerWind(cm, p, cell);
 }
@@ -139,9 +151,9 @@ static void updatePlayerMovment(ChunkManager* cm, Player* p, Cell* cell, Input i
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static void updatePlayer(ChunkManager* cm, Player* p, Input input) {
+static void updatePlayer(ChunkManager* cm, Player* p, Input input, unsigned int updateCount) {
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
-    updatePlayerMovment(cm, p, cell, input);
+    updatePlayerMovement(cm, p, cell, input, updateCount);
 
     updatePlayerHealth(p, cell);
     updateDamagePlayer(p, cell);
@@ -206,7 +218,7 @@ static void updateEnemies(Map* this) {
 static void update(Map* this, Controler* controler) {
     ChunkManager* cm = this->manager;
     cm->updateAdjacentsChunks(cm);
-    updatePlayer(cm, this->player, controler->input);
+    updatePlayer(cm, this->player, controler->input, this->updateCount);
     updateEnemies(this);
     this->updateCount++;
 }
@@ -222,7 +234,8 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(11, 21);
+    this->player = new_Player(200, 21);
+    this->player->biome = 1;
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

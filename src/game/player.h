@@ -7,9 +7,14 @@
 
 #define START_LIFE 100
 
+typedef struct Effect {
+    //unsigned strenght: 8;
+    unsigned duration: 24;
+} Effect;
+
 typedef struct Effects {
-    unsigned slowness: 1;
-    unsigned invulnerable: 1;
+    Effect slowness;
+    Effect invulnerability;
 } Effects;
 
 typedef struct Player {
