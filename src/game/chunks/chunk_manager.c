@@ -26,7 +26,7 @@ static void loadAdjacents(ChunkManager* this){
     }
 }
 
-static void updateAdjacents(ChunkManager* this){
+static void updateAdjacentsChunks(ChunkManager* this){
     for (int i = 0; i < 9; i++){
         int idx = CLOSER_IDX[i];
         Chunk* chunk = this->adjacents[idx];
@@ -94,7 +94,7 @@ ChunkManager* new_ChunkManager(int cols, int rows, Player* p) {
     this->getLoadedCell = getLoadedCell;
     this->getUpdatedCell = getUpdatedCell;
     this->loadAdjacents = loadAdjacents;
-    this->updateAdjacents = updateAdjacents;
+    this->updateAdjacentsChunks = updateAdjacentsChunks;
     this->free = _free;
     return this;
 }

@@ -12,6 +12,7 @@
 
 typedef enum {
     CELL_EMPTY,
+    CELL_FONT_HEALTH,
     CELL_WALL,
     CELL_COIN,
     CELL_MUD,

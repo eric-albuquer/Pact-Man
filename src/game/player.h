@@ -7,6 +7,11 @@
 
 #define START_LIFE 100
 
+typedef struct Effects {
+    unsigned slowness: 1;
+    unsigned invulnerable: 1;
+} Effects;
+
 typedef struct Player {
     int x;
     int y;
@@ -18,6 +23,7 @@ typedef struct Player {
     int chunkY;
 
     Direction dir;
+    Effects effects;
 
     int life;
     int totalFragment;
@@ -25,8 +31,8 @@ typedef struct Player {
     bool fragmentByCoins;
     unsigned short biomeCoins;
     unsigned short totalCoins;
+    
     unsigned biome : 2;
-    unsigned slowness : 1;
 
     bool (*updateChunk)(struct Player*);
     void (*updateDirection)(struct Player*);

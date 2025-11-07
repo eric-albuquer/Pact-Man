@@ -3,21 +3,31 @@
 #include <stdlib.h>
 
 static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
-    1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1,
-    1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
-    1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0,
-    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-    1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0,
-    0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+    1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
 };
 
-static const int FONT_MATRIX[25] = { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-                                    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1 };
+static const int FONT_MATRIX[25] = {   
+    1, 0, 0, 0, 1,
+    0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0,
+    1, 0, 0, 0, 1 
+};
 
 static const int BIOME_ENEMY_PROBABILITY[4] = { 50, 50, 50, 20 };
 
@@ -153,7 +163,8 @@ static void generateTemple(ChunkLoader* this, Chunk* chunk) {
     if (chunk->type != CHUNK_TEMPLE) return;
 
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
-        chunk->cells[i].type = TEMPLE_MATRIX[i];
+        int templeCell = TEMPLE_MATRIX[i];
+        chunk->cells[i].type = templeCell == 0 ? CELL_EMPTY : CELL_WALL;
     }
 }
 
@@ -165,7 +176,8 @@ static void generateFont(ChunkLoader* this, Chunk* chunk) {
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             Cell* cell = chunk->cellAt(chunk, j + startX, i + startY);
-            cell->type = FONT_MATRIX[i * 5 + j];
+            int fontCell = FONT_MATRIX[i * 5 + j];
+            cell->type = fontCell == 0 ? CELL_FONT_HEALTH : CELL_WALL;
         }
     }
 }
@@ -175,8 +187,8 @@ static void generateWalls1x1(ChunkLoader* this, Chunk* chunk) {
     for (int y = 0; y < CHUNK_SIZE; y++) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             Cell* cell = chunk->cellAt(chunk, x, y);
-            bool evenOrEven = ((y & 1) == 0 || (x & 1) == 0);
-            cell->type = evenOrEven;
+            if (((y & 1) == 0 || (x & 1) == 0))
+                cell->type = CELL_WALL;
             if ((y & 1) == 0 && (x & 1) == 0) continue;
             if (randChunk(this, chunk) % 100 <= 70) {
                 cell->type = CELL_EMPTY;
@@ -436,11 +448,11 @@ void generate(ChunkLoader* this, Chunk* chunk) {
     }
 }
 
-static void _free(ChunkLoader* this){
+static void _free(ChunkLoader* this) {
     free(this);
 }
 
-ChunkLoader* new_ChunkLoader(const int width, const int height, const int seed){
+ChunkLoader* new_ChunkLoader(const int width, const int height, const int seed) {
     ChunkLoader* this = malloc(sizeof(ChunkLoader));
     this->width = width;
     this->height = height;

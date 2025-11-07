@@ -47,8 +47,8 @@ static Node* hasEnemyInCell(Chunk* this, int x, int y) {
 }
 
 static void updateGraveInfested(Chunk* this, int x, int y) {
-    if (this->biome != 2) return;
     Cell* cell = cellAt(this, x, y);
+    if (cell->biome != 2) return;
     LinkedList* enemies = this->enemies;
     if (cell->type == CELL_GRAVE_INFESTED) {
         cell->type = CELL_EMPTY;
