@@ -199,18 +199,25 @@ static void updateEnemies(Map* this) {
             e->lastX = e->x;
             e->lastY = e->y;
             if (enemyStepTowardsPlayer(this, e)) {
+            LinkedList* actualList = enemies;
                 if (e->updateChunk(e)) {
                     e->changedChunk = true;
                     changed[changedLength++] = e;
                     enemies->removeNode(enemies, cur);
                     Chunk* newChunk = cm->getLoadedChunk(cm, e->chunkX, e->chunkY);
-                    LinkedList* newEnemies = newChunk->enemies;
-                    newEnemies->addLast(newEnemies, e);
-                }
-                if (e->x == p->x && e->y == p->y) {
-                    p->life -= ENEMY_DAGAME;
+                    actualList = newChunk->enemies;
+                    actualList->addLast(actualList, e);
                 }
                 e->updateDirection(e);
+                if (e->x == p->x && e->y == p->y) {
+                    if (p->effects.invulnerability.duration > 0){
+                       e->free(e);
+                       actualList->removeNode(actualList, cur);
+                    } else {
+                        p->life -= ENEMY_DAGAME;
+                    }
+                   
+                }
             }
             cur = next;
         }

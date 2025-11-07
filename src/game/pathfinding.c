@@ -103,8 +103,9 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
 
     if (length == 0) return false;
 
+    Player* p = map->player;
     // Indo para a pior direção
-    if (farAway(map->player, e)) {
+    if (farAway(p, e) || (p->effects.invulnerability.duration > 0 && rand() % 100 < BEST_PATH_PROBABILITY)) {
         e->x = moves[length - 1].x;
         e->y = moves[length - 1].y;
         return true;
@@ -114,8 +115,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
     int ny = moves[0].y;
 
     // probabilidade de seguir melhor caminho ou um aleatório
-    float random = rand() / (float)RAND_MAX;
-    if (random > BEST_PATH_PROBABILITY) {
+    if (rand() % 100 < BEST_PATH_PROBABILITY) {
         int idx = rand() % length;
         QNode choosed = moves[idx];
         nx = choosed.x;

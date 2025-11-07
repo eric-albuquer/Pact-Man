@@ -390,7 +390,7 @@ static void generateFragement(ChunkLoader* this, Chunk* chunk) {
 }
 
 static void generateFruit(ChunkLoader* this, Chunk* chunk) {
-    if (chunk->type == CHUNK_TRANSITION || randChunk(this, chunk) % 100 > 8) return;
+    if (chunk->type == CHUNK_TRANSITION || randChunk(this, chunk) % 100 > FRUIT_CHUNK_PROBABILITY) return;
 
     int x, y;
     Cell* cell;

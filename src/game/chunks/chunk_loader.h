@@ -3,6 +3,8 @@
 
 #include "chunk.h"
 
+#define FRUIT_CHUNK_PROBABILITY 8
+
 typedef struct ChunkLoader{
     int width, height;
     int biomeWidthChunks;
