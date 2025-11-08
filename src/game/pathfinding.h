@@ -9,6 +9,6 @@
 
 void mapDistancePlayer(Map* map);
 
-bool enemyStepTowardsPlayer(Map* map, Enemy* e);
+bool enemyStepTowardsPlayer(ChunkManager* cm, Enemy* e, Player* p);
 
 #endif

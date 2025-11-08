@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
-    1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -21,15 +21,13 @@ static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
     1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
 };
 
-static const int FONT_MATRIX[25] = {   
+static const int FONT_MATRIX[25] = {
     1, 0, 0, 0, 1,
     0, 0, 0, 0, 0,
     0, 0, 1, 0, 0,
     0, 0, 0, 0, 0,
-    1, 0, 0, 0, 1 
+    1, 0, 0, 0, 1
 };
-
-static const int BIOME_ENEMY_PROBABILITY[4] = { 50, 50, 50, 20 };
 
 static inline unsigned int hash2D(int x, int y, unsigned int seed) {
     uint64_t h = (uint64_t)(x) * 0x9E3779B185EBCA87ULL;
@@ -164,7 +162,7 @@ static void generateTemple(ChunkLoader* this, Chunk* chunk) {
 
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
         int templeCell = TEMPLE_MATRIX[i];
-        chunk->cells[i].type = templeCell == 0 ? CELL_EMPTY : CELL_WALL;
+        chunk->cells[i].type = templeCell == 0 ? CELL_TEMPLE : CELL_WALL;
     }
 }
 
@@ -190,7 +188,7 @@ static void generateWalls1x1(ChunkLoader* this, Chunk* chunk) {
             if (((y & 1) == 0 || (x & 1) == 0))
                 cell->type = CELL_WALL;
             if ((y & 1) == 0 && (x & 1) == 0) continue;
-            if (randChunk(this, chunk) % 100 <= 70) {
+            if (randChunk(this, chunk) % 100 < WALL_DENSITY) {
                 cell->type = CELL_EMPTY;
             }
         }
@@ -231,7 +229,7 @@ static void generateWalls2x2(ChunkLoader* this, Chunk* chunk) {
         for (int j = startX; j < CHUNK_SIZE; j += 3) {
             if (j < 0 || j >= CHUNK_SIZE) continue;
 
-            if ((randChunk(this, chunk) % 100 < 70)) {
+            if ((randChunk(this, chunk) % 100 < WALL_DENSITY)) {
                 for (int k = 0; k < 2; k++) {
                     int idx = i + k + 1;
                     if (idx >= 0 && idx < CHUNK_SIZE)
@@ -239,7 +237,7 @@ static void generateWalls2x2(ChunkLoader* this, Chunk* chunk) {
                 }
             }
 
-            if (randChunk(this, chunk) % 100 < 70) {
+            if (randChunk(this, chunk) % 100 < WALL_DENSITY) {
                 for (int k = 0; k < 2; k++) {
                     int idx = j + k + 1;
                     if (idx >= 0 && idx < CHUNK_SIZE)
@@ -264,12 +262,12 @@ static void generateWalls3x3(ChunkLoader* this, Chunk* chunk) {
 
     for (int i = 0; i < CHUNK_SIZE; i += 4) {
         for (int j = 0; j < CHUNK_SIZE; j += 4) {
-            if (randChunk(this, chunk) % 100 < 70) {
+            if (randChunk(this, chunk) % 100 < WALL_DENSITY) {
                 for (int k = 0; k < 3; k++) {
                     chunk->cellAt(chunk, j + k + 1, i)->type = CELL_EMPTY;
                 }
             }
-            if (randChunk(this, chunk) % 100 < 70) {
+            if (randChunk(this, chunk) % 100 < WALL_DENSITY) {
                 for (int k = 0; k < 3; k++) {
                     chunk->cellAt(chunk, j, i + k + 1)->type = CELL_EMPTY;
                 }
@@ -310,7 +308,7 @@ static void generateMud(ChunkLoader* this, Chunk* chunk) {
         for (int j = 0; j < CHUNK_SIZE; j++) {
             Cell* cell = chunk->cellAt(chunk, j, i);
             if (cell->type == CELL_WALL) continue;
-            if (randChunk(this, chunk) % 100 < 10) cell->type = CELL_MUD;
+            if (randChunk(this, chunk) % 100 < MUD_DENSITY) cell->type = CELL_MUD;
         }
     }
 }
@@ -322,8 +320,8 @@ static void generateGraves(ChunkLoader* this, Chunk* chunk) {
         for (int j = 0; j < CHUNK_SIZE; j++) {
             Cell* cell = chunk->cellAt(chunk, j, i);
             if (cell->type == CELL_WALL) continue;
-            if (randChunk(this, chunk) % 100 < 5) {
-                if (randChunk(this, chunk) % 100 < 5)
+            if (randChunk(this, chunk) % 100 < GRAVE_DENSITY) {
+                if (randChunk(this, chunk) % 100 < GRAVE_INFESTED_PROBABILITY)
                     cell->type = CELL_GRAVE_INFESTED;
                 else
                     cell->type = CELL_GRAVE;
@@ -336,13 +334,13 @@ static void generateFire(ChunkLoader* this, Chunk* chunk) {
     if (chunk->type == CHUNK_TRANSITION || isStructure(chunk->type) || chunk->biome != 2) return;
     for (int i = 0; i < CHUNK_SIZE; i += 4) {
         for (int j = 0; j < CHUNK_SIZE; j += 4) {
-            if (randChunk(this, chunk) % 100 < 40 &&
+            if (randChunk(this, chunk) % 100 < FIRE_DENSITY &&
                 chunk->cellAt(chunk, j + 1, i)->type == CELL_EMPTY) {
                 for (int k = 0; k < 2; k++) {
                     chunk->cellAt(chunk, j + 1 + k, i)->type = CELL_FIRE_ON;
                 }
             }
-            if (randChunk(this, chunk) % 100 < 40 &&
+            if (randChunk(this, chunk) % 100 < FIRE_DENSITY &&
                 chunk->cellAt(chunk, j, i + 1)->type == CELL_EMPTY) {
                 for (int k = 0; k < 2; k++) {
                     chunk->cellAt(chunk, j, i + 1 + k)->type = CELL_FIRE_ON;
@@ -359,7 +357,7 @@ static void generateSpikes(ChunkLoader* this, Chunk* chunk) {
         for (int j = 0; j < CHUNK_SIZE; j++) {
             Cell* cell = chunk->cellAt(chunk, j, i);
             if (cell->type == CELL_WALL) continue;
-            if (randChunk(this, chunk) % 100 < 5) cell->type = CELL_SPIKE;
+            if (randChunk(this, chunk) % 100 < SPIKE_DENSITY) cell->type = CELL_SPIKE;
         }
     }
 }
@@ -371,34 +369,35 @@ static void generateCoins(ChunkLoader* this, Chunk* chunk) {
         for (int j = 0; j < CHUNK_SIZE; j++) {
             Cell* cell = chunk->cellAt(chunk, j, i);
             if (cell->type != CELL_EMPTY) continue;
-            if (randChunk(this, chunk) & 1) cell->type = CELL_COIN;
+            if (randChunk(this, chunk) % 100 < COIN_DENSITY) cell->type = CELL_COIN;
         }
     }
 }
 
 static void generateFragement(ChunkLoader* this, Chunk* chunk) {
     if (chunk->type != CHUNK_FRAGMENT) return;
-    int x, y;
+    
     Cell* cell;
-    do {
-        x = randChunk(this, chunk) & CHUNK_MASK;
-        y = randChunk(this, chunk) & CHUNK_MASK;
-        cell = chunk->cellAt(chunk, x, y);
-    } while (!isPassable(cell->type) || !isSafe(cell->type));
+    int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
+    for (int i = 0; i < CELLS_PER_CHUNK; i++){
+        cell = &chunk->cells[idx];
+        if (cell->type == CELL_EMPTY) break;
+        idx = (idx + 1) & TOTAL_CELLS_MASK;
+    }
 
     cell->type = CELL_FRAGMENT;
 }
 
 static void generateFruit(ChunkLoader* this, Chunk* chunk) {
-    if (chunk->type == CHUNK_TRANSITION || randChunk(this, chunk) % 100 > FRUIT_CHUNK_PROBABILITY) return;
+    if (chunk->type == CHUNK_TRANSITION || randChunk(this, chunk) % 100 > FRUIT_PROBABILITY) return;
 
-    int x, y;
     Cell* cell;
-    do {
-        x = randChunk(this, chunk) & CHUNK_MASK;
-        y = randChunk(this, chunk) & CHUNK_MASK;
-        cell = chunk->cellAt(chunk, x, y);
-    } while (cell->type != CELL_EMPTY);
+    int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
+    for (int i = 0; i < CELLS_PER_CHUNK; i++){
+        cell = &chunk->cells[idx];
+        if (cell->type == CELL_EMPTY) break;
+        idx = (idx + 1) & TOTAL_CELLS_MASK;
+    }
     cell->type = CELL_FRUIT;
 }
 
@@ -406,16 +405,18 @@ static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
     if (isStructure(chunk->type) || chunk->isBorder) return;
     if (randChunk(this, chunk) % 100 >= BIOME_ENEMY_PROBABILITY[chunk->biome]) return;
     LinkedList* enemies = chunk->enemies;
-    int cx, cy, x, y;
     Cell* cell;
-    do {
-        cx = randChunk(this, chunk) & CHUNK_MASK;
-        cy = randChunk(this, chunk) & CHUNK_MASK;
-        x = cx + (chunk->x << CHUNK_SHIFT);
-        y = cy + (chunk->y << CHUNK_SHIFT);
-        cell = chunk->cellAt(chunk, cx, cy);
-    } while (!isPassable(cell->type));
-    Enemy* e = new_Enemy(x, y, cell->biome);
+    int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
+    for (int i = 0; i < CELLS_PER_CHUNK; i++){
+        cell = &chunk->cells[idx];
+        if (isPassable(cell->type)) break;
+        idx = (idx + 1) & TOTAL_CELLS_MASK;
+    }
+
+    int ex = (idx & CHUNK_MASK) + (chunk->x << CHUNK_SHIFT);
+    int ey = (idx >> CHUNK_SHIFT) + (chunk->y << CHUNK_SHIFT);
+    
+    Enemy* e = new_Enemy(ex, ey, cell->biome);
     enemies->addLast(enemies, e);
 }
 
@@ -437,8 +438,8 @@ static ChunkGeneratorFn GENERATORS[] = {
     generateSpikes,
     generateFragement,
     generateFruit,
-    generateCoins,
     generateEnemies,
+    generateCoins,
 };
 
 void generate(ChunkLoader* this, Chunk* chunk) {

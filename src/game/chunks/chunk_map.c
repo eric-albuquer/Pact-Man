@@ -7,7 +7,8 @@ static size_t chunkKey(int cx, int cy) {
 }
 
 static int hashCode(size_t key) {
-    return (int)(key ^ (key >> 32));
+    size_t h = key * 0x9E3779B97F4A7C15ULL;
+    return (int)(h ^ (h >> 32));
 }
 
 static void rehash(ChunkMap* map) {

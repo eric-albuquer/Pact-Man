@@ -41,8 +41,8 @@ void mapDistancePlayer(Map* map) {
     Cell* cell = cm->getUpdatedCell(cm, start->x, start->y);
     cell->distance = 0;
 
-    static const int DX[4] = {1, -1, 0, 0};
-    static const int DY[4] = {0, 0, 1, -1};
+    static const int DX[4] = { 1, -1, 0, 0 };
+    static const int DY[4] = { 0, 0, 1, -1 };
 
     while (BFSQueue->length > 0) {
         QNode* curr = BFSQueue->removeFirst(BFSQueue);
@@ -65,17 +65,15 @@ void mapDistancePlayer(Map* map) {
     BFSQueue->free(BFSQueue);
 }
 
-bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
-    if (!map || !e) return false;
-    ChunkManager* cm = map->manager;
-
+bool enemyStepTowardsPlayer(ChunkManager* cm, Enemy* e, Player* p) {
+    if (e == NULL) return false;
     int enemyPosX = e->x, enemyPosY = e->y;
 
     Cell* cell = cm->getUpdatedCell(cm, enemyPosX, enemyPosY);
     if (!cell || cell->distance <= 0) return false;
 
-    static const int DX[4] = {0, 1, 0, -1};
-    static const int DY[4] = {-1, 0, 1, 0};
+    static const int DX[4] = { 0, 1, 0, -1 };
+    static const int DY[4] = { -1, 0, 1, 0 };
 
     static QNode moves[4];
     int length = 0;
@@ -87,7 +85,7 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
         Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
         if (!next || !isPassable(next->type) || next->biome != e->biome) continue;
 
-        moves[length++] = (QNode){neighborX, neighborY, next->distance};
+        moves[length++] = (QNode){ neighborX, neighborY, next->distance };
     }
 
     // ordenando direções
@@ -103,23 +101,24 @@ bool enemyStepTowardsPlayer(Map* map, Enemy* e) {
 
     if (length == 0) return false;
 
-    Player* p = map->player;
+    int nx;
+    int ny;
+
     // Indo para a pior direção
     if (farAway(p, e) || (p->effects.invulnerability.duration > 0 && rand() % 100 < BEST_PATH_PROBABILITY)) {
-        e->x = moves[length - 1].x;
-        e->y = moves[length - 1].y;
-        return true;
-    }
+        nx = moves[length - 1].x;
+        ny = moves[length - 1].y;
+    } else {
+        nx = moves[0].x;
+        ny = moves[0].y;
 
-    int nx = moves[0].x;
-    int ny = moves[0].y;
-
-    // probabilidade de seguir melhor caminho ou um aleatório
-    if (rand() % 100 < BEST_PATH_PROBABILITY) {
-        int idx = rand() % length;
-        QNode choosed = moves[idx];
-        nx = choosed.x;
-        ny = choosed.y;
+        // probabilidade de seguir melhor caminho ou um aleatório
+        if (rand() % 100 > BEST_PATH_PROBABILITY) {
+            int idx = rand() % length;
+            QNode choosed = moves[idx];
+            nx = choosed.x;
+            ny = choosed.y;
+        }
     }
 
     e->x = nx;

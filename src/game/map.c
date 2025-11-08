@@ -14,6 +14,14 @@
 //  FUNÇÕES AUXILIARES DA ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
+static inline void updatePlayerBiome(Player* p, Cell* cell){
+    if (cell->biome <= p->biome) return;
+    p->biome = cell->biome;
+    p->biomeCoins = 0;
+    p->biomeFragment = 0;
+    p->fragmentByCoins = false;
+}
+
 static inline void collectItens(Player* p, Cell* cell) {
     if (cell->type == CELL_COIN) {
         cell->type = CELL_EMPTY;
@@ -57,6 +65,7 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
 }
 
 static inline void updateDamagePlayer(Player* p, Cell* cell) {
+    if (p->effects.invulnerability.duration > 0) return;
     if (cell->type == CELL_FIRE_ON) {
         p->life -= FIRE_DAMAGE;
     } else if (cell->type == CELL_SPIKE) {
@@ -86,7 +95,7 @@ static const Vec2i DIR_VECTOR[4] = {
     {0, 1}
 };
 
-static Cell* movePlayer(ChunkManager* cm, Player* p, Vec2i newDir) {
+static inline Cell* movePlayer(ChunkManager* cm, Player* p, Vec2i newDir) {
     int playerNextX = p->x + newDir.x;
     int playerNextY = p->y + newDir.y;
 
@@ -99,20 +108,22 @@ static Cell* movePlayer(ChunkManager* cm, Player* p, Vec2i newDir) {
     p->x = playerNextX;
     p->y = playerNextY;
 
+    updatePlayerBiome(p, nextCell);
+
     p->updateDirection(p);
 
     if (p->updateChunk(p)) cm->loadAdjacents(cm);
     return nextCell;
 }
 
-static void updatePlayerWind(ChunkManager* cm, Player* p, Cell* cell) {
+static inline void updatePlayerWind(ChunkManager* cm, Player* p, Cell* cell) {
     if (isWind(cell->type)) {
         Vec2i dir = DIR_VECTOR[cell->type - CELL_WIND_RIGHT];
         movePlayer(cm, p, dir);
     }
 }
 
-static void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, Input input) {
+static inline void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, Input input) {
     static Vec2i dir[4];
     int length = 0;
 
@@ -147,7 +158,7 @@ static void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, Input i
     }
 }
 
-static void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input input, unsigned int updateCount) {
+static inline void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input input, unsigned int updateCount) {
     p->lastX = p->x;
     p->lastY = p->y;
 
@@ -161,9 +172,9 @@ static void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input 
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static void updatePlayer(ChunkManager* cm, Player* p, Input input, unsigned int updateCount) {
+static inline void updatePlayer(ChunkManager* cm, Player* p, Input input, unsigned int updateCount) {
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
-    
+
     updatePlayerEffects(p, cell);
     updatePlayerMovement(cm, p, cell, input, updateCount);
 
@@ -176,11 +187,50 @@ static void updatePlayer(ChunkManager* cm, Player* p, Input input, unsigned int 
 //  FUNÇÃO DE ATUALIZAÇÃO DOS INIMIGOS
 //===============================================================
 
-static void updateEnemies(Map* this) {
+static inline void updateEnemyChunk(ChunkManager* cm, Node* node, LinkedList* list, ArrayList* changedChunk) {
+    Enemy* e = node->data;
+    if (!e->updateChunk(e)) return;
+    e->changedChunk = true;
+    list->removeNode(list, node);
+    Chunk* newChunk = cm->getLoadedChunk(cm, e->chunkX, e->chunkY);
+    newChunk->enemies->addLast(newChunk->enemies, e);
+    changedChunk->push(changedChunk, e);
+}
+
+static inline void updateEnemyMovement(ChunkManager* cm, Node* node, LinkedList* list, Player* p) {
+    Enemy* e = node->data;
+    e->lastX = e->x;
+    e->lastY = e->y;
+    enemyStepTowardsPlayer(cm, e, p);
+    e->updateDirection(e);
+}
+
+static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Player* p) {
+    Enemy* e = node->data;
+    if ((e->lastX == p->x && e->lastY == p->y) || (e->x == p->x && e->y == p->y)) {
+        if (p->effects.invulnerability.duration > 0) {
+            e->free(e);
+            enemies->removeNode(enemies, node);
+            return true;
+        } else {
+            p->life -= ENEMY_DAGAME;
+        }
+    }
+    return false;
+}
+
+static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk) {
+    if (checkPlayerEnemyColision(node, list, p)) return;
+    updateEnemyMovement(cm, node, list, p);
+    updateEnemyChunk(cm, node, list, changedChunk);
+}
+
+static inline void updateEnemies(Map* this) {
     Player* p = this->player;
     ChunkManager* cm = this->manager;
-    static Enemy* changed[100];
-    int changedLength = 0;
+
+    ArrayList* changedChunk = this->changedChunk;
+    changedChunk->clear(changedChunk);
 
     mapDistancePlayer(this);
 
@@ -196,35 +246,13 @@ static void updateEnemies(Map* this) {
             Node* next = cur->next;
             Enemy* e = cur->data;
             if (e->changedChunk) break;
-            e->lastX = e->x;
-            e->lastY = e->y;
-            if (enemyStepTowardsPlayer(this, e)) {
-            LinkedList* actualList = enemies;
-                if (e->updateChunk(e)) {
-                    e->changedChunk = true;
-                    changed[changedLength++] = e;
-                    enemies->removeNode(enemies, cur);
-                    Chunk* newChunk = cm->getLoadedChunk(cm, e->chunkX, e->chunkY);
-                    actualList = newChunk->enemies;
-                    actualList->addLast(actualList, e);
-                }
-                e->updateDirection(e);
-                if (e->x == p->x && e->y == p->y) {
-                    if (p->effects.invulnerability.duration > 0){
-                       e->free(e);
-                       actualList->removeNode(actualList, cur);
-                    } else {
-                        p->life -= ENEMY_DAGAME;
-                    }
-                   
-                }
-            }
+            updateEnemy(cm, cur, enemies, p, changedChunk);
             cur = next;
         }
     }
 
-    for (int i = 0; i < changedLength; i++) {
-        Enemy* e = changed[i];
+    for (int i = 0; i < changedChunk->length; i++) {
+        Enemy* e = changedChunk->data[i];
         e->changedChunk = false;
     }
 }
@@ -235,7 +263,7 @@ static void updateEnemies(Map* this) {
 
 static void update(Map* this, Controler* controler) {
     ChunkManager* cm = this->manager;
-    cm->updateAdjacentsChunks(cm);
+    cm->updateChunks(cm);
     updatePlayer(cm, this->player, controler->input, this->updateCount);
     updateEnemies(this);
     this->updateCount++;
@@ -245,6 +273,7 @@ static void _free(Map* this) {
     this->manager->free(this->manager);
     Player* p = this->player;
     p->free(p);
+    this->changedChunk->free(this->changedChunk);
     free(this);
 }
 
@@ -252,8 +281,11 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(200, 21);
-    this->player->biome = 1;
+    this->player = new_Player(11, 21);
+    this->player->biome = 0;
+
+    this->changedChunk = new_ArrayList();
+    this->degenerescence = 0.0f;
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

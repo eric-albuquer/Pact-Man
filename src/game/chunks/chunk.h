@@ -9,10 +9,12 @@
 #define CHUNK_SIZE 16
 #define CHUNK_MASK 0xf
 #define CELLS_PER_CHUNK 256
+#define TOTAL_CELLS_MASK 0xff
 
 typedef enum {
     CELL_EMPTY,
     CELL_FONT_HEALTH,
+    CELL_TEMPLE,
     CELL_WALL,
     CELL_COIN,
     CELL_MUD,
@@ -26,11 +28,12 @@ typedef enum {
     CELL_WIND_RIGHT,
     CELL_WIND_LEFT,
     CELL_WIND_UP,
-    CELL_WIND_DOWN
+    CELL_WIND_DOWN,
+    CELL_DEGENERATED
 } CellType;
 
 typedef struct {
-    unsigned type : 4;
+    unsigned type : 5;
     unsigned biome : 2;
 
     signed distance : 9;

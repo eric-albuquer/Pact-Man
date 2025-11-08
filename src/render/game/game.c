@@ -62,6 +62,16 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size,
         color.r = 128;
         color.g = 128;
         color.b = 128;
+    } else if (cell->type == CELL_FONT_HEALTH){
+        color.r = 0;
+        color.g = 100;
+        color.b = 200;
+    } else if (cell->type == CELL_TEMPLE){
+        color.r -= 20;
+        color.g -= 20;
+        color.b -= 20;
+    } else if (cell->type == CELL_DEGENERATED){
+        color = BLANK;
     }
 
     DrawRectangle(x, y, size, size, color);

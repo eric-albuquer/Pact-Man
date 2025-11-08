@@ -17,6 +17,11 @@ static bool inline isFire(Cell* cell){
     return cell->type == CELL_FIRE_OFF || cell->type == CELL_FIRE_ON;
 }
 
+static void updateDegenerescence(Chunk* this, int x, int y){
+    Cell* cell = cellAt(this, x, y);
+    cell->type = CELL_DEGENERATED;
+}
+
 static void updateFire(Chunk* this, int x, int y) {
     Cell* cell = cellAt(this, x, y);
     if (!isFire(cell)) return;
@@ -69,6 +74,7 @@ static void updateGraveInfested(Chunk* this, int x, int y) {
 static void update(Chunk* this) {
     int y = rand() & CHUNK_MASK;
     int x = rand() & CHUNK_MASK;
+    //updateDegenerescence(this, x, y);
     updateFire(this, x, y);
     updateGraveInfested(this, x, y);
 }
