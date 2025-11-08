@@ -111,7 +111,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size,
         DrawTexture(*overlap, x, y, WHITE);
 
     sprintf(buffer, "%d", cell->distance);
-    DrawText(buffer, x + 15, y + 15, 20, WHITE);
+    //DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
 static Texture2D getPlayerTexture(Game* this, Player* p) {
