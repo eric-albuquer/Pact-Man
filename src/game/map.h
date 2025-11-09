@@ -24,6 +24,9 @@ typedef struct Map {
     ArrayList* changedChunk;
 
     float degenerescence;
+    float elapsedTime;
+    float biomeTime;
+    unsigned biomeId;
 
     Player* player;
     unsigned int updateCount;

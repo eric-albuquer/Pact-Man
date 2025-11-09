@@ -10,6 +10,11 @@
 #include "pathfinding.h"
 #include "chunk_loader.h"
 
+// Constantes para ajudar no degen dos biomas
+#define MAP_UPDATE_DT 0.15f
+#define BIOME_DEGEN_START_TIME 180.0f
+#define BIOME_DEGEN_FULL_TIME 360.0f
+
 //===============================================================
 //  FUNÇÕES AUXILIARES DA ATUALIZAÇÃO DO PLAYER
 //===============================================================
@@ -260,6 +265,31 @@ static inline void updateEnemies(Map* this) {
 //===============================================================
 //  FUNÇÃO DE ATUALIZAÇÃO DO MAPA
 //===============================================================
+
+static void updateTime(Map* this) {
+    Player* p = this->player;
+
+    this->elapsedTime += MAP_UPDATE_DT;
+
+    if (this->biomeId != p->biome) {
+        this->biomeId = p->biome;
+        this->biomeTime = 0.0f;
+        this->degenerescence = 0.0f;
+        return;
+    }
+
+    this->biomeTime += MAP_UPDATE_DT;
+
+    if (this->biomeTime < BIOME_DEGEN_START_TIME) {
+        this->degenerescence = 0.0f;
+        return;
+    }
+
+    float t = this->biomeTime - BIOME_DEGEN_START_TIME;
+    float duration = BIOME_DEGEN_FULL_TIME - BIOME_DEGEN_START_TIME;
+    if (t > duration) t = duration;
+    this->degenerescence = t / duration;
+}
 
 static void update(Map* this, Controler* controler) {
     ChunkManager* cm = this->manager;
