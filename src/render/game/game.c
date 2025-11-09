@@ -18,10 +18,30 @@ static const char* SPRITES[] = {
     "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png",
     "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
 
-    "assets/sprites/coin.png",         "assets/sprites/Key.png",
-    "assets/sprites/apple.png",        "assets/sprites/heresia/chao.png",
-    "assets/sprites/heresia/parede.png", "assets/sprites/heresia/cova.png",
-    "assets/sprites/heresia/fogo.png"
+    "assets/sprites/coin.png",
+    "assets/sprites/Key.png",
+    "assets/sprites/apple.png",
+
+    // 19
+    "assets/sprites/gula/chao.png",
+    "assets/sprites/gula/parede.png",
+    "assets/sprites/gula/lama.png",
+
+    // 22
+    "assets/sprites/heresia/chao.png",
+    "assets/sprites/heresia/parede.png",
+    "assets/sprites/heresia/cova.png",
+    "assets/sprites/heresia/fogo.png",
+
+    // 26
+    "assets/sprites/flegetonte/chao.png",
+    "assets/sprites/flegetonte/parede.png",
+    "assets/sprites/flegetonte/espinhos.png",
+
+    // 29
+    "assets/sprites/luxuria/chao.png",
+    "assets/sprites/luxuria/parede.png",
+    "assets/sprites/luxuria/ventania.png",
 };
 
 static const Color CELL_COLORS[4] = {
@@ -36,13 +56,25 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size,
 
     Texture2D* base = NULL;
 
-    if (cell->biome == 2) {
+    if (cell->biome == 0) {
+base = &this->sprites[29];
+    } else if (cell->biome == 1) {
         base = &this->sprites[19];
+    } else if (cell->biome == 2) {
+        base = &this->sprites[22];
+    } else if (cell->biome == 3) {
+        base = &this->sprites[26];
     }
 
     if (cell->type == CELL_WALL) {
-        if (cell->biome == 2) {
+        if (cell->biome == 0) {
+base = &this->sprites[30];
+        } else if (cell->biome == 1) {
             base = &this->sprites[20];
+        } else if (cell->biome == 2) {
+            base = &this->sprites[23];
+        } else if (cell->biome == 3) {
+            base = &this->sprites[27];
         }
         color.r += 70;
         color.g += 70;
@@ -51,20 +83,22 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size,
         color.r *= 0.7;
         color.g += 100;
     } else if (cell->type == CELL_MUD) {
+        base = &this->sprites[21];
         color.r = 79;
         color.g = 39;
         color.b = 30;
     } else if (cell->type == CELL_SPIKE) {
+        base = &this->sprites[28];
         color.r = 185;
         color.g = 185;
         color.b = 185;
     } else if (cell->type == CELL_GRAVE) {
-        base = &this->sprites[21];
+        base = &this->sprites[24];
         color.r = 10;
         color.g = 10;
         color.b = 10;
     } else if (cell->type == CELL_GRAVE_INFESTED) {
-        base = &this->sprites[21];
+        base = &this->sprites[24];
         color.r = 10;
         color.g = 10;
         color.b = 100;
@@ -92,9 +126,9 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size,
         DrawTexture(*base, x, y, WHITE);
     } else {
         DrawRectangle(x, y, size, size, color);
+        return;
     }
 
-    if (!itens) return;
     Texture2D* overlap = NULL;
 
     if (cell->type == CELL_COIN) {
@@ -103,8 +137,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size,
         overlap = &this->sprites[17];
     } else if (cell->type == CELL_FRUIT) {
         overlap = &this->sprites[18];
-    } else if (cell->type == CELL_FIRE_ON){
-        overlap = &this->sprites[22];
+    } else if (cell->type == CELL_FIRE_ON) {
+        overlap = &this->sprites[25];
+    } else if (isWind(cell->type)){
+        overlap = &this->sprites[31];
     }
 
     if (overlap != NULL)
@@ -352,7 +388,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->map = map;
 
-    loadSprites(this, SPRITES, 23);
+    loadSprites(this, SPRITES, 32);
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 
     this->drawMapDebug = drawMapDebug;
