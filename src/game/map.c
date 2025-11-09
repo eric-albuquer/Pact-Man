@@ -291,11 +291,46 @@ static void updateTime(Map* this) {
     this->degenerescence = t / duration;
 }
 
+static void applyDegenerescence(Map* this) {
+    if (this->degenerescence <= 0.0f) return;
+
+    ChunkManager* cm = this->manager;
+    Player* p = this->player;
+
+    int maxChanges = 2 + (int)(this->degenerescence * 8.0f);
+
+    for (int n = 0; n < maxChanges; ++n) {
+        int idx = CLOSER_IDX[rand() % 9];
+        Chunk* chunk = cm->adjacents[idx];
+        if (!chunk) continue;
+        if (chunk->biome != p->biome) continue; 
+
+        int x = rand() & CHUNK_MASK;
+        int y = rand() & CHUNK_MASK;
+
+        Cell* cell = chunk->cellAt(chunk, x, y);
+        if (!cell) continue;
+
+        if (cell->type == CELL_EMPTY ||
+            cell->type == CELL_MUD   ||
+            cell->type == CELL_COIN  ||
+            cell->type == CELL_FIRE_OFF ||
+            cell->type == CELL_FIRE_ON) {
+
+            cell->type = CELL_DEGENERATED;
+        }
+    }
+}
+
 static void update(Map* this, Controler* controler) {
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
     updatePlayer(cm, this->player, controler->input, this->updateCount);
     updateEnemies(this);
+
+    updateTime(this);
+    applyDegenerescence(this);
+
     this->updateCount++;
 }
 
@@ -316,6 +351,9 @@ Map* new_Map(int chunkCols, int chunkRows) {
 
     this->changedChunk = new_ArrayList();
     this->degenerescence = 0.0f;
+    this->elapsedTime = 0.0f;
+    this->biomeTime = 0.0f;
+    this->biomeId = this->player->biome;
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

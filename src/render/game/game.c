@@ -225,6 +225,56 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
     DrawRectangle(x0 + offset, y0 + offset, cellSize, cellSize, WHITE);
 }
 
+static void drawTimeHUD(Game* this) {
+    Map* map = this->map;
+    Player* p = map->player;
+
+    int totalSeconds = (int)map->elapsedTime;
+    int mm = totalSeconds / 60;
+    int ss = totalSeconds % 60;
+
+    sprintf(buffer, "%02d:%02d", mm, ss);
+
+    float d = map->degenerescence;
+    int stage = 0;
+    if (d > 0.0f && d < 0.34f) stage = 1;
+    else if (d >= 0.34f && d < 0.67f) stage = 2;
+    else if (d >= 0.67f) stage = 3;
+
+    const char* stageText[] = {
+        "STABLE",
+        "UNSTABLE",
+        "CRACKING",
+        "COLLAPSING"
+    };
+
+    Color stageColors[] = {
+        { 0,   228, 48,  255 }, 
+        { 253, 249, 0,   255 },  
+        { 255, 161, 0,   255 },
+        { 230, 41,  55,  255 }
+    };
+
+    Color stageColor = stageColors[stage];
+
+    Color biomeColor = CELL_COLORS[p->biome];
+    biomeColor.a = 255;
+
+    int boxWidth = 220;
+    int boxHeight = 80;
+    int x = this->width - boxWidth - 20;
+    int y = 20;
+
+    DrawRectangle(x, y, boxWidth, boxHeight, (Color){ 0, 0, 0, 200 });
+
+    DrawText(buffer, x + 16, y + 10, 30, WHITE);
+
+    DrawText(stageText[stage], x + 16, y + 45, 20, stageColor);
+
+    DrawRectangle(x + boxWidth - 30, y + 10, 16, 16, biomeColor);
+}
+
+
 static void drawHudDebug(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
@@ -335,6 +385,8 @@ static void drawMapDebug(Game* this) {
             DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, this->cellSize* CHUNK_SIZE + 5, this->cellSize* CHUNK_SIZE + 5 }, 5, GREEN);
         }
     }
+
+    drawTimeHUD(this);
 
     if (p->biome != 3)
         drawHudDebug(this);

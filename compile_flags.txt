@@ -4,6 +4,8 @@
 -I./src/render
 -I./src/utils
 -I./src/game/chunks
+-I./src/render/game
+-I./src/render/menu/
 -I/opt/homebrew/include
 -I/opt/homebrew/opt/raylib/include
 -DPLATFORM_DESKTOP
