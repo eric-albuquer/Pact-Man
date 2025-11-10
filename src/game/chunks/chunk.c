@@ -71,10 +71,11 @@ static void updateGraveInfested(Chunk* this, int x, int y) {
     cell->type = CELL_GRAVE_INFESTED;
 }
 
-static void update(Chunk* this) {
+static void update(Chunk* this, int biome) {
     int y = rand() & CHUNK_MASK;
     int x = rand() & CHUNK_MASK;
-    //updateDegenerescence(this, x, y);
+    if (this->biome <= biome)
+        updateDegenerescence(this, x, y);
     updateFire(this, x, y);
     updateGraveInfested(this, x, y);
 }

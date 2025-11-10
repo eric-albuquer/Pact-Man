@@ -2,10 +2,29 @@
 #define GAME_H
 
 #include <raylib.h>
-
+#include "sounds.h"
 #include "map.h"
 
 #define FRAMES_ANIMATION 8.0f
+
+typedef enum {
+    BIOME_FLOOR_SPRITE,
+    BIOME_WALL_SPRITE,
+    BIOME_ITEN_1_SPRITE,
+    BIOME_ITEN_2_SPRITE
+} BiomeSprite;
+
+typedef struct Sprites {
+    Texture2D ghost[8];
+    Texture2D pacman[8];
+
+    Texture2D itens[3];
+
+    Texture2D gula[3];
+    Texture2D heresia[4];
+    Texture2D violencia[3];
+    Texture2D luxuria[3];
+} Sprites;
 
 typedef struct Game {
     int width;
@@ -26,9 +45,11 @@ typedef struct Game {
     Map* map;
     Chunk* visibleChunks[49];
 
+    Sounds* sounds;
+
     RenderTexture2D shadowMap;
-    Texture2D* sprites;
-    unsigned int totalSprites;
+
+    Sprites sprites;
 
     void (*drawMapDebug)(struct Game*);
     void (*saveUpdate)(struct Game*);

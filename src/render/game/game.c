@@ -7,75 +7,87 @@
 
 #include "enemy.h"
 
-static const char* SPRITES[] = {
+static const char* ghostSprites[] = {
     "assets/sprites/ghostRight1.png",  "assets/sprites/ghostRight2.png",
     "assets/sprites/ghostDown1.png",   "assets/sprites/ghostDown2.png",
     "assets/sprites/ghostLeft1.png",   "assets/sprites/ghostLeft2.png",
     "assets/sprites/ghostUp1.png",     "assets/sprites/ghostUp2.png",
+};
 
+static const char* pacmanSprites[] = {
     "assets/sprites/pacmanRight1.png", "assets/sprites/pacmanRight2.png",
     "assets/sprites/pacmanDown1.png",  "assets/sprites/pacmanDown2.png",
     "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png",
     "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
+};
 
+static const char* itensSprites[] = {
     "assets/sprites/coin.png",
     "assets/sprites/Key.png",
     "assets/sprites/apple.png",
+};
 
-    // 19
+static const char* gulaSprites[] = {
     "assets/sprites/gula/chao.png",
     "assets/sprites/gula/parede.png",
     "assets/sprites/gula/lama.png",
+};
 
-    // 22
+static const char* heresiaSprites[] = {
     "assets/sprites/heresia/chao.png",
     "assets/sprites/heresia/parede.png",
     "assets/sprites/heresia/cova.png",
     "assets/sprites/heresia/fogo.png",
+};
 
-    // 26
-    "assets/sprites/flegetonte/chao.png",
-    "assets/sprites/flegetonte/parede.png",
-    "assets/sprites/flegetonte/espinhos.png",
+static const char* violenciaSprites[] = {
+    "assets/sprites/violencia/chao.png",
+    "assets/sprites/violencia/parede.png",
+    "assets/sprites/violencia/espinhos.png",
+};
 
-    // 29
+static const char* luxuriaSprites[] = {
     "assets/sprites/luxuria/chao.png",
     "assets/sprites/luxuria/parede.png",
     "assets/sprites/luxuria/ventania.png",
 };
 
-static const Color CELL_COLORS[4] = {
-    {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255} };
+static const Color CELL_COLORS[4] = { {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255} };
 
 static char buffer[1000];
 
-static void drawCell(Game* this, Cell* cell, int x, int y, int size,
-    bool itens) {
+static Texture2D* getSprites(Sprites* sprites, Biome biome){
+    if (biome == HERESIA) return sprites->heresia;
+    else if (biome == GULA) return sprites->gula;
+    else if (biome == LUXURIA) return sprites->luxuria;
+    else if (biome == VIOLENCIA) return sprites->violencia;
+    return sprites->heresia;
+}
+
+static Texture2D getEntityTexture(Texture2D* sprites, Direction dir, int updateCount) {
+    int offsetTexture = 0;
+    if (dir == RIGHT)
+        offsetTexture = 0;
+    else if (dir == DOWN)
+        offsetTexture = 2;
+    else if (dir == LEFT)
+        offsetTexture = 4;
+    else if (dir == UP)
+        offsetTexture = 6;
+    return sprites[offsetTexture + (updateCount & 1)];
+}
+
+static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens) {
     if (!cell) return;
     Color color = CELL_COLORS[cell->biome];
 
     Texture2D* base = NULL;
+    Sprites* sprites = &this->sprites;
 
-    if (cell->biome == 0) {
-base = &this->sprites[29];
-    } else if (cell->biome == 1) {
-        base = &this->sprites[19];
-    } else if (cell->biome == 2) {
-        base = &this->sprites[22];
-    } else if (cell->biome == 3) {
-        base = &this->sprites[26];
-    }
+    base = &getSprites(sprites, cell->biome)[BIOME_FLOOR_SPRITE];
 
     if (cell->type == CELL_WALL) {
-        if (cell->biome == 0) {
-base = &this->sprites[30];
-        } else if (cell->biome == 1) {
-            base = &this->sprites[20];
-        } else if (cell->biome == 2) {
-            base = &this->sprites[23];
-        } else if (cell->biome == 3) {
-            base = &this->sprites[27];
-        }
+        base = &getSprites(sprites, cell->biome)[BIOME_WALL_SPRITE];
         color.r += 70;
         color.g += 70;
         color.b += 70;
@@ -83,22 +95,22 @@ base = &this->sprites[30];
         color.r *= 0.7;
         color.g += 100;
     } else if (cell->type == CELL_MUD) {
-        base = &this->sprites[21];
+        base = &sprites->gula[BIOME_ITEN_1_SPRITE];
         color.r = 79;
         color.g = 39;
         color.b = 30;
     } else if (cell->type == CELL_SPIKE) {
-        base = &this->sprites[28];
+        base = &sprites->violencia[BIOME_ITEN_1_SPRITE];
         color.r = 185;
         color.g = 185;
         color.b = 185;
     } else if (cell->type == CELL_GRAVE) {
-        base = &this->sprites[24];
+        base = &sprites->heresia[BIOME_ITEN_1_SPRITE];
         color.r = 10;
         color.g = 10;
         color.b = 10;
     } else if (cell->type == CELL_GRAVE_INFESTED) {
-        base = &this->sprites[24];
+        base = &sprites->heresia[BIOME_ITEN_1_SPRITE];
         color.r = 10;
         color.g = 10;
         color.b = 100;
@@ -120,6 +132,7 @@ base = &this->sprites[30];
         color.b -= 20;
     } else if (cell->type == CELL_DEGENERATED) {
         color = BLANK;
+        base = NULL;
     }
 
     if (base != NULL && itens) {
@@ -132,48 +145,22 @@ base = &this->sprites[30];
     Texture2D* overlap = NULL;
 
     if (cell->type == CELL_COIN) {
-        overlap = &this->sprites[16];
+        overlap = &sprites->itens[0];
     } else if (cell->type == CELL_FRAGMENT) {
-        overlap = &this->sprites[17];
+        overlap = &sprites->itens[1];
     } else if (cell->type == CELL_FRUIT) {
-        overlap = &this->sprites[18];
+        overlap = &sprites->itens[2];
     } else if (cell->type == CELL_FIRE_ON) {
-        overlap = &this->sprites[25];
-    } else if (isWind(cell->type)){
-        overlap = &this->sprites[31];
+        overlap = &sprites->heresia[BIOME_ITEN_2_SPRITE];
+    } else if (isWind(cell->type)) {
+        overlap = &sprites->luxuria[BIOME_ITEN_1_SPRITE];
     }
 
     if (overlap != NULL)
         DrawTexture(*overlap, x, y, WHITE);
 
     sprintf(buffer, "%d", cell->distance);
-    //DrawText(buffer, x + 15, y + 15, 20, WHITE);
-}
-
-static Texture2D getPlayerTexture(Game* this, Player* p) {
-    int offsetTexture = 0;
-    if (p->dir == RIGHT)
-        offsetTexture = 0;
-    else if (p->dir == DOWN)
-        offsetTexture = 2;
-    else if (p->dir == LEFT)
-        offsetTexture = 4;
-    else if (p->dir == UP)
-        offsetTexture = 6;
-    return this->sprites[offsetTexture + (this->updateCount & 1)];
-}
-
-static Texture2D getEnemyTexture(Game* this, Enemy* e) {
-    int offsetTexture = 8;
-    if (e->dir == RIGHT)
-        offsetTexture = 8;
-    else if (e->dir == DOWN)
-        offsetTexture = 10;
-    else if (e->dir == LEFT)
-        offsetTexture = 12;
-    else if (e->dir == UP)
-        offsetTexture = 14;
-    return this->sprites[offsetTexture + (this->updateCount & 1)];
+    DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
@@ -287,10 +274,13 @@ static void drawHudDebug(Game* this) {
     DrawText(buffer, this->width - 300, 50, 30, GREEN);
 
     drawMinimapDebug(this, 20, 20, 500, 100);
+
+    drawTimeHUD(this);
 }
 
 static void drawMapDebug(Game* this) {
     Map* map = this->map;
+    //this->sounds->updateMusic(this->sounds, map->player->biome);
     ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
@@ -353,7 +343,7 @@ static void drawMapDebug(Game* this) {
                 EndTextureMode();
             }
 
-            DrawTexture(getEnemyTexture(this, e), x, y, WHITE);
+            DrawTexture(getEntityTexture(this->sprites.pacman, e->dir, this->updateCount), x, y, WHITE);
 
             cur = cur->next;
         }
@@ -371,7 +361,7 @@ static void drawMapDebug(Game* this) {
         EndBlendMode();
     }
 
-    DrawTexture(getPlayerTexture(this, p), this->offsetHalfX, this->offsetHalfY, WHITE);
+    DrawTexture(getEntityTexture(this->sprites.ghost, p->dir, this->updateCount), this->offsetHalfX, this->offsetHalfY, WHITE);
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -386,25 +376,34 @@ static void drawMapDebug(Game* this) {
         }
     }
 
-    drawTimeHUD(this);
-
     if (p->biome != 3)
         drawHudDebug(this);
 
     this->frameCount++;
 }
 
-static void loadSprites(Game* this, const char** paths, int total) {
-    this->sprites = malloc(sizeof(Texture2D) * total);
-    this->totalSprites = total;
-
+static void loadSprites(const char** paths, const int total, Texture2D* sprites, const int size) {
     for (int i = 0; i < total; i++) {
         Image img = LoadImage(paths[i]);
-        ImageResize(&img, this->cellSize, this->cellSize);
-        Texture2D spriteTexture = LoadTextureFromImage(img);
-        this->sprites[i] = spriteTexture;
+        ImageResize(&img, size, size);
+        sprites[i] = LoadTextureFromImage(img);
         UnloadImage(img);
     }
+}
+
+static void loadAllSprites(Game* this) {
+    Sprites* sprites = &this->sprites;
+    int size = this->cellSize;
+
+    loadSprites(ghostSprites, 8, sprites->ghost, size);
+    loadSprites(pacmanSprites, 8, sprites->pacman, size);
+
+    loadSprites(itensSprites, 3, sprites->itens, size);
+
+    loadSprites(gulaSprites, 3, sprites->gula, size);
+    loadSprites(heresiaSprites, 4, sprites->heresia, size);
+    loadSprites(violenciaSprites, 3, sprites->violencia, size);
+    loadSprites(luxuriaSprites, 3, sprites->luxuria, size);
 }
 
 static void saveUpdate(Game* this) {
@@ -412,14 +411,20 @@ static void saveUpdate(Game* this) {
     this->updateCount++;
 }
 
-static void _free(Game* this) {
-    Texture2D* sprites = this->sprites;
-    for (unsigned int i = 0; i < this->totalSprites; i++) {
-        Texture2D spriteTexture = sprites[i];
-        UnloadTexture(spriteTexture);
+static void freeSprites(Texture2D* sprites, int length){
+    for (int i = 0; i < length; i++) {
+        UnloadTexture(sprites[i]);
     }
+}
+
+static void _free(Game* this) {
+    freeSprites(this->sprites.ghost, 8);
+    freeSprites(this->sprites.pacman, 8);
+    freeSprites(this->sprites.violencia, 3);
+    freeSprites(this->sprites.gula, 3);
+    freeSprites(this->sprites.heresia, 4);
+    freeSprites(this->sprites.luxuria, 3);
     UnloadRenderTexture(this->shadowMap);
-    free(this->sprites);
     free(this);
 }
 
@@ -428,6 +433,8 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->width = width;
     this->height = height;
     this->cellSize = cellSize;
+
+    this->sounds = new_Sounds("assets/music/heresia_trilha.mp3", "assets/music/heresia_trilha.mp3", "assets/music/violencia_trilha.mp3", "assets/music/luxuria_trilha.mp3");
 
     this->renderDistX = ((width / cellSize) >> 1) + 3;
     this->renderDistY = ((height / cellSize) >> 1) + 3;
@@ -440,7 +447,8 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->map = map;
 
-    loadSprites(this, SPRITES, 32);
+    loadAllSprites(this);
+
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 
     this->drawMapDebug = drawMapDebug;

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "enemy.h"
 #include "linkedlist.h"
+#include "common.h"
 
 #define CHUNK_SHIFT 4
 #define CHUNK_SIZE 16
@@ -76,7 +77,7 @@ typedef struct Chunk {
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];
 
-    void (*update)(struct Chunk*);
+    void (*update)(struct Chunk*, int);
     void (*resetDistance)(struct Chunk*);
     Cell* (*cellAt)(struct Chunk*, int, int);
     void (*free)(struct Chunk*);

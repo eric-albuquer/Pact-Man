@@ -31,7 +31,7 @@ static void updateChunks(ChunkManager* this){
         int idx = CLOSER_IDX[i];
         Chunk* chunk = this->adjacents[idx];
         if (!chunk) continue;
-        chunk->update(chunk);
+        chunk->update(chunk, this->degenerated);
     }
 }
 
@@ -84,6 +84,8 @@ ChunkManager* new_ChunkManager(int cols, int rows, Player* p) {
     this->cols = cols;
     this->rows = rows;
     this->player = p;
+
+    this->degenerated = -1;
 
     this->player->updateChunk(this->player);
 

@@ -19,6 +19,11 @@
 #define SPIKE_SLOWNESS_DURATION 5
 #define FRUIT_INVULNERABILITY_DURATION 100
 
+// Constantes para ajudar no degen dos biomas
+#define MAP_UPDATE_DT 0.15f
+#define BIOME_DEGEN_START_TIME 60.0f
+#define BIOME_DEGEN_FULL_TIME 180.0f
+
 typedef struct Map {
     ChunkManager* manager;
     ArrayList* changedChunk;
@@ -26,7 +31,6 @@ typedef struct Map {
     float degenerescence;
     float elapsedTime;
     float biomeTime;
-    unsigned biomeId;
 
     Player* player;
     unsigned int updateCount;

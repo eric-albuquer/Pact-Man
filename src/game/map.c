@@ -10,21 +10,20 @@
 #include "pathfinding.h"
 #include "chunk_loader.h"
 
-// Constantes para ajudar no degen dos biomas
-#define MAP_UPDATE_DT 0.15f
-#define BIOME_DEGEN_START_TIME 180.0f
-#define BIOME_DEGEN_FULL_TIME 360.0f
-
 //===============================================================
 //  FUNÇÕES AUXILIARES DA ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static inline void updatePlayerBiome(Player* p, Cell* cell){
+static inline void updatePlayerBiome(Map* this, Cell* cell){
+    Player* p = this->player;
     if (cell->biome <= p->biome) return;
     p->biome = cell->biome;
     p->biomeCoins = 0;
     p->biomeFragment = 0;
     p->fragmentByCoins = false;
+
+    this->biomeTime = 0.0f;
+    this->degenerescence = 0.0f;
 }
 
 static inline void collectItens(Player* p, Cell* cell) {
@@ -100,7 +99,9 @@ static const Vec2i DIR_VECTOR[4] = {
     {0, 1}
 };
 
-static inline Cell* movePlayer(ChunkManager* cm, Player* p, Vec2i newDir) {
+static inline Cell* movePlayer(Map* this, Vec2i newDir) {
+    Player* p = this->player;
+    ChunkManager* cm = this->manager;
     int playerNextX = p->x + newDir.x;
     int playerNextY = p->y + newDir.y;
 
@@ -113,7 +114,7 @@ static inline Cell* movePlayer(ChunkManager* cm, Player* p, Vec2i newDir) {
     p->x = playerNextX;
     p->y = playerNextY;
 
-    updatePlayerBiome(p, nextCell);
+    updatePlayerBiome(this, nextCell);
 
     p->updateDirection(p);
 
@@ -121,14 +122,15 @@ static inline Cell* movePlayer(ChunkManager* cm, Player* p, Vec2i newDir) {
     return nextCell;
 }
 
-static inline void updatePlayerWind(ChunkManager* cm, Player* p, Cell* cell) {
+static inline void updatePlayerWind(Map* this, Cell* cell) {
     if (isWind(cell->type)) {
         Vec2i dir = DIR_VECTOR[cell->type - CELL_WIND_RIGHT];
-        movePlayer(cm, p, dir);
+        movePlayer(this, dir);
     }
 }
 
-static inline void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, Input input) {
+static inline void updatePlayerByInput(Map* this, Cell* cell, Input input) {
+    Player* p = this->player;
     static Vec2i dir[4];
     int length = 0;
 
@@ -155,7 +157,7 @@ static inline void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, 
     }
 
     for (int i = 0; i < length; i++) {
-        Cell* nextCell = movePlayer(cm, p, dir[i]);
+        Cell* nextCell = movePlayer(this, dir[i]);
         if (nextCell) {
             cell = nextCell;
             break;
@@ -163,25 +165,28 @@ static inline void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, 
     }
 }
 
-static inline void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input input, unsigned int updateCount) {
+static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
+    Player* p = this->player;
     p->lastX = p->x;
     p->lastY = p->y;
 
     if ((p->effects.slowness.duration & 1) == 0)
-        updatePlayerByInput(cm, p, cell, input);
+        updatePlayerByInput(this, cell, input);
 
-    updatePlayerWind(cm, p, cell);
+    updatePlayerWind(this, cell);
 }
 
 //===============================================================
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static inline void updatePlayer(ChunkManager* cm, Player* p, Input input, unsigned int updateCount) {
+static inline void updatePlayer(Map* this, Input input) {
+    Player* p = this->player;
+    ChunkManager* cm = this->manager;
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
 
     updatePlayerEffects(p, cell);
-    updatePlayerMovement(cm, p, cell, input, updateCount);
+    updatePlayerMovement(this, cell, input);
 
     updatePlayerHealth(p, cell);
     updateDamagePlayer(p, cell);
@@ -267,23 +272,12 @@ static inline void updateEnemies(Map* this) {
 //===============================================================
 
 static void updateTime(Map* this) {
-    Player* p = this->player;
-
     this->elapsedTime += MAP_UPDATE_DT;
-
-    if (this->biomeId != p->biome) {
-        this->biomeId = p->biome;
-        this->biomeTime = 0.0f;
-        this->degenerescence = 0.0f;
-        return;
-    }
-
     this->biomeTime += MAP_UPDATE_DT;
 
-    if (this->biomeTime < BIOME_DEGEN_START_TIME) {
-        this->degenerescence = 0.0f;
-        return;
-    }
+    if (this->biomeTime < BIOME_DEGEN_START_TIME) return;
+
+    this->manager->degenerated = this->player->biome;
 
     float t = this->biomeTime - BIOME_DEGEN_START_TIME;
     float duration = BIOME_DEGEN_FULL_TIME - BIOME_DEGEN_START_TIME;
@@ -291,45 +285,13 @@ static void updateTime(Map* this) {
     this->degenerescence = t / duration;
 }
 
-static void applyDegenerescence(Map* this) {
-    if (this->degenerescence <= 0.0f) return;
-
-    ChunkManager* cm = this->manager;
-    Player* p = this->player;
-
-    int maxChanges = 2 + (int)(this->degenerescence * 8.0f);
-
-    for (int n = 0; n < maxChanges; ++n) {
-        int idx = CLOSER_IDX[rand() % 9];
-        Chunk* chunk = cm->adjacents[idx];
-        if (!chunk) continue;
-        if (chunk->biome != p->biome) continue; 
-
-        int x = rand() & CHUNK_MASK;
-        int y = rand() & CHUNK_MASK;
-
-        Cell* cell = chunk->cellAt(chunk, x, y);
-        if (!cell) continue;
-
-        if (cell->type == CELL_EMPTY ||
-            cell->type == CELL_MUD   ||
-            cell->type == CELL_COIN  ||
-            cell->type == CELL_FIRE_OFF ||
-            cell->type == CELL_FIRE_ON) {
-
-            cell->type = CELL_DEGENERATED;
-        }
-    }
-}
-
 static void update(Map* this, Controler* controler) {
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
-    updatePlayer(cm, this->player, controler->input, this->updateCount);
+    updatePlayer(this, controler->input);
     updateEnemies(this);
 
     updateTime(this);
-    applyDegenerescence(this);
 
     this->updateCount++;
 }
@@ -346,14 +308,13 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(401, 21);
-    this->player->biome = 3;
+    this->player = new_Player(11, 21);
+    this->player->biome = 0;
 
     this->changedChunk = new_ArrayList();
-    this->degenerescence = 0.0f;
     this->elapsedTime = 0.0f;
     this->biomeTime = 0.0f;
-    this->biomeId = this->player->biome;
+    this->degenerescence = 0.0f;
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

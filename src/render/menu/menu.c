@@ -24,7 +24,7 @@ void update(Menu* this){
     Vector2 mouse = GetMousePosition();
     play->hovered = play->isInside(play, mouse);
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && play->hovered)
-        play->action(play);
+        play->action();
 }
 
 Menu* new_Menu(){
