@@ -40,10 +40,10 @@ static const char* heresiaSprites[] = {
     "assets/sprites/heresia/fogo.png",
 };
 
-static const char* flegetonteSprites[] = {
-    "assets/sprites/flegetonte/chao.png",
-    "assets/sprites/flegetonte/parede.png",
-    "assets/sprites/flegetonte/espinhos.png",
+static const char* violenciaSprites[] = {
+    "assets/sprites/violencia/chao.png",
+    "assets/sprites/violencia/parede.png",
+    "assets/sprites/violencia/espinhos.png",
 };
 
 static const char* luxuriaSprites[] = {
@@ -60,7 +60,7 @@ static Texture2D* getSprites(Sprites* sprites, Biome biome){
     if (biome == HERESIA) return sprites->heresia;
     else if (biome == GULA) return sprites->gula;
     else if (biome == LUXURIA) return sprites->luxuria;
-    else if (biome == FLEGETONTE) return sprites->flegetonte;
+    else if (biome == VIOLENCIA) return sprites->violencia;
     return sprites->heresia;
 }
 
@@ -100,7 +100,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.g = 39;
         color.b = 30;
     } else if (cell->type == CELL_SPIKE) {
-        base = &sprites->flegetonte[BIOME_ITEN_1_SPRITE];
+        base = &sprites->violencia[BIOME_ITEN_1_SPRITE];
         color.r = 185;
         color.g = 185;
         color.b = 185;
@@ -350,7 +350,7 @@ static void loadAllSprites(Game* this) {
 
     loadSprites(gulaSprites, 3, sprites->gula, size);
     loadSprites(heresiaSprites, 4, sprites->heresia, size);
-    loadSprites(flegetonteSprites, 3, sprites->flegetonte, size);
+    loadSprites(violenciaSprites, 3, sprites->violencia, size);
     loadSprites(luxuriaSprites, 3, sprites->luxuria, size);
 }
 
@@ -368,7 +368,7 @@ static void freeSprites(Texture2D* sprites, int length){
 static void _free(Game* this) {
     freeSprites(this->sprites.ghost, 8);
     freeSprites(this->sprites.pacman, 8);
-    freeSprites(this->sprites.flegetonte, 3);
+    freeSprites(this->sprites.violencia, 3);
     freeSprites(this->sprites.gula, 3);
     freeSprites(this->sprites.heresia, 4);
     freeSprites(this->sprites.luxuria, 3);

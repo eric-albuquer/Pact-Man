@@ -4,7 +4,7 @@
 static void applyFunction(Sounds* this, Biome biome, void (*func)(Music)){
     if (biome == GULA) func(this->gulaMusic);
     else if (biome == HERESIA) func(this->heresiaMusic);
-    else if (biome == FLEGETONTE) func(this->flegetonteMusic);
+    else if (biome == VIOLENCIA) func(this->violenciaMusic);
     else if (biome == LUXURIA) func(this->luxuriaMusic);
 }
 
@@ -28,17 +28,17 @@ static void _free(Sounds* this) {
     free(this);
 }
 
-Sounds* new_Sounds(const char* gula, const char* heresia, const char* flegetonte, const char* luxuria) {
+Sounds* new_Sounds(const char* gula, const char* heresia, const char* violencia, const char* luxuria) {
     Sounds* this = malloc(sizeof(Sounds));
 
     this->gulaMusic = LoadMusicStream(gula);
     this->heresiaMusic = LoadMusicStream(heresia);
-    this->flegetonteMusic = LoadMusicStream(flegetonte);
+    this->violenciaMusic = LoadMusicStream(violencia);
     this->luxuriaMusic = LoadMusicStream(luxuria);
 
     PlayMusicStream(this->gulaMusic);
     PlayMusicStream(this->heresiaMusic);
-    PlayMusicStream(this->flegetonteMusic);
+    PlayMusicStream(this->violenciaMusic);
     PlayMusicStream(this->luxuriaMusic);
 
     this->resumeMusic = resumeMusic;

@@ -281,8 +281,8 @@ Map* new_Map(int chunkCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(201, 21);
-    this->player->biome = 1;
+    this->player = new_Player(11, 21);
+    this->player->biome = 0;
 
     this->changedChunk = new_ArrayList();
 

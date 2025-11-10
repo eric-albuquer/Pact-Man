@@ -2,10 +2,10 @@
 #define COMMON_H
 
 typedef enum {
+    LUXURIA,
     GULA,
     HERESIA,
-    FLEGETONTE,
-    LUXURIA
+    VIOLENCIA,
 } Biome;
 
 typedef enum { RIGHT, LEFT, UP, DOWN } Direction;

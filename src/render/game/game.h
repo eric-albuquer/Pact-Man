@@ -22,7 +22,7 @@ typedef struct Sprites {
 
     Texture2D gula[3];
     Texture2D heresia[4];
-    Texture2D flegetonte[3];
+    Texture2D violencia[3];
     Texture2D luxuria[3];
 } Sprites;
 

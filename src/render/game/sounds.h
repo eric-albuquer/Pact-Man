@@ -7,7 +7,7 @@
 typedef struct Sounds {
   Music gulaMusic;
   Music heresiaMusic;
-  Music flegetonteMusic;
+  Music violenciaMusic;
   Music luxuriaMusic;
 
   void (*resumeMusic)(struct Sounds*, Biome);
@@ -17,6 +17,6 @@ typedef struct Sounds {
   void (*free)(struct Sounds*);
 } Sounds;
 
-Sounds* new_Sounds(const char* gula, const char* heresia, const char* flegetonte, const char* luxuria);
+Sounds* new_Sounds(const char* gula, const char* heresia, const char* violencia, const char* luxuria);
 
 #endif
