@@ -23,8 +23,6 @@ typedef struct Map {
     ChunkManager* manager;
     ArrayList* changedChunk;
 
-    float degenerescence;
-
     Player* player;
     unsigned int updateCount;
 

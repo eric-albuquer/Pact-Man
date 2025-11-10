@@ -12,13 +12,6 @@
 #define TOTAL_CELLS_MASK 0xff
 
 typedef enum {
-    GULA,
-    HERESIA,
-    FLEGETONTE,
-    LUXURIA
-} Biome;
-
-typedef enum {
     CELL_EMPTY,
     CELL_FONT_HEALTH,
     CELL_TEMPLE,

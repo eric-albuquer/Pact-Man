@@ -1,6 +1,13 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+typedef enum {
+    GULA,
+    HERESIA,
+    FLEGETONTE,
+    LUXURIA
+} Biome;
+
 typedef enum { RIGHT, LEFT, UP, DOWN } Direction;
 
 typedef enum { MENU, GAME } GameState;

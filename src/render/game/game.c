@@ -61,6 +61,7 @@ static Texture2D* getSprites(Sprites* sprites, Biome biome){
     else if (biome == GULA) return sprites->gula;
     else if (biome == LUXURIA) return sprites->luxuria;
     else if (biome == FLEGETONTE) return sprites->flegetonte;
+    return sprites->heresia;
 }
 
 static Texture2D getEntityTexture(Texture2D* sprites, Direction dir, int updateCount) {
@@ -227,6 +228,7 @@ static void drawHudDebug(Game* this) {
 
 static void drawMapDebug(Game* this) {
     Map* map = this->map;
+    this->sounds->updateMusic(this->sounds, map->player->biome);
     ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
@@ -379,6 +381,8 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->width = width;
     this->height = height;
     this->cellSize = cellSize;
+
+    this->sounds = new_Sounds("assets/music/heresia_trilha.mp3", "assets/music/heresia_trilha.mp3", "assets/music/violencia_trilha.mp3", "assets/music/luxuria_trilha.mp3");
 
     this->renderDistX = ((width / cellSize) >> 1) + 3;
     this->renderDistY = ((height / cellSize) >> 1) + 3;

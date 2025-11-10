@@ -158,7 +158,7 @@ static inline void updatePlayerByInput(ChunkManager* cm, Player* p, Cell* cell, 
     }
 }
 
-static inline void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input input, unsigned int updateCount) {
+static inline void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell, Input input) {
     p->lastX = p->x;
     p->lastY = p->y;
 
@@ -172,11 +172,11 @@ static inline void updatePlayerMovement(ChunkManager* cm, Player* p, Cell* cell,
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static inline void updatePlayer(ChunkManager* cm, Player* p, Input input, unsigned int updateCount) {
+static inline void updatePlayer(ChunkManager* cm, Player* p, Input input) {
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
 
     updatePlayerEffects(p, cell);
-    updatePlayerMovement(cm, p, cell, input, updateCount);
+    updatePlayerMovement(cm, p, cell, input);
 
     updatePlayerHealth(p, cell);
     updateDamagePlayer(p, cell);
@@ -264,7 +264,7 @@ static inline void updateEnemies(Map* this) {
 static void update(Map* this, Controler* controler) {
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
-    updatePlayer(cm, this->player, controler->input, this->updateCount);
+    updatePlayer(cm, this->player, controler->input);
     updateEnemies(this);
     this->updateCount++;
 }
@@ -285,7 +285,6 @@ Map* new_Map(int chunkCols, int chunkRows) {
     this->player->biome = 1;
 
     this->changedChunk = new_ArrayList();
-    this->degenerescence = 0.0f;
 
     this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
 

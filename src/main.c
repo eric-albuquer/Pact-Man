@@ -41,6 +41,7 @@ void updateMenu() {
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
+    InitAudioDevice();
     SetTargetFPS(60);
 
     ChangeDirectory(GetApplicationDirectory());
@@ -58,6 +59,7 @@ int main(void) {
     render->free(render);
     controler->free(controler);
 
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }

@@ -2,7 +2,7 @@
 #define GAME_H
 
 #include <raylib.h>
-
+#include "sounds.h"
 #include "map.h"
 
 #define FRAMES_ANIMATION 8.0f
@@ -44,6 +44,8 @@ typedef struct Game {
 
     Map* map;
     Chunk* visibleChunks[49];
+
+    Sounds* sounds;
 
     RenderTexture2D shadowMap;
 

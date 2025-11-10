@@ -17,7 +17,7 @@ void drawButton(Button* this){
     DrawText(this->text, halfX, halfY, this->fontSize, this->fontColor);
 }
 
-Button* new_Button(int x, int y, int w, int h, Color color, Color fontColor, char* text, int fontSize, void (*action)(Button*)){
+Button* new_Button(int x, int y, int w, int h, Color color, Color fontColor, char* text, int fontSize, void (*action)()){
     Button* this = malloc(sizeof(Button));
     this->x = x;
     this->y = y;
