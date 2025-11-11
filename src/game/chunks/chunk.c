@@ -71,6 +71,7 @@ static void updateGraveInfested(Chunk* this, int x, int y) {
     Node* node = hasEnemyInCell(this, x, y);
     if (node == NULL) return;
     Enemy* e = node->data;
+    if (e->isBoss) return;
     enemies->removeNode(enemies, node);
     e->free(e);
     cell->type = CELL_GRAVE_INFESTED;

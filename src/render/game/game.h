@@ -23,7 +23,7 @@ typedef enum {
     SPRITE_DEGENERATED_2,
     SPRITE_DEGENERATED_3,
 
-    SPRITE_MUD,
+    //SPRITE_MUD,
     SPRITE_GRAVE,
     SPRITE_SPIKE,
 
@@ -46,7 +46,10 @@ typedef enum {
     ANIMATION_FRUIT,
 
     ANIMATION_WIND,
+    ANIMATION_MUD, 
     ANIMATION_FIRE,
+
+    ANIMATION_FONT,
 
     ANIMATION_COUNT
 } AnimationsEnum;

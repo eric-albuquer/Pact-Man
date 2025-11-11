@@ -26,8 +26,6 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     if (cell->type == CELL_WALL) {
         sprite = sprites[SPRITE_WALL_LUXURIA + cell->biome];
-    } else if (cell->type == CELL_MUD) {
-        sprite = sprites[SPRITE_MUD];
     } else if (cell->type == CELL_GRAVE) {
         sprite = sprites[SPRITE_GRAVE];
     } else if (cell->type == CELL_GRAVE_INFESTED) {
@@ -38,17 +36,29 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         sprite = sprites[SPRITE_DEGENERATED_2];
     } else if (cell->type == CELL_DEGENERATED_3) {
         sprite = sprites[SPRITE_DEGENERATED_3];
-    } else if (cell->type == CELL_FONT_HEALTH){
-        color = BLUE;
     } else if (cell->type == CELL_TEMPLE) {
         color = GRAY;
-    }
+    } 
 
     DrawSprite(sprite, x, y, size, color);
 
-    if (!itens) return;
-
     color = WHITE;
+
+    if (cell->type == CELL_FIRE_ON) {
+        DrawAnimation(animations[ANIMATION_FIRE], x, y, size, color);
+    } else if (cell->type == CELL_FIRE_OFF) {
+        DrawAnimation(animations[ANIMATION_FIRE], x, y, size, DARKGRAY);
+    } else if (isWind(cell->type)) {
+        DrawAnimation(animations[ANIMATION_WIND], x, y, size, color);
+    } else if (cell->type == CELL_SPIKE) {
+        DrawSprite(sprites[SPRITE_SPIKE], x, y, size, color);
+    } else if (cell->type == CELL_MUD) {
+        DrawAnimation(animations[ANIMATION_MUD], x, y, size, color);
+    } else if (cell->type == CELL_FONT_HEALTH) {
+        DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
+    } 
+    
+    if (!itens) return;
 
     if (cell->type == CELL_COIN) {
         DrawAnimation(animations[ANIMATION_COIN], x, y, size, color);
@@ -56,16 +66,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
     } else if (cell->type == CELL_FRUIT) {
         DrawAnimation(animations[ANIMATION_FRUIT], x, y, size, color);
-    } else if (cell->type == CELL_FIRE_ON) {
-        DrawAnimation(animations[ANIMATION_FIRE], x, y, size, color);
-    } else if (isWind(cell->type)) {
-        DrawAnimation(animations[ANIMATION_WIND], x, y, size, color);
-    } else if (cell->type == CELL_SPIKE) {
-        DrawSprite(sprites[SPRITE_SPIKE], x, y, size, color);
-    }
+    } 
 
     sprintf(buffer, "%d", cell->distance);
-    DrawText(buffer, x + 15, y + 15, 20, WHITE);
+    //DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
@@ -297,10 +301,10 @@ static void loadAllSprites(Game* this) {
     Animation* animations = this->animations;
 
     // ---------- GHOST ----------
-    const char* ghostRight[] = { "assets/sprites/ghostRight1.png", "assets/sprites/ghostRight2.png" };
-    const char* ghostLeft[] = { "assets/sprites/ghostLeft1.png",  "assets/sprites/ghostLeft2.png" };
-    const char* ghostUp[] = { "assets/sprites/ghostUp1.png",    "assets/sprites/ghostUp2.png" };
-    const char* ghostDown[] = { "assets/sprites/ghostDown1.png",  "assets/sprites/ghostDown2.png" };
+    const char* ghostRight[] = { "assets/sprites/ghost/ghostRight1.png", "assets/sprites/ghost/ghostRight2.png" };
+    const char* ghostLeft[] = { "assets/sprites/ghost/ghostLeft1.png",  "assets/sprites/ghost/ghostLeft2.png" };
+    const char* ghostUp[] = { "assets/sprites/ghost/ghostUp1.png",    "assets/sprites/ghost/ghostUp2.png" };
+    const char* ghostDown[] = { "assets/sprites/ghost/ghostDown1.png",  "assets/sprites/ghost/ghostDown2.png" };
 
     animations[ANIMATION_GHOST_RIGHT] = LoadAnimation(2, ghostRight);
     animations[ANIMATION_GHOST_LEFT] = LoadAnimation(2, ghostLeft);
@@ -308,29 +312,37 @@ static void loadAllSprites(Game* this) {
     animations[ANIMATION_GHOST_DOWN] = LoadAnimation(2, ghostDown);
 
     // ---------- PACMAN ----------
-    const char* pacmanRight[] = { "assets/sprites/pacmanRight1.png", "assets/sprites/pacmanRight2.png" };
-    const char* pacmanLeft[] = { "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png" };
-    const char* pacmanUp[] = { "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png" };
-    const char* pacmanDown[] = { "assets/sprites/pacmanDown1.png",  "assets/sprites/pacmanDown2.png" };
+    const char* pacmanRight[] = { "assets/sprites/pacman/pacmanRight1.png", "assets/sprites/pacman/pacmanRight2.png" };
+    const char* pacmanLeft[] = { "assets/sprites/pacman/pacmanLeft1.png",  "assets/sprites/pacman/pacmanLeft2.png" };
+    const char* pacmanUp[] = { "assets/sprites/pacman/pacmanUp1.png",    "assets/sprites/pacman/pacmanUp2.png" };
+    const char* pacmanDown[] = { "assets/sprites/pacman/pacmanDown1.png",  "assets/sprites/pacman/pacmanDown2.png" };
 
     animations[ANIMATION_PACMAN_RIGHT] = LoadAnimation(2, pacmanRight);
     animations[ANIMATION_PACMAN_LEFT] = LoadAnimation(2, pacmanLeft);
     animations[ANIMATION_PACMAN_UP] = LoadAnimation(2, pacmanUp);
     animations[ANIMATION_PACMAN_DOWN] = LoadAnimation(2, pacmanDown);
 
-    const char* coin[] = { "assets/sprites/coin.png" };
-    const char* fragment[] = { "assets/sprites/Key.png" };
-    const char* fruit[] = { "assets/sprites/apple.png" };
+    const char* coin[] = { "assets/sprites/itens/coin.png" };
+    const char* fragment[] = { "assets/sprites/itens/chave.png" };
+    const char* fruit[] = { "assets/sprites/itens/apple.png" };
 
     animations[ANIMATION_COIN] = LoadAnimation(1, coin);
     animations[ANIMATION_FRAGMENT] = LoadAnimation(1, fragment);
     animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
 
     const char* wind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
-    const char* fire[] = { "assets/sprites/heresia/fogo.png", "assets/sprites/heresia/fogo2.png" };
+    const char* mud[] = { "assets/sprites/gula/lama1.png", "assets/sprites/gula/lama2.png", "assets/sprites/gula/lama3.png"};
+    const char* fire[] = { "assets/sprites/heresia/fogo.png", "assets/sprites/heresia/fogo2.png", "assets/sprites/heresia/fogo3.png",
+                             "assets/sprites/heresia/fogo4.png" };
+
+    const char* font[] = { "assets/sprites/fonte.png", "assets/sprites/fonte1.png", "assets/sprites/fonte2.png", "assets/sprites/fonte3.png",
+                            "assets/sprites/fonte3.png", "assets/sprites/fonte2.png", "assets/sprites/fonte1.png" };
 
     animations[ANIMATION_WIND] = LoadAnimation(2, wind);
-    animations[ANIMATION_FIRE] = LoadAnimation(2, fire);
+    animations[ANIMATION_MUD] = LoadAnimation(3, mud);
+    animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
+
+     animations[ANIMATION_FONT] = LoadAnimation(7, font);
 
     sprites[SPRITE_FLOOR_LUXURIA] = LoadSprite("assets/sprites/luxuria/chao.png");
     sprites[SPRITE_WALL_LUXURIA] = LoadSprite("assets/sprites/luxuria/parede.png");
@@ -348,7 +360,8 @@ static void loadAllSprites(Game* this) {
     sprites[SPRITE_DEGENERATED_2] = LoadSprite("assets/sprites/degenerated2.png");
     sprites[SPRITE_DEGENERATED_3] = LoadSprite("assets/sprites/degenerated3.png");
 
-    sprites[SPRITE_MUD] = LoadSprite("assets/sprites/gula/lama.png");
+   
+    //sprites[SPRITE_MUD] = LoadSprite("assets/sprites/gula/lama1.png");
     sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");
     sprites[SPRITE_SPIKE] = LoadSprite("assets/sprites/violencia/espinhos.png");
 }

@@ -381,13 +381,26 @@ static void generateCoins(ChunkLoader* this, Chunk* chunk) {
 
 static void generateFragement(ChunkLoader* this, Chunk* chunk) {
     if (chunk->type != CHUNK_FRAGMENT) return;
-    
+
     Cell* cell;
     int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
-    for (int i = 0; i < CELLS_PER_CHUNK; i++){
+    for (int i = 0; i < CELLS_PER_CHUNK; i++) {
         cell = &chunk->cells[idx];
         if (cell->type == CELL_EMPTY) break;
         idx = (idx + 1) & TOTAL_CELLS_MASK;
+    }
+
+    int keyX = idx & CHUNK_MASK;
+    int keyY = idx >> CHUNK_SHIFT;
+
+    for (int i = -2; i < 3; i++) {
+        int cY = keyY + i;
+        if (cY < 0 || cY >= CHUNK_SIZE) continue;
+        for (int j = -2; j < 3; j++) {
+            int cX = keyX + j;
+            if (cX < 0 || cX >= CHUNK_SIZE) continue;
+            chunk->cells[(cY << CHUNK_SHIFT) | cX].type = CELL_EMPTY;
+        }
     }
 
     cell->type = CELL_FRAGMENT;
@@ -398,7 +411,7 @@ static void generateFruit(ChunkLoader* this, Chunk* chunk) {
 
     Cell* cell;
     int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
-    for (int i = 0; i < CELLS_PER_CHUNK; i++){
+    for (int i = 0; i < CELLS_PER_CHUNK; i++) {
         cell = &chunk->cells[idx];
         if (cell->type == CELL_EMPTY) break;
         idx = (idx + 1) & TOTAL_CELLS_MASK;
@@ -412,7 +425,7 @@ static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
     LinkedList* enemies = chunk->enemies;
     Cell* cell;
     int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
-    for (int i = 0; i < CELLS_PER_CHUNK; i++){
+    for (int i = 0; i < CELLS_PER_CHUNK; i++) {
         cell = &chunk->cells[idx];
         if (isPassable(cell->type)) break;
         idx = (idx + 1) & TOTAL_CELLS_MASK;
@@ -420,7 +433,7 @@ static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
 
     int ex = (idx & CHUNK_MASK) + (chunk->x << CHUNK_SHIFT);
     int ey = (idx >> CHUNK_SHIFT) + (chunk->y << CHUNK_SHIFT);
-    
+
     Enemy* e = new_Enemy(ex, ey, cell->biome);
     enemies->addLast(enemies, e);
 }
