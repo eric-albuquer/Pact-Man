@@ -40,6 +40,7 @@ Enemy* new_Enemy(int x, int y, int biome){
     this->changedChunk = false;
 
     this->biome = biome;
+    this->isBoss = false;
 
     this->updateChunk = updateChunk;
     this->updateDirection = updateDirection;

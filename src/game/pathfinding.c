@@ -65,7 +65,7 @@ NextPos getNextPos(ChunkManager* cm, int x, int y, int biome) {
     if (cm == NULL) return nextPos;
 
     Cell* cell = cm->getUpdatedCell(cm, x, y);
-    if (!cell || cell->distance <= 0) return nextPos;
+    if (!cell || cell->distance < 0) return nextPos;
 
     static const int DX[4] = { 0, 1, 0, -1 };
     static const int DY[4] = { -1, 0, 1, 0 };
@@ -76,7 +76,7 @@ NextPos getNextPos(ChunkManager* cm, int x, int y, int biome) {
 
         Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
 
-        if (next && isPassable(next->type) && next->biome == biome)
+        if (next && isPassable(next->type) && next->biome == biome && next->distance >= 0)
             nextPos.pos[nextPos.moves++] = (QNode){ neighborX, neighborY, next->distance };
     }
 
@@ -109,4 +109,20 @@ Vec2i getRandomPos(NextPos nextPos) {
     if (nextPos.moves == 0) return (Vec2i) { 0 };
     int idx = rand() % nextPos.moves;
     return (Vec2i) { nextPos.pos[idx].x, nextPos.pos[idx].y };
+}
+
+Vec2i getCloserToSpawn(NextPos nextPos, int x, int y){
+    Vec2i closer = {0};
+    if (nextPos.moves == 0) return closer;
+    float dist = 10000000.0f;
+    for (int i = 0; i < nextPos.moves; i++){
+        QNode pos = nextPos.pos[i];
+        int posDist = hypotf(pos.x - x, pos.y - y);
+        if (posDist < dist){
+            dist = posDist;
+            closer.x = pos.x;
+            closer.y = pos.y;
+        }
+    }
+    return closer;
 }

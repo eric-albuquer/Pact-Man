@@ -26,5 +26,6 @@ void sortNextPos(NextPos* nextPos);
 Vec2i getWorstPos(NextPos nextPos);
 Vec2i getBestPos(NextPos nextPos);
 Vec2i getRandomPos(NextPos nextPos);
+Vec2i getCloserToSpawn(NextPos nextPos, int x, int y);
 
 #endif

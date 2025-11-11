@@ -212,8 +212,7 @@ static inline bool isFarAwayFromSpawn(Player* p, Enemy* e) {
     return distToSpawn > MAX_PERSUIT_RADIUS;
 }
 
-static inline void updateEnemyMovement(ChunkManager* cm, Node* node, LinkedList* list, Player* p) {
-    Enemy* e = node->data;
+static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
     NextPos pos = getNextPos(cm, e->x, e->y, e->biome);
@@ -225,7 +224,7 @@ static inline void updateEnemyMovement(ChunkManager* cm, Node* node, LinkedList*
 
     Vec2i nextPos = normalMovement ? getBestPos(pos) : getRandomPos(pos);
     if (isFarAwayFromSpawn(p, e))
-        nextPos = getWorstPos(pos);
+        nextPos = getCloserToSpawn(pos, e->spawnX, e->spawnY);
     else if (p->effects.invulnerability.duration > 0 && normalMovement)
         nextPos = getWorstPos(pos);
 
@@ -235,23 +234,43 @@ static inline void updateEnemyMovement(ChunkManager* cm, Node* node, LinkedList*
     e->updateDirection(e);
 }
 
+static inline void bossDestroyMap(ChunkManager* cm, int x, int y) {
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
+            Cell* cell = cm->getUpdatedCell(cm, x + j, y + i);
+            if (cell)
+                cell->type = CELL_TEMPLE;
+        }
+    }
+}
+
 static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Player* p) {
     Enemy* e = node->data;
-    if ((e->lastX == p->x && e->lastY == p->y) || (e->x == p->x && e->y == p->y)) {
-        if (p->effects.invulnerability.duration > 0) {
-            e->free(e);
-            enemies->removeNode(enemies, node);
-            return true;
-        } else {
-            p->life -= ENEMY_DAGAME;
+
+    int start = e->isBoss;
+    for (int i = -start; i <= start; i++) {
+        for (int j = -start; j <= start; j++) {
+            if ((e->lastX + j == p->x && e->lastY + i == p->y) || (e->x + j == p->x && e->y + i == p->y)) {
+                if (p->effects.invulnerability.duration > 0) {
+                    e->free(e);
+                    enemies->removeNode(enemies, node);
+                    return true;
+                } else {
+                    p->life -= ENEMY_DAGAME;
+                }
+                return false;
+            }
         }
     }
     return false;
 }
 
 static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk) {
+    Enemy* e = node->data;
+    if (e->isBoss)
+        bossDestroyMap(cm, e->x, e->y);
     if (checkPlayerEnemyColision(node, list, p)) return;
-    updateEnemyMovement(cm, node, list, p);
+    updateEnemyMovement(cm, e, p);
     updateEnemyChunk(cm, node, list, changedChunk);
 }
 

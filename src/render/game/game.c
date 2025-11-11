@@ -11,8 +11,8 @@ static const Color CELL_COLORS[4] = { {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 1
 
 static char buffer[1000];
 
-static void updateAnimations(Game* this){
-    for (int i = 0; i < ANIMATION_COUNT; i++){
+static void updateAnimations(Game* this) {
+    for (int i = 0; i < ANIMATION_COUNT; i++) {
         UpdateAnimation(&this->animations[i]);
     }
 }
@@ -123,7 +123,11 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             int x = (e->x - map->player->x) * cellSize;
             int y = (e->y - map->player->y) * cellSize;
 
-            DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize, YELLOW);
+            if (!e->isBoss)
+                DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize, YELLOW);
+            else
+                DrawRectangle(x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, cellSize * 3, YELLOW);
+
             cur = cur->next;
         }
     }
@@ -277,7 +281,10 @@ static void drawMapDebug(Game* this) {
                 EndTextureMode();
             }
 
-            DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize);
+            if (!e->isBoss)
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize);
+            else
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3);
 
             cur = cur->next;
         }
@@ -355,7 +362,7 @@ static void loadAllSprites(Game* this) {
 
     animations[ANIMATION_WIND] = LoadAnimation(2, wind);
     animations[ANIMATION_FIRE] = LoadAnimation(2, fire);
-    
+
     sprites[SPRITE_FLOOR_LUXURIA] = LoadSprite("assets/sprites/luxuria/chao.png");
     sprites[SPRITE_WALL_LUXURIA] = LoadSprite("assets/sprites/luxuria/parede.png");
 
@@ -380,14 +387,14 @@ static void saveUpdate(Game* this) {
 }
 
 static void _free(Game* this) {
-    for (int i = 0; i < ANIMATION_COUNT; i++){
+    for (int i = 0; i < ANIMATION_COUNT; i++) {
         UnloadAnimation(this->animations[i]);
     }
 
-    for (int i = 0; i < SPRITE_COUNT; i++){
+    for (int i = 0; i < SPRITE_COUNT; i++) {
         UnloadSprite(this->sprites[i]);
     }
-    
+
     UnloadRenderTexture(this->shadowMap);
     free(this);
 }

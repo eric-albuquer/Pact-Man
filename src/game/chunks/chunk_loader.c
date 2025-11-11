@@ -161,6 +161,14 @@ static void generateTemple(ChunkLoader* this, Chunk* chunk) {
         int templeCell = TEMPLE_MATRIX[i];
         chunk->cells[i].type = templeCell == 0 ? CELL_TEMPLE : CELL_WALL;
     }
+
+    LinkedList* enemies = chunk->enemies;
+
+    int x = 7 + (chunk->x << CHUNK_SHIFT);
+    int y = 7 + (chunk->y << CHUNK_SHIFT);
+    Enemy* boss = new_Enemy(x, y, chunk->biome);
+    boss->isBoss = true;
+    enemies->addLast(enemies, boss);
 }
 
 static void generateFont(ChunkLoader* this, Chunk* chunk) {

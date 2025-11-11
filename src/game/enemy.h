@@ -19,6 +19,7 @@ typedef struct Enemy {
     int chunkY;
 
     unsigned changedChunk : 1;
+    unsigned isBoss: 1;
 
     Direction dir;
 
