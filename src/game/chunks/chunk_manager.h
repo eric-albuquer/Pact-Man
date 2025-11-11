@@ -26,6 +26,6 @@ typedef struct ChunkManager {
     void (*free)(struct ChunkManager*);
 } ChunkManager;
 
-ChunkManager* new_ChunkManager(int cols, int rows, Player* p);
+ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p);
 
 #endif

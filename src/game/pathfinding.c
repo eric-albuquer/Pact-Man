@@ -7,11 +7,6 @@
 #include "chunk.h"
 #include "linkedlist.h"
 
-struct QNode {
-    int x, y, d;
-};
-typedef struct QNode QNode;
-
 static inline bool farAway(Player* p, Enemy* e) {
     float distToSpawn = hypotf(p->x - e->spawnX, p->y - e->spawnY);
 
@@ -65,63 +60,53 @@ void mapDistancePlayer(Map* map) {
     BFSQueue->free(BFSQueue);
 }
 
-bool enemyStepTowardsPlayer(ChunkManager* cm, Enemy* e, Player* p) {
-    if (e == NULL) return false;
-    int enemyPosX = e->x, enemyPosY = e->y;
+NextPos getNextPos(ChunkManager* cm, int x, int y, int biome) {
+    NextPos nextPos = { 0 };
+    if (cm == NULL) return nextPos;
 
-    Cell* cell = cm->getUpdatedCell(cm, enemyPosX, enemyPosY);
-    if (!cell || cell->distance <= 0) return false;
+    Cell* cell = cm->getUpdatedCell(cm, x, y);
+    if (!cell || cell->distance <= 0) return nextPos;
 
     static const int DX[4] = { 0, 1, 0, -1 };
     static const int DY[4] = { -1, 0, 1, 0 };
 
-    static QNode moves[4];
-    int length = 0;
-
     for (int i = 0; i < 4; i++) {
-        int neighborX = enemyPosX + DX[i];
-        int neighborY = enemyPosY + DY[i];
+        int neighborX = x + DX[i];
+        int neighborY = y + DY[i];
 
         Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
-        if (!next || !isPassable(next->type) || next->biome != e->biome) continue;
 
-        moves[length++] = (QNode){ neighborX, neighborY, next->distance };
+        if (next && isPassable(next->type) && next->biome == biome)
+            nextPos.pos[nextPos.moves++] = (QNode){ neighborX, neighborY, next->distance };
     }
 
-    // ordenando direções
-    for (int i = 0; i < length; i++) {
-        for (int j = i + 1; j < length; j++) {
-            if (moves[i].d > moves[j].d) {
-                QNode temp = moves[i];
-                moves[i] = moves[j];
-                moves[j] = temp;
+    return nextPos;
+}
+
+void sortNextPos(NextPos* nextPos) {
+    for (int i = 0; i < nextPos->moves; i++) {
+        for (int j = i + 1; j < nextPos->moves; j++) {
+            if (nextPos->pos[i].d > nextPos->pos[j].d) {
+                QNode temp = nextPos->pos[i];
+                nextPos->pos[i] = nextPos->pos[j];
+                nextPos->pos[j] = temp;
             }
         }
     }
+}
 
-    if (length == 0) return false;
+Vec2i getWorstPos(NextPos nextPos) {
+    if (nextPos.moves == 0) return (Vec2i) { 0 };
+    return (Vec2i) { nextPos.pos[nextPos.moves - 1].x, nextPos.pos[nextPos.moves - 1].y };
+}
 
-    int nx;
-    int ny;
+Vec2i getBestPos(NextPos nextPos) {
+    if (nextPos.moves == 0) return (Vec2i) { 0 };
+    return (Vec2i) { nextPos.pos[0].x, nextPos.pos[0].y };
+}
 
-    // Indo para a pior direção
-    if (farAway(p, e) || (p->effects.invulnerability.duration > 0 && rand() % 100 < BEST_PATH_PROBABILITY)) {
-        nx = moves[length - 1].x;
-        ny = moves[length - 1].y;
-    } else {
-        nx = moves[0].x;
-        ny = moves[0].y;
-
-        // probabilidade de seguir melhor caminho ou um aleatório
-        if (rand() % 100 > BEST_PATH_PROBABILITY) {
-            int idx = rand() % length;
-            QNode choosed = moves[idx];
-            nx = choosed.x;
-            ny = choosed.y;
-        }
-    }
-
-    e->x = nx;
-    e->y = ny;
-    return true;
+Vec2i getRandomPos(NextPos nextPos) {
+    if (nextPos.moves == 0) return (Vec2i) { 0 };
+    int idx = rand() % nextPos.moves;
+    return (Vec2i) { nextPos.pos[idx].x, nextPos.pos[idx].y };
 }

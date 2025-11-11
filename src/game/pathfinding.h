@@ -4,11 +4,27 @@
 #include "enemy.h"
 #include "map.h"
 
-#define MAX_PERSUIT_RADIUS 30
-#define BEST_PATH_PROBABILITY 50
+typedef struct {
+    int x;
+    int y;
+} Vec2i;
+
+typedef struct QNode {
+    int x, y, d;
+} QNode;
+
+typedef struct {
+    QNode pos[4];
+    int moves;
+} NextPos;
 
 void mapDistancePlayer(Map* map);
 
-bool enemyStepTowardsPlayer(ChunkManager* cm, Enemy* e, Player* p);
+NextPos getNextPos(ChunkManager* cm, int x, int y, int biome);
+
+void sortNextPos(NextPos* nextPos);
+Vec2i getWorstPos(NextPos nextPos);
+Vec2i getBestPos(NextPos nextPos);
+Vec2i getRandomPos(NextPos nextPos);
 
 #endif

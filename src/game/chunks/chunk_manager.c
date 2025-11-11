@@ -77,12 +77,14 @@ static void _free(ChunkManager* this) {
     free(this);
 }
 
-ChunkManager* new_ChunkManager(int cols, int rows, Player* p) {
+ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
+    biomeCols++;
     ChunkManager* this = malloc(sizeof(ChunkManager));
     this->chunks = new_ChunkMap();
-    this->chunkLoader = new_ChunkLoader(cols, rows, time(NULL));
-    this->cols = cols;
+    this->cols = biomeCols << 2;
     this->rows = rows;
+    this->chunkLoader = new_ChunkLoader(biomeCols, rows, time(NULL));
+    
     this->player = p;
 
     this->degenerated = -1;

@@ -203,8 +203,8 @@ static void drawHudDebug(Game* this) {
         p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK,
         p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration);
 
-    DrawRectangle(this->width - 400, 0, 400, 400, (Color) { 0, 0, 0, 200 });
-    DrawText(buffer, this->width - 300, 50, 30, GREEN);
+    DrawRectangle(this->width - 400, 200, 400, 600, (Color) { 0, 0, 0, 200 });
+    DrawText(buffer, this->width - 300, 250, 30, GREEN);
 
     drawMinimapDebug(this, 20, 20, 500, 100);
 

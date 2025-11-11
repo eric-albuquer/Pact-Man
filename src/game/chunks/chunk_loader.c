@@ -450,12 +450,12 @@ static void _free(ChunkLoader* this) {
     free(this);
 }
 
-ChunkLoader* new_ChunkLoader(const int width, const int height, const int seed) {
+ChunkLoader* new_ChunkLoader(const int biomeWidth, const int height, const int seed) {
     ChunkLoader* this = malloc(sizeof(ChunkLoader));
-    this->width = width;
+    this->width = biomeWidth << 2;
     this->height = height;
     this->seed = seed;
-    this->biomeWidthChunks = width >> 2;
+    this->biomeWidthChunks = biomeWidth;
 
     this->generate = generate;
     this->free = _free;

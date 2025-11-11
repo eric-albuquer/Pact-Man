@@ -14,7 +14,7 @@
 //  FUNÇÕES AUXILIARES DA ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static inline void updatePlayerBiome(Map* this, Cell* cell){
+static inline void updatePlayerBiome(Map* this, Cell* cell) {
     Player* p = this->player;
     if (cell->biome <= p->biome) return;
     p->biome = cell->biome;
@@ -58,14 +58,25 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
     } else if (cell->type == CELL_FRUIT) {
         p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
         return;
+    } else if (cell->type == CELL_FONT_HEALTH) {
+        p->effects.regeneration.duration = FONT_REGENERATION_DURATION;
+        p->effects.regeneration.strenght = max(FONT_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
     }
 
     if (p->effects.slowness.duration > 0) {
         p->effects.slowness.duration--;
     }
+
     if (p->effects.invulnerability.duration > 0) {
         p->effects.invulnerability.duration--;
     }
+
+    if (p->effects.regeneration.duration > 0) {
+        if (p->life < START_LIFE)
+            p->life = min(p->effects.regeneration.strenght + p->life, START_LIFE);
+        p->effects.regeneration.duration--;
+    } else
+        p->effects.regeneration.strenght = 0;
 }
 
 static inline void updateDamagePlayer(Player* p, Cell* cell) {
@@ -77,20 +88,9 @@ static inline void updateDamagePlayer(Player* p, Cell* cell) {
     }
 }
 
-static inline void updatePlayerHealth(Player* p, Cell* cell) {
-    if (cell->type == CELL_FONT_HEALTH && p->life < START_LIFE) {
-        p->life += FONT_HEALTH;
-    }
-}
-
 //===============================================================
 //  FUNÇÕES DE MOVIMENTAÇÃO DO PLAYER
 //===============================================================
-
-typedef struct {
-    int x;
-    int y;
-} Vec2i;
 
 static const Vec2i DIR_VECTOR[4] = {
     {1, 0},
@@ -188,7 +188,6 @@ static inline void updatePlayer(Map* this, Input input) {
     updatePlayerEffects(p, cell);
     updatePlayerMovement(this, cell, input);
 
-    updatePlayerHealth(p, cell);
     updateDamagePlayer(p, cell);
     collectItens(p, cell);
 }
@@ -207,11 +206,32 @@ static inline void updateEnemyChunk(ChunkManager* cm, Node* node, LinkedList* li
     changedChunk->push(changedChunk, e);
 }
 
+static inline bool isFarAwayFromSpawn(Player* p, Enemy* e) {
+    float distToSpawn = hypotf(p->x - e->spawnX, p->y - e->spawnY);
+
+    return distToSpawn > MAX_PERSUIT_RADIUS;
+}
+
 static inline void updateEnemyMovement(ChunkManager* cm, Node* node, LinkedList* list, Player* p) {
     Enemy* e = node->data;
     e->lastX = e->x;
     e->lastY = e->y;
-    enemyStepTowardsPlayer(cm, e, p);
+    NextPos pos = getNextPos(cm, e->x, e->y, e->biome);
+    if (pos.moves == 0) return;
+
+    sortNextPos(&pos);
+
+    bool normalMovement = rand() % 100 < BEST_PATH_PROBABILITY;
+
+    Vec2i nextPos = normalMovement ? getBestPos(pos) : getRandomPos(pos);
+    if (isFarAwayFromSpawn(p, e))
+        nextPos = getWorstPos(pos);
+    else if (p->effects.invulnerability.duration > 0 && normalMovement)
+        nextPos = getWorstPos(pos);
+
+    e->x = nextPos.x;
+    e->y = nextPos.y;
+
     e->updateDirection(e);
 }
 
@@ -304,7 +324,7 @@ static void _free(Map* this) {
     free(this);
 }
 
-Map* new_Map(int chunkCols, int chunkRows) {
+Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
@@ -315,7 +335,7 @@ Map* new_Map(int chunkCols, int chunkRows) {
     this->biomeTime = 0.0f;
     this->degenerescence = 0.0f;
 
-    this->manager = new_ChunkManager(chunkCols, chunkRows, this->player);
+    this->manager = new_ChunkManager(biomeCols, chunkRows, this->player);
 
     this->update = update;
     this->free = _free;
