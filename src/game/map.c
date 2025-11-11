@@ -45,7 +45,7 @@ static inline void collectItens(Player* p, Cell* cell) {
     }
 }
 
-static inline void updatePlayerEffects(Player* p, Cell* cell) {
+static inline void applyPlayerEffects(Player* p, Cell* cell) {
     static const int mudDuration = (MUD_SLOWNESS_DURATION << 1) - 1;
     static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1) - 1;
 
@@ -61,8 +61,13 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
     } else if (cell->type == CELL_FONT_HEALTH) {
         p->effects.regeneration.duration = FONT_REGENERATION_DURATION;
         p->effects.regeneration.strenght = max(FONT_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
+    } else if (isDegenerated(cell->type)) {
+        p->effects.degeneration.duration = DEGENERATION_DURATION;
+        p->effects.degeneration.strenght = (cell->type - CELL_DEGENERATED_1) + 1;
     }
+}
 
+static inline void updatePlayerEffects(Player* p, Cell* cell) {
     if (p->effects.slowness.duration > 0) {
         p->effects.slowness.duration--;
     }
@@ -72,11 +77,16 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
     }
 
     if (p->effects.regeneration.duration > 0) {
-        if (p->life < START_LIFE)
-            p->life = min(p->effects.regeneration.strenght + p->life, START_LIFE);
+        p->life = min(p->effects.regeneration.strenght + p->life, START_LIFE);
         p->effects.regeneration.duration--;
     } else
         p->effects.regeneration.strenght = 0;
+
+    if (p->effects.degeneration.duration > 0) {
+        p->life -= DEGENERATION_DAMAGE;
+        p->effects.degeneration.duration--;
+    } else
+        p->effects.degeneration.strenght = 0;
 }
 
 static inline void updateDamagePlayer(Player* p, Cell* cell) {
@@ -167,11 +177,12 @@ static inline void updatePlayerByInput(Map* this, Cell* cell, Input input) {
 
 static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
     Player* p = this->player;
-    p->lastX = p->x;
-    p->lastY = p->y;
 
-    if ((p->effects.slowness.duration & 1) == 0)
+    if ((p->effects.slowness.duration & 1) == 0) {
+        p->lastX = p->x;
+        p->lastY = p->y;
         updatePlayerByInput(this, cell, input);
+    }
 
     updatePlayerWind(this, cell);
 }
@@ -185,6 +196,7 @@ static inline void updatePlayer(Map* this, Input input) {
     ChunkManager* cm = this->manager;
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
 
+    applyPlayerEffects(p, cell);
     updatePlayerEffects(p, cell);
     updatePlayerMovement(this, cell, input);
 

@@ -69,7 +69,14 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.r -= 20;
         color.g -= 20;
         color.b -= 20;
-    } else if (cell->type == CELL_DEGENERATED) {
+    } else if (cell->type == CELL_DEGENERATED_1) {
+        DrawSprite(sprites[SPRITE_DEGENERATED_1], x, y, size);
+        color = BLANK;
+    } else if (cell->type == CELL_DEGENERATED_2) {
+        DrawSprite(sprites[SPRITE_DEGENERATED_2], x, y, size);
+        color = BLANK;
+    } else if (cell->type == CELL_DEGENERATED_3) {
+        DrawSprite(sprites[SPRITE_DEGENERATED_3], x, y, size);
         color = BLANK;
     }
 
@@ -374,6 +381,10 @@ static void loadAllSprites(Game* this) {
 
     sprites[SPRITE_FLOOR_VIOLENCIA] = LoadSprite("assets/sprites/violencia/chao.png");
     sprites[SPRITE_WALL_VIOLENCIA] = LoadSprite("assets/sprites/violencia/parede.png");
+
+    sprites[SPRITE_DEGENERATED_1] = LoadSprite("assets/sprites/degenerated1.png");
+    sprites[SPRITE_DEGENERATED_2] = LoadSprite("assets/sprites/degenerated2.png");
+    sprites[SPRITE_DEGENERATED_3] = LoadSprite("assets/sprites/degenerated3.png");
 
     sprites[SPRITE_MUD] = LoadSprite("assets/sprites/gula/lama.png");
     sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");

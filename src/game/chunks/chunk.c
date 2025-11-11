@@ -17,9 +17,13 @@ static bool inline isFire(Cell* cell){
     return cell->type == CELL_FIRE_OFF || cell->type == CELL_FIRE_ON;
 }
 
-static void updateDegenerescence(Chunk* this, int x, int y){
+static void updateDegenerescence(Chunk* this, int x, int y, int biome){
     Cell* cell = cellAt(this, x, y);
-    cell->type = CELL_DEGENERATED;
+    if (cell->biome > biome) return;
+    if (!isDegenerated(cell->type))
+        cell->type = CELL_DEGENERATED_1;
+    else if (cell->type < CELL_DEGENERATED_3)
+        cell->type++;
 }
 
 static void updateFire(Chunk* this, int x, int y) {
@@ -74,8 +78,7 @@ static void updateGraveInfested(Chunk* this, int x, int y) {
 static void update(Chunk* this, int biome) {
     int y = rand() & CHUNK_MASK;
     int x = rand() & CHUNK_MASK;
-    if (this->biome <= biome)
-        updateDegenerescence(this, x, y);
+    updateDegenerescence(this, x, y, biome);
     updateFire(this, x, y);
     updateGraveInfested(this, x, y);
 }

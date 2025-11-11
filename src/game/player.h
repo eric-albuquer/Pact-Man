@@ -16,6 +16,7 @@ typedef struct Effects {
     Effect slowness;
     Effect invulnerability;
     Effect regeneration;
+    Effect degeneration;
 } Effects;
 
 typedef struct Player {

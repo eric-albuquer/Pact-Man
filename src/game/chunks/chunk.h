@@ -30,15 +30,14 @@ typedef enum {
     CELL_WIND_LEFT,
     CELL_WIND_UP,
     CELL_WIND_DOWN,
-    CELL_DEGENERATED
+    CELL_DEGENERATED_1,
+    CELL_DEGENERATED_2,
+    CELL_DEGENERATED_3,
 } CellType;
 
-typedef struct {
-    unsigned type : 5;
-    unsigned biome : 2;
-
-    signed distance : 9;
-} Cell;
+inline bool isDegenerated(CellType type){
+    return type >= CELL_DEGENERATED_1 && type <= CELL_DEGENERATED_3;
+}
 
 inline bool isWind(CellType type) {
     return type >= CELL_WIND_RIGHT && type <= CELL_WIND_DOWN;
@@ -51,6 +50,13 @@ inline bool isPassable(CellType type) {
 inline bool isSafe(CellType type) {
     return type != CELL_FIRE_ON && type != CELL_SPIKE;
 }
+
+typedef struct {
+    unsigned type : 5;
+    unsigned biome : 2;
+
+    signed distance : 9;
+} Cell;
 
 typedef enum {
     CHUNK_NORMAL,
