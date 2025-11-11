@@ -6,6 +6,8 @@
 
 typedef struct Menu {
     Button* play;
+    Button* volume;
+    Button* difficulty;
 
     void (*draw)(struct Menu*);
     void (*update)(struct Menu*);
@@ -15,3 +17,4 @@ typedef struct Menu {
 Menu* new_Menu();
 
 #endif
+
