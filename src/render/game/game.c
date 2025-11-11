@@ -9,6 +9,8 @@
 
 static char buffer[1000];
 
+static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0, 0, 255, 255}, {0, 0, 255, 255} };
+
 static void updateAnimations(Game* this) {
     for (int i = 0; i < ANIMATION_COUNT; i++) {
         UpdateAnimation(&this->animations[i]);
@@ -38,7 +40,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         sprite = sprites[SPRITE_DEGENERATED_3];
     } else if (cell->type == CELL_TEMPLE) {
         color = GRAY;
-    } 
+    }
 
     DrawSprite(sprite, x, y, size, color);
 
@@ -56,8 +58,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_MUD], x, y, size, color);
     } else if (cell->type == CELL_FONT_HEALTH) {
         DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
-    } 
-    
+    }
+
     if (!itens) return;
 
     if (cell->type == CELL_COIN) {
@@ -66,10 +68,37 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
     } else if (cell->type == CELL_FRUIT) {
         DrawAnimation(animations[ANIMATION_FRUIT], x, y, size, color);
-    } 
+    }
 
     sprintf(buffer, "%d", cell->distance);
     //DrawText(buffer, x + 15, y + 15, 20, WHITE);
+}
+
+static void drawEffects(Game* this, int x, int y, int size){
+    Sprite *sprites = this->sprites;
+
+    Effects effects = this->map->player->effects;
+
+    int delta = size + 20;
+    int ex = x;
+
+    DrawRectangle(x - 20, y - 20, delta * 4 + 20, delta + 20, (Color){100, 100, 100, 100});
+
+    if (effects.degeneration.duration > 0){
+        DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], ex, y, size, WHITE);
+        ex += delta;
+    } 
+    if (effects.regeneration.duration > 0){
+        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size, WHITE);
+        ex += delta;
+    } 
+    if (effects.slowness.duration > 0){
+        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size, WHITE);
+        ex += delta;
+    } 
+    if (effects.invulnerability.duration > 0){
+        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, WHITE);
+    } 
 }
 
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
@@ -101,9 +130,9 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             int y = (e->y - map->player->y) * cellSize;
 
             if (!e->isBoss)
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset, y + y0 + offset, cellSize, WHITE);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset, y + y0 + offset, cellSize, BIOME_COLOR[e->biome]);
             else
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, WHITE);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, BIOME_COLOR[e->biome]);
 
             cur = cur->next;
         }
@@ -168,11 +197,11 @@ static void drawTimeHUD(Game* this) {
 
     DrawText(stageText[stage], x + 16, y + 45, 20, stageColor);
 
-    DrawRectangle(x + boxWidth - 30, y + 10, 16, 16, RED);
+    DrawRectangle(x + boxWidth - 30, y + 10, 16, 16, BIOME_COLOR[map->player->biome]);
 }
 
 
-static void drawHudDebug(Game* this) {
+static void drawHud(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
     sprintf(buffer,
@@ -186,12 +215,13 @@ static void drawHudDebug(Game* this) {
     drawMinimapDebug(this, 20, 20, 500, 100);
 
     drawTimeHUD(this);
+    drawEffects(this, 550, 50, 100);
 }
 
 static void drawMapDebug(Game* this) {
     Animation* animations = this->animations;
     Map* map = this->map;
-    //this->sounds->updateMusic(this->sounds, map->player->biome);
+    this->sounds->updateMusic(this->sounds, map->player->biome);
     ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
@@ -255,9 +285,9 @@ static void drawMapDebug(Game* this) {
             }
 
             if (!e->isBoss)
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize, WHITE);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize, BIOME_COLOR[e->biome]);
             else
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3, WHITE);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3, BIOME_COLOR[e->biome]);
 
             cur = cur->next;
         }
@@ -291,7 +321,7 @@ static void drawMapDebug(Game* this) {
     }
 
     if (p->biome != 3)
-        drawHudDebug(this);
+        drawHud(this);
 
     this->frameCount++;
 }
@@ -331,18 +361,18 @@ static void loadAllSprites(Game* this) {
     animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
 
     const char* wind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
-    const char* mud[] = { "assets/sprites/gula/lama1.png", "assets/sprites/gula/lama2.png", "assets/sprites/gula/lama3.png"};
+    const char* mud[] = { "assets/sprites/gula/lama1.png", "assets/sprites/gula/lama2.png", "assets/sprites/gula/lama3.png" };
     const char* fire[] = { "assets/sprites/heresia/fogo.png", "assets/sprites/heresia/fogo2.png", "assets/sprites/heresia/fogo3.png",
                              "assets/sprites/heresia/fogo4.png" };
 
-    const char* font[] = { "assets/sprites/fonte.png", "assets/sprites/fonte1.png", "assets/sprites/fonte2.png", "assets/sprites/fonte3.png",
-                            "assets/sprites/fonte3.png", "assets/sprites/fonte2.png", "assets/sprites/fonte1.png" };
+    const char* font[] = { "assets/sprites/common_cells/fonte.png", "assets/sprites/common_cells/fonte1.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte3.png",
+                            "assets/sprites/common_cells/fonte3.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte1.png" };
 
     animations[ANIMATION_WIND] = LoadAnimation(2, wind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
     animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
 
-     animations[ANIMATION_FONT] = LoadAnimation(7, font);
+    animations[ANIMATION_FONT] = LoadAnimation(7, font);
 
     sprites[SPRITE_FLOOR_LUXURIA] = LoadSprite("assets/sprites/luxuria/chao.png");
     sprites[SPRITE_WALL_LUXURIA] = LoadSprite("assets/sprites/luxuria/parede.png");
@@ -356,14 +386,17 @@ static void loadAllSprites(Game* this) {
     sprites[SPRITE_FLOOR_VIOLENCIA] = LoadSprite("assets/sprites/violencia/chao.png");
     sprites[SPRITE_WALL_VIOLENCIA] = LoadSprite("assets/sprites/violencia/parede.png");
 
-    sprites[SPRITE_DEGENERATED_1] = LoadSprite("assets/sprites/degenerated1.png");
-    sprites[SPRITE_DEGENERATED_2] = LoadSprite("assets/sprites/degenerated2.png");
-    sprites[SPRITE_DEGENERATED_3] = LoadSprite("assets/sprites/degenerated3.png");
+    sprites[SPRITE_DEGENERATED_1] = LoadSprite("assets/sprites/common_cells/degenerated1.png");
+    sprites[SPRITE_DEGENERATED_2] = LoadSprite("assets/sprites/common_cells/degenerated2.png");
+    sprites[SPRITE_DEGENERATED_3] = LoadSprite("assets/sprites/common_cells/degenerated3.png");
 
-   
-    //sprites[SPRITE_MUD] = LoadSprite("assets/sprites/gula/lama1.png");
     sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");
     sprites[SPRITE_SPIKE] = LoadSprite("assets/sprites/violencia/espinhos.png");
+
+    sprites[SPRITE_EFFECT_REGENERATION] = LoadSprite("assets/sprites/effects/regeneration.png");
+    sprites[SPRITE_EFFECT_DEGENERATION] = LoadSprite("assets/sprites/effects/degeneration.png");
+    sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/invulnerability.png");
+    sprites[SPRITE_EFFECT_SLOWNESS] = LoadSprite("assets/sprites/effects/slowness.png");
 }
 
 static void saveUpdate(Game* this) {

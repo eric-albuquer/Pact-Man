@@ -19,7 +19,7 @@ static bool inline isFire(Cell* cell){
 
 static void updateDegenerescence(Chunk* this, int x, int y, int biome){
     Cell* cell = cellAt(this, x, y);
-    if (cell->type == CELL_FRAGMENT) return;
+    if (cell->type == CELL_FRAGMENT || rand() % 100 >= DEGENERATION_PROBABILITY) return;
     if (cell->biome > biome) return;
     if (!isDegenerated(cell->type))
         cell->type = CELL_DEGENERATED_1;

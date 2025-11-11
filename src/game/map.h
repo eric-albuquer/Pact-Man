@@ -24,13 +24,13 @@
 #define DEGENERATION_DURATION 5
 #define DEGENERATION_DAMAGE 1
 
-#define MAX_PERSUIT_RADIUS 30
+#define MAX_PERSUIT_RADIUS 40
 #define BEST_PATH_PROBABILITY 60
 
 // Constantes para ajudar no degen dos biomas
 #define MAP_UPDATE_DT 0.15f
-#define BIOME_DEGEN_START_TIME 60.0f
-#define BIOME_DEGEN_FULL_TIME 180.0f
+#define BIOME_DEGEN_START_TIME 180.0f
+#define BIOME_DEGEN_FULL_TIME 360.0f
 
 typedef struct Map {
     ChunkManager* manager;

@@ -63,7 +63,7 @@ static inline void applyPlayerEffects(Player* p, Cell* cell) {
     } else if (isDegenerated(cell->type)) {
         p->effects.degeneration.duration = DEGENERATION_DURATION;
         p->effects.degeneration.strenght = (cell->type - CELL_DEGENERATED_1) + 1;
-    } 
+    }
 }
 
 static inline void updatePlayerEffects(Player* p, Cell* cell) {
@@ -84,7 +84,7 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
     if (p->effects.degeneration.duration > 0) {
         p->life -= DEGENERATION_DAMAGE;
         p->effects.degeneration.duration--;
-    } else 
+    } else
         p->effects.degeneration.strenght = 0;
 }
 
@@ -262,6 +262,10 @@ static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Pla
         for (int j = -start; j <= start; j++) {
             if ((e->lastX + j == p->x && e->lastY + i == p->y) || (e->x + j == p->x && e->y + i == p->y)) {
                 if (p->effects.invulnerability.duration > 0) {
+                    if (e->isBoss) {
+                        p->biomeFragment++;
+                        p->totalFragment++;
+                    }
                     e->free(e);
                     enemies->removeNode(enemies, node);
                     return true;
@@ -357,7 +361,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(15, 21);
+    this->player = new_Player(11, 21);
 
     this->changedChunk = new_ArrayList();
     this->elapsedTime = 0.0f;
