@@ -49,7 +49,8 @@ static const char* violenciaSprites[] = {
 static const char* luxuriaSprites[] = {
     "assets/sprites/luxuria/chao.png",
     "assets/sprites/luxuria/parede.png",
-    "assets/sprites/luxuria/ventania.png",
+    "assets/sprites/luxuria/ventania1.png",
+    "assets/sprites/luxuria/ventania2.png",
 };
 
 static const Color CELL_COLORS[4] = { {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255} };
@@ -100,7 +101,6 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.g = 39;
         color.b = 30;
     } else if (cell->type == CELL_SPIKE) {
-        base = &sprites->violencia[BIOME_ITEN_1_SPRITE];
         color.r = 185;
         color.g = 185;
         color.b = 185;
@@ -153,14 +153,16 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     } else if (cell->type == CELL_FIRE_ON) {
         overlap = &sprites->heresia[BIOME_ITEN_2_SPRITE];
     } else if (isWind(cell->type)) {
-        overlap = &sprites->luxuria[BIOME_ITEN_1_SPRITE];
+        overlap = &sprites->luxuria[BIOME_ITEN_1_SPRITE + (this->updateCount & 1)];
+    } else if (cell->type == CELL_SPIKE) {
+        overlap = &sprites->violencia[BIOME_ITEN_1_SPRITE];
     }
 
     if (overlap != NULL)
         DrawTexture(*overlap, x, y, WHITE);
 
     sprintf(buffer, "%d", cell->distance);
-    DrawText(buffer, x + 15, y + 15, 20, WHITE);
+    //DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
@@ -280,7 +282,7 @@ static void drawHudDebug(Game* this) {
 
 static void drawMapDebug(Game* this) {
     Map* map = this->map;
-    //this->sounds->updateMusic(this->sounds, map->player->biome);
+    this->sounds->updateMusic(this->sounds, map->player->biome);
     ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
@@ -403,7 +405,7 @@ static void loadAllSprites(Game* this) {
     loadSprites(gulaSprites, 3, sprites->gula, size);
     loadSprites(heresiaSprites, 4, sprites->heresia, size);
     loadSprites(violenciaSprites, 3, sprites->violencia, size);
-    loadSprites(luxuriaSprites, 3, sprites->luxuria, size);
+    loadSprites(luxuriaSprites, 4, sprites->luxuria, size);
 }
 
 static void saveUpdate(Game* this) {
