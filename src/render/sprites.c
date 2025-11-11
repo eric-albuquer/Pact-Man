@@ -6,13 +6,13 @@ void UpdateAnimation(Animation* animation) {
     if (animation->actualFrame == animation->lenght) animation->actualFrame = 0;
 }
 
-void DrawAnimation(Animation animation, int x, int y, int size) {
+void DrawAnimation(Animation animation, int x, int y, int size, Color color) {
     Texture2D frame = animation.frames[animation.actualFrame];
     Rectangle source = { 0, 0, frame.width, frame.height };
     Rectangle dest = { x, y, size, size };
     Vector2 origin = { 0, 0 };
 
-    DrawTexturePro(frame, source, dest, origin, 0.0f, WHITE);
+    DrawTexturePro(frame, source, dest, origin, 0.0f, color);
 }
 
 Texture2D GetAnimationFrame(Animation animation) {
@@ -41,13 +41,13 @@ Animation LoadAnimation(int lenght, const char** path) {
     return this;
 }
 
-void DrawSprite(Sprite sprite, int x, int y, int size) {
+void DrawSprite(Sprite sprite, int x, int y, int size, Color color) {
     Texture2D texture = sprite.texture;
     Rectangle source = { 0, 0, texture.width, texture.height };
     Rectangle dest = { x, y, size, size };
     Vector2 origin = { 0, 0 };
 
-    DrawTexturePro(texture, source, dest, origin, 0.0f, WHITE);
+    DrawTexturePro(texture, source, dest, origin, 0.0f, color);
 }
 
 void UnloadSprite(Sprite sprite) {

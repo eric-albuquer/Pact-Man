@@ -7,8 +7,6 @@
 
 #include "enemy.h"
 
-static const Color CELL_COLORS[4] = { {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255} };
-
 static char buffer[1000];
 
 static void updateAnimations(Game* this) {
@@ -19,84 +17,51 @@ static void updateAnimations(Game* this) {
 
 static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens) {
     if (!cell) return;
-    Color color = CELL_COLORS[cell->biome];
 
     Sprite* sprites = this->sprites;
     Animation* animations = this->animations;
 
-    DrawSprite(sprites[SPRITE_FLOOR_LUXURIA + cell->biome], x, y, size);
+    Sprite sprite = sprites[SPRITE_FLOOR_LUXURIA + cell->biome];
+    Color color = WHITE;
 
     if (cell->type == CELL_WALL) {
-        DrawSprite(sprites[SPRITE_WALL_LUXURIA + cell->biome], x, y, size);
-        color.r += 70;
-        color.g += 70;
-        color.b += 70;
-    } else  if (isWind(cell->type)) {
-        color.r *= 0.7;
-        color.g += 100;
+        sprite = sprites[SPRITE_WALL_LUXURIA + cell->biome];
     } else if (cell->type == CELL_MUD) {
-        DrawSprite(sprites[SPRITE_MUD], x, y, size);
-        color.r = 79;
-        color.g = 39;
-        color.b = 30;
-    } else if (cell->type == CELL_SPIKE) {
-        color.r = 185;
-        color.g = 185;
-        color.b = 185;
+        sprite = sprites[SPRITE_MUD];
     } else if (cell->type == CELL_GRAVE) {
-        DrawSprite(sprites[SPRITE_GRAVE], x, y, size);
-        color.r = 10;
-        color.g = 10;
-        color.b = 10;
+        sprite = sprites[SPRITE_GRAVE];
     } else if (cell->type == CELL_GRAVE_INFESTED) {
-        DrawSprite(sprites[SPRITE_GRAVE], x, y, size);
-        color.r = 10;
-        color.g = 10;
-        color.b = 100;
-    } else if (cell->type == CELL_FIRE_ON) {
-        color.r = 255;
-        color.g = 0;
-        color.b = 0;
-    } else if (cell->type == CELL_FIRE_OFF) {
-        color.r = 128;
-        color.g = 128;
-        color.b = 128;
-    } else if (cell->type == CELL_FONT_HEALTH) {
-        color.r = 0;
-        color.g = 100;
-        color.b = 200;
-    } else if (cell->type == CELL_TEMPLE) {
-        color.r -= 20;
-        color.g -= 20;
-        color.b -= 20;
+        sprite = sprites[SPRITE_GRAVE];
     } else if (cell->type == CELL_DEGENERATED_1) {
-        DrawSprite(sprites[SPRITE_DEGENERATED_1], x, y, size);
-        color = BLANK;
+        sprite = sprites[SPRITE_DEGENERATED_1];
     } else if (cell->type == CELL_DEGENERATED_2) {
-        DrawSprite(sprites[SPRITE_DEGENERATED_2], x, y, size);
-        color = BLANK;
+        sprite = sprites[SPRITE_DEGENERATED_2];
     } else if (cell->type == CELL_DEGENERATED_3) {
-        DrawSprite(sprites[SPRITE_DEGENERATED_3], x, y, size);
-        color = BLANK;
+        sprite = sprites[SPRITE_DEGENERATED_3];
+    } else if (cell->type == CELL_FONT_HEALTH){
+        color = BLUE;
+    } else if (cell->type == CELL_TEMPLE) {
+        color = GRAY;
     }
 
-    if (!itens) {
-        DrawRectangle(x, y, size, size, color);
-        return;
-    }
+    DrawSprite(sprite, x, y, size, color);
+
+    if (!itens) return;
+
+    color = WHITE;
 
     if (cell->type == CELL_COIN) {
-        DrawAnimation(animations[ANIMATION_COIN], x, y, size);
+        DrawAnimation(animations[ANIMATION_COIN], x, y, size, color);
     } else if (cell->type == CELL_FRAGMENT) {
-        DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size);
+        DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
     } else if (cell->type == CELL_FRUIT) {
-        DrawAnimation(animations[ANIMATION_FRUIT], x, y, size);
+        DrawAnimation(animations[ANIMATION_FRUIT], x, y, size, color);
     } else if (cell->type == CELL_FIRE_ON) {
-        DrawAnimation(animations[ANIMATION_FIRE], x, y, size);
+        DrawAnimation(animations[ANIMATION_FIRE], x, y, size, color);
     } else if (isWind(cell->type)) {
-        DrawAnimation(animations[ANIMATION_WIND], x, y, size);
+        DrawAnimation(animations[ANIMATION_WIND], x, y, size, color);
     } else if (cell->type == CELL_SPIKE) {
-        DrawSprite(sprites[SPRITE_SPIKE], x, y, size);
+        DrawSprite(sprites[SPRITE_SPIKE], x, y, size, color);
     }
 
     sprintf(buffer, "%d", cell->distance);
@@ -106,6 +71,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
     ChunkManager* cm = map->manager;
+    Animation* animations = this->animations;
     int cellSize = size / (zoom);
     DrawRectangle(x0 - 5, y0 - 5, size + 10, size + 10, BLACK);
     for (int y = 0; y < zoom; y++) {
@@ -131,9 +97,9 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
             int y = (e->y - map->player->y) * cellSize;
 
             if (!e->isBoss)
-                DrawRectangle(x + x0 + offset, y + y0 + offset, cellSize, cellSize, YELLOW);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset, y + y0 + offset, cellSize, WHITE);
             else
-                DrawRectangle(x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, cellSize * 3, YELLOW);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, WHITE);
 
             cur = cur->next;
         }
@@ -158,7 +124,6 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
 
 static void drawTimeHUD(Game* this) {
     Map* map = this->map;
-    Player* p = map->player;
 
     int totalSeconds = (int)map->elapsedTime;
     int mm = totalSeconds / 60;
@@ -188,9 +153,6 @@ static void drawTimeHUD(Game* this) {
 
     Color stageColor = stageColors[stage];
 
-    Color biomeColor = CELL_COLORS[p->biome];
-    biomeColor.a = 255;
-
     int boxWidth = 220;
     int boxHeight = 80;
     int x = this->width - boxWidth - 20;
@@ -202,7 +164,7 @@ static void drawTimeHUD(Game* this) {
 
     DrawText(stageText[stage], x + 16, y + 45, 20, stageColor);
 
-    DrawRectangle(x + boxWidth - 30, y + 10, 16, 16, biomeColor);
+    DrawRectangle(x + boxWidth - 30, y + 10, 16, 16, RED);
 }
 
 
@@ -289,9 +251,9 @@ static void drawMapDebug(Game* this) {
             }
 
             if (!e->isBoss)
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize, WHITE);
             else
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3, WHITE);
 
             cur = cur->next;
         }
@@ -309,7 +271,7 @@ static void drawMapDebug(Game* this) {
         EndBlendMode();
     }
 
-    DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize);
+    DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, WHITE);
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -365,7 +327,7 @@ static void loadAllSprites(Game* this) {
     animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
 
     const char* wind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
-    const char* fire[] = { "assets/sprites/heresia/fogo.png" };
+    const char* fire[] = { "assets/sprites/heresia/fogo.png", "assets/sprites/heresia/fogo2.png" };
 
     animations[ANIMATION_WIND] = LoadAnimation(2, wind);
     animations[ANIMATION_FIRE] = LoadAnimation(2, fire);

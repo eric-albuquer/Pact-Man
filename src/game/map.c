@@ -48,23 +48,22 @@ static inline void collectItens(Player* p, Cell* cell) {
 static inline void applyPlayerEffects(Player* p, Cell* cell) {
     static const int mudDuration = (MUD_SLOWNESS_DURATION << 1) - 1;
     static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1) - 1;
+    static const int mudDurationLimit = (MUD_SLOWNESS_DURATION << 1) - 2;
+    static const int spikeDurationLimit = (SPIKE_SLOWNESS_DURATION << 1) - 2;
 
-    if (cell->type == CELL_MUD && p->effects.slowness.duration < mudDuration) {
+    if (cell->type == CELL_MUD && p->effects.slowness.duration < mudDurationLimit) {
         p->effects.slowness.duration = mudDuration;
-        return;
-    } else if (cell->type == CELL_SPIKE && p->effects.slowness.duration < spikeDuration) {
+    } else if (cell->type == CELL_SPIKE && p->effects.slowness.duration < spikeDurationLimit) {
         p->effects.slowness.duration = spikeDuration;
-        return;
     } else if (cell->type == CELL_FRUIT) {
         p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
-        return;
     } else if (cell->type == CELL_FONT_HEALTH) {
         p->effects.regeneration.duration = FONT_REGENERATION_DURATION;
         p->effects.regeneration.strenght = max(FONT_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
     } else if (isDegenerated(cell->type)) {
         p->effects.degeneration.duration = DEGENERATION_DURATION;
         p->effects.degeneration.strenght = (cell->type - CELL_DEGENERATED_1) + 1;
-    }
+    } 
 }
 
 static inline void updatePlayerEffects(Player* p, Cell* cell) {
@@ -85,7 +84,7 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
     if (p->effects.degeneration.duration > 0) {
         p->life -= DEGENERATION_DAMAGE;
         p->effects.degeneration.duration--;
-    } else
+    } else 
         p->effects.degeneration.strenght = 0;
 }
 
@@ -177,12 +176,11 @@ static inline void updatePlayerByInput(Map* this, Cell* cell, Input input) {
 
 static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
     Player* p = this->player;
+    p->lastX = p->x;
+    p->lastY = p->y;
 
-    if ((p->effects.slowness.duration & 1) == 0) {
-        p->lastX = p->x;
-        p->lastY = p->y;
+    if ((p->effects.slowness.duration & 1) == 0)
         updatePlayerByInput(this, cell, input);
-    }
 
     updatePlayerWind(this, cell);
 }
@@ -197,8 +195,8 @@ static inline void updatePlayer(Map* this, Input input) {
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
 
     applyPlayerEffects(p, cell);
-    updatePlayerEffects(p, cell);
     updatePlayerMovement(this, cell, input);
+    updatePlayerEffects(p, cell);
 
     updateDamagePlayer(p, cell);
     collectItens(p, cell);
@@ -359,7 +357,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(11, 21);
+    this->player = new_Player(101, 21);
 
     this->changedChunk = new_ArrayList();
     this->elapsedTime = 0.0f;
