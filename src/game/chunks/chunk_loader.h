@@ -16,7 +16,7 @@
 
 #define SPIKE_DENSITY 5
 
-#define COIN_DENSITY 50
+#define COIN_DENSITY 15
 
 #define FRUIT_PROBABILITY 8
 

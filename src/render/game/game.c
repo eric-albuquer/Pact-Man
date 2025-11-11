@@ -141,7 +141,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
     if (effects.regeneration.duration > 0) {
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size, size, WHITE);
-        drawActionHud(this, BLUE);
+        drawActionHud(this, (Color) { 0, 255, 255, 255 });
         ex += delta;
     }
     if (effects.slowness.duration > 0) {
@@ -153,7 +153,8 @@ static void drawEffects(Game* this, int x, int y, int size) {
     if (effects.invulnerability.duration > 0) {
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, size, WHITE);
-        drawActionHud(this, YELLOW);
+        if (effects.invulnerability.duration & 1)
+            drawActionHud(this, YELLOW);
     }
 }
 
@@ -216,7 +217,10 @@ static void drawTimeHUD(Game* this, int x, int y) {
     int mm = totalSeconds / 60;
     int ss = totalSeconds % 60;
 
-    sprintf(buffer, "%02d:%02d", mm, ss);
+    static const int totalMM = (int)(BIOME_DEGEN_START_TIME) / 60;
+    static const int totalSS = (int)(BIOME_DEGEN_START_TIME) % 60;
+
+    sprintf(buffer, "%02d:%02d / %02d:%02d", mm, ss, totalMM, totalSS);
 
     float d = map->degenerescence;
     int stage = 0;
@@ -240,10 +244,10 @@ static void drawTimeHUD(Game* this, int x, int y) {
 
     Color stageColor = stageColors[stage];
 
-    int boxWidth = 220;
+    int boxWidth = 320;
     int boxHeight = 80;
 
-    DrawRectangle(x, y, boxWidth, boxHeight, (Color) { 0, 0, 0, 200 });
+    DrawRectangle(x, y, boxWidth, boxHeight, HUD_OPACITY);
 
     DrawText(buffer, x + 16, y + 10, 30, WHITE);
 
@@ -256,18 +260,21 @@ static void drawTimeHUD(Game* this, int x, int y) {
 static void drawHud(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
-    sprintf(buffer,
-        "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\n",
-        p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK,
-        p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration);
+    // sprintf(buffer,
+    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\n",
+    //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK,
+    //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration);
 
-    DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
-    DrawText(buffer, 30, this->height - 580, 30, GREEN);
+    // DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
+    // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
-    drawMinimap(this, this->width - 520, 20, 500, 80);
+    static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
+    DrawText(BIOMES[p->biome], this->offsetHalfX, 50, 60, BIOME_COLOR[p->biome]);
+
+    drawMinimap(this, this->width - 520, 40, 500, 80);
 
     drawTimeHUD(this, 30, 30);
-    drawEffects(this, 300, 50, 80);
+    drawEffects(this, 370, 20, 80);
     drawLifeBar(this, this->offsetHalfX - 200, this->height - 150, 400, 100);
     drawInfoHud(this, this->width - 250, 540, 80);
 
@@ -352,8 +359,12 @@ static void drawMap(Game* this) {
     if (p->biome == VIOLENCIA) {
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(this->shadowMap.texture,
-            (Rectangle) { 0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height },
-            (Vector2) { 0, 0 }, WHITE);
+            (Rectangle) {
+            0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height
+        },
+            (Vector2) {
+            0, 0
+        }, WHITE);
         EndBlendMode();
     }
 
@@ -403,12 +414,14 @@ static void loadAllSprites(Game* this) {
     animations[ANIMATION_PACMAN_UP] = LoadAnimation(2, pacmanUp);
     animations[ANIMATION_PACMAN_DOWN] = LoadAnimation(2, pacmanDown);
 
-    const char* coin[] = { "assets/sprites/itens/coin.png" };
-    const char* fragment[] = { "assets/sprites/itens/chave.png" };
+    const char* coin[] = { "assets/sprites/itens/coin1.png", "assets/sprites/itens/coin2.png", "assets/sprites/itens/coin3.png", "assets/sprites/itens/coin4.png",
+    "assets/sprites/itens/coin5.png", "assets/sprites/itens/coin6.png" };
+    const char* fragment[] = { "assets/sprites/itens/keys1.png", "assets/sprites/itens/keys2.png", "assets/sprites/itens/keys3.png", "assets/sprites/itens/keys4.png",
+    "assets/sprites/itens/keys5.png", "assets/sprites/itens/keys6.png", "assets/sprites/itens/keys7.png", "assets/sprites/itens/keys8.png", "assets/sprites/itens/keys9.png" };
     const char* fruit[] = { "assets/sprites/itens/apple.png" };
 
-    animations[ANIMATION_COIN] = LoadAnimation(1, coin);
-    animations[ANIMATION_FRAGMENT] = LoadAnimation(1, fragment);
+    animations[ANIMATION_COIN] = LoadAnimation(6, coin);
+    animations[ANIMATION_FRAGMENT] = LoadAnimation(9, fragment);
     animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
 
     const char* verticalWind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };

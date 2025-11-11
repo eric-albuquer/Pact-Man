@@ -92,10 +92,13 @@ static inline void updateDamagePlayer(Player* p, Cell* cell) {
     if (p->effects.invulnerability.duration > 0) return;
     if (cell->type == CELL_FIRE_ON) {
         p->life -= FIRE_DAMAGE;
+        p->damaged = true;
     } else if (cell->type == CELL_SPIKE) {
         p->life -= SPIKE_DAMAGE;
+        p->damaged = true;
     }
-    p->damaged = true;
+
+    if (p->life < 0) p->life = 0;
 }
 
 //===============================================================
@@ -195,6 +198,8 @@ static inline void updatePlayer(Map* this, Input input) {
     ChunkManager* cm = this->manager;
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
 
+    p->damaged = false;
+
     applyPlayerEffects(p, cell);
     updatePlayerMovement(this, cell, input);
     updatePlayerEffects(p, cell);
@@ -202,7 +207,7 @@ static inline void updatePlayer(Map* this, Input input) {
     updateDamagePlayer(p, cell);
     collectItens(p, cell);
 
-    p->damaged = false;
+    
 }
 
 //===============================================================
@@ -262,7 +267,7 @@ static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Pla
     int start = e->isBoss;
     for (int i = -start; i <= start; i++) {
         for (int j = -start; j <= start; j++) {
-            if ((e->lastX + j == p->x && e->lastY + i == p->y) || (e->x + j == p->x && e->y + i == p->y)) {
+            if ((e->lastX + j == p->lastX && e->lastY + i == p->lastY) || (e->x + j == p->lastX && e->y + i == p->lastY)) {
                 if (p->effects.invulnerability.duration > 0) {
                     if (e->isBoss) {
                         p->biomeFragment++;
