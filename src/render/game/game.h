@@ -3,27 +3,32 @@
 
 #include <raylib.h>
 #include "sounds.h"
+#include "sprites.h"
 #include "map.h"
 
 #define FRAMES_ANIMATION 8.0f
 
 typedef enum {
-    BIOME_FLOOR_SPRITE,
-    BIOME_WALL_SPRITE,
-    BIOME_ITEN_1_SPRITE,
-    BIOME_ITEN_2_SPRITE
-} BiomeSprite;
+    SPRITE_COIN,
+    SPRITE_FRAGMENT,
+    SPRITE_FRUIT
+} ItenSprites;
 
 typedef struct Sprites {
-    Texture2D ghost[8];
-    Texture2D pacman[8];
+    Animation ghost[4];
+    Animation pacman[4];
 
-    Texture2D itens[3];
+    Animation itens[3];
 
-    Texture2D gula[3];
-    Texture2D heresia[4];
-    Texture2D violencia[3];
-    Texture2D luxuria[4];
+    Sprite floor[4];
+    Sprite wall[4];
+    
+    Animation wind;
+    Sprite mud;
+    Sprite grave;
+    Sprite fire;
+    Sprite spike;
+    
 } Sprites;
 
 typedef struct Game {
@@ -43,7 +48,6 @@ typedef struct Game {
     unsigned int updateCount;
 
     Map* map;
-    Chunk* visibleChunks[49];
 
     Sounds* sounds;
 

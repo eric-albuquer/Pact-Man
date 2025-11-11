@@ -7,88 +7,33 @@
 
 #include "enemy.h"
 
-static const char* ghostSprites[] = {
-    "assets/sprites/ghostRight1.png",  "assets/sprites/ghostRight2.png",
-    "assets/sprites/ghostDown1.png",   "assets/sprites/ghostDown2.png",
-    "assets/sprites/ghostLeft1.png",   "assets/sprites/ghostLeft2.png",
-    "assets/sprites/ghostUp1.png",     "assets/sprites/ghostUp2.png",
-};
-
-static const char* pacmanSprites[] = {
-    "assets/sprites/pacmanRight1.png", "assets/sprites/pacmanRight2.png",
-    "assets/sprites/pacmanDown1.png",  "assets/sprites/pacmanDown2.png",
-    "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png",
-    "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png",
-};
-
-static const char* itensSprites[] = {
-    "assets/sprites/coin.png",
-    "assets/sprites/Key.png",
-    "assets/sprites/apple.png",
-};
-
-static const char* gulaSprites[] = {
-    "assets/sprites/gula/chao.png",
-    "assets/sprites/gula/parede.png",
-    "assets/sprites/gula/lama.png",
-};
-
-static const char* heresiaSprites[] = {
-    "assets/sprites/heresia/chao.png",
-    "assets/sprites/heresia/parede.png",
-    "assets/sprites/heresia/cova.png",
-    "assets/sprites/heresia/fogo.png",
-};
-
-static const char* violenciaSprites[] = {
-    "assets/sprites/violencia/chao.png",
-    "assets/sprites/violencia/parede.png",
-    "assets/sprites/violencia/espinhos.png",
-};
-
-static const char* luxuriaSprites[] = {
-    "assets/sprites/luxuria/chao.png",
-    "assets/sprites/luxuria/parede.png",
-    "assets/sprites/luxuria/ventania1.png",
-    "assets/sprites/luxuria/ventania2.png",
-};
-
 static const Color CELL_COLORS[4] = { {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 100, 0, 255}, {0, 0, 150, 255} };
 
 static char buffer[1000];
 
-static Texture2D* getSprites(Sprites* sprites, Biome biome){
-    if (biome == HERESIA) return sprites->heresia;
-    else if (biome == GULA) return sprites->gula;
-    else if (biome == LUXURIA) return sprites->luxuria;
-    else if (biome == VIOLENCIA) return sprites->violencia;
-    return sprites->heresia;
-}
+static void updateAnimations(Game* this){
+    for (int i = 0; i < 4; i++){
+        UpdateAnimation(&this->sprites.pacman[i]);
+        UpdateAnimation(&this->sprites.ghost[i]);
+    }
 
-static Texture2D getEntityTexture(Texture2D* sprites, Direction dir, int updateCount) {
-    int offsetTexture = 0;
-    if (dir == RIGHT)
-        offsetTexture = 0;
-    else if (dir == DOWN)
-        offsetTexture = 2;
-    else if (dir == LEFT)
-        offsetTexture = 4;
-    else if (dir == UP)
-        offsetTexture = 6;
-    return sprites[offsetTexture + (updateCount & 1)];
+    for (int i = 0; i < 3; i++){
+        UpdateAnimation(&this->sprites.itens[i]);
+    }
+    
+    UpdateAnimation(&this->sprites.wind);
 }
 
 static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens) {
     if (!cell) return;
     Color color = CELL_COLORS[cell->biome];
 
-    Texture2D* base = NULL;
     Sprites* sprites = &this->sprites;
 
-    base = &getSprites(sprites, cell->biome)[BIOME_FLOOR_SPRITE];
+    DrawSprite(sprites->floor[cell->biome], x, y, size);
 
     if (cell->type == CELL_WALL) {
-        base = &getSprites(sprites, cell->biome)[BIOME_WALL_SPRITE];
+        DrawSprite(sprites->wall[cell->biome], x, y, size);
         color.r += 70;
         color.g += 70;
         color.b += 70;
@@ -96,7 +41,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.r *= 0.7;
         color.g += 100;
     } else if (cell->type == CELL_MUD) {
-        base = &sprites->gula[BIOME_ITEN_1_SPRITE];
+        DrawSprite(sprites->mud, x, y, size);
         color.r = 79;
         color.g = 39;
         color.b = 30;
@@ -105,12 +50,12 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.g = 185;
         color.b = 185;
     } else if (cell->type == CELL_GRAVE) {
-        base = &sprites->heresia[BIOME_ITEN_1_SPRITE];
+        DrawSprite(sprites->grave, x, y, size);
         color.r = 10;
         color.g = 10;
         color.b = 10;
     } else if (cell->type == CELL_GRAVE_INFESTED) {
-        base = &sprites->heresia[BIOME_ITEN_1_SPRITE];
+        DrawSprite(sprites->grave, x, y, size);
         color.r = 10;
         color.g = 10;
         color.b = 100;
@@ -132,37 +77,29 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.b -= 20;
     } else if (cell->type == CELL_DEGENERATED) {
         color = BLANK;
-        base = NULL;
     }
 
-    if (base != NULL && itens) {
-        DrawTexture(*base, x, y, WHITE);
-    } else {
+    if (!itens) {
         DrawRectangle(x, y, size, size, color);
         return;
     }
 
-    Texture2D* overlap = NULL;
-
     if (cell->type == CELL_COIN) {
-        overlap = &sprites->itens[0];
+        DrawAnimation(sprites->itens[SPRITE_COIN], x, y, size);
     } else if (cell->type == CELL_FRAGMENT) {
-        overlap = &sprites->itens[1];
+        DrawAnimation(sprites->itens[SPRITE_FRAGMENT], x, y, size);
     } else if (cell->type == CELL_FRUIT) {
-        overlap = &sprites->itens[2];
+        DrawAnimation(sprites->itens[SPRITE_FRUIT], x, y, size);
     } else if (cell->type == CELL_FIRE_ON) {
-        overlap = &sprites->heresia[BIOME_ITEN_2_SPRITE];
+        DrawSprite(sprites->fire, x, y, size);
     } else if (isWind(cell->type)) {
-        overlap = &sprites->luxuria[BIOME_ITEN_1_SPRITE + (this->updateCount & 1)];
+        DrawAnimation(sprites->wind, x, y, size);
     } else if (cell->type == CELL_SPIKE) {
-        overlap = &sprites->violencia[BIOME_ITEN_1_SPRITE];
+        DrawSprite(sprites->spike, x, y, size);
     }
 
-    if (overlap != NULL)
-        DrawTexture(*overlap, x, y, WHITE);
-
     sprintf(buffer, "%d", cell->distance);
-    //DrawText(buffer, x + 15, y + 15, 20, WHITE);
+    DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
 static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
@@ -238,8 +175,8 @@ static void drawTimeHUD(Game* this) {
     };
 
     Color stageColors[] = {
-        { 0,   228, 48,  255 }, 
-        { 253, 249, 0,   255 },  
+        { 0,   228, 48,  255 },
+        { 253, 249, 0,   255 },
         { 255, 161, 0,   255 },
         { 230, 41,  55,  255 }
     };
@@ -254,7 +191,7 @@ static void drawTimeHUD(Game* this) {
     int x = this->width - boxWidth - 20;
     int y = 20;
 
-    DrawRectangle(x, y, boxWidth, boxHeight, (Color){ 0, 0, 0, 200 });
+    DrawRectangle(x, y, boxWidth, boxHeight, (Color) { 0, 0, 0, 200 });
 
     DrawText(buffer, x + 16, y + 10, 30, WHITE);
 
@@ -345,7 +282,7 @@ static void drawMapDebug(Game* this) {
                 EndTextureMode();
             }
 
-            DrawTexture(getEntityTexture(this->sprites.pacman, e->dir, this->updateCount), x, y, WHITE);
+            DrawAnimation(this->sprites.pacman[e->dir], x, y, this->cellSize);
 
             cur = cur->next;
         }
@@ -363,7 +300,7 @@ static void drawMapDebug(Game* this) {
         EndBlendMode();
     }
 
-    DrawTexture(getEntityTexture(this->sprites.ghost, p->dir, this->updateCount), this->offsetHalfX, this->offsetHalfY, WHITE);
+    DrawAnimation(this->sprites.ghost[p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize);
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -384,48 +321,80 @@ static void drawMapDebug(Game* this) {
     this->frameCount++;
 }
 
-static void loadSprites(const char** paths, const int total, Texture2D* sprites, const int size) {
-    for (int i = 0; i < total; i++) {
-        Image img = LoadImage(paths[i]);
-        ImageResize(&img, size, size);
-        sprites[i] = LoadTextureFromImage(img);
-        UnloadImage(img);
-    }
+static void loadBiomeSprites(Game* this, Biome biome, char* floorPath, char* wallPath) {
+    this->sprites.floor[biome] = LoadSprite(floorPath);
+    this->sprites.wall[biome] = LoadSprite(wallPath);
 }
 
 static void loadAllSprites(Game* this) {
     Sprites* sprites = &this->sprites;
-    int size = this->cellSize;
 
-    loadSprites(ghostSprites, 8, sprites->ghost, size);
-    loadSprites(pacmanSprites, 8, sprites->pacman, size);
+    // ---------- GHOST ----------
+    const char* ghostRight[] = { "assets/sprites/ghostRight1.png", "assets/sprites/ghostRight2.png" };
+    const char* ghostLeft[] = { "assets/sprites/ghostLeft1.png",  "assets/sprites/ghostLeft2.png" };
+    const char* ghostUp[] = { "assets/sprites/ghostUp1.png",    "assets/sprites/ghostUp2.png" };
+    const char* ghostDown[] = { "assets/sprites/ghostDown1.png",  "assets/sprites/ghostDown2.png" };
 
-    loadSprites(itensSprites, 3, sprites->itens, size);
+    sprites->ghost[RIGHT] = LoadAnimation(2, ghostRight);
+    sprites->ghost[LEFT] = LoadAnimation(2, ghostLeft);
+    sprites->ghost[UP] = LoadAnimation(2, ghostUp);
+    sprites->ghost[DOWN] = LoadAnimation(2, ghostDown);
 
-    loadSprites(gulaSprites, 3, sprites->gula, size);
-    loadSprites(heresiaSprites, 4, sprites->heresia, size);
-    loadSprites(violenciaSprites, 3, sprites->violencia, size);
-    loadSprites(luxuriaSprites, 4, sprites->luxuria, size);
+    // ---------- PACMAN ----------
+    const char* pacmanRight[] = { "assets/sprites/pacmanRight1.png", "assets/sprites/pacmanRight2.png" };
+    const char* pacmanLeft[] = { "assets/sprites/pacmanLeft1.png",  "assets/sprites/pacmanLeft2.png" };
+    const char* pacmanUp[] = { "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png" };
+    const char* pacmanDown[] = { "assets/sprites/pacmanDown1.png",  "assets/sprites/pacmanDown2.png" };
+
+    sprites->pacman[RIGHT] = LoadAnimation(2, pacmanRight);
+    sprites->pacman[LEFT] = LoadAnimation(2, pacmanLeft);
+    sprites->pacman[UP] = LoadAnimation(2, pacmanUp);
+    sprites->pacman[DOWN] = LoadAnimation(2, pacmanDown);
+
+    const char* coin[] = { "assets/sprites/coin.png" };
+    const char* fragment[] = { "assets/sprites/Key.png" };
+    const char* fruit[] = { "assets/sprites/apple.png" };
+    sprites->itens[SPRITE_COIN] = LoadAnimation(1, coin);
+    sprites->itens[SPRITE_FRAGMENT] = LoadAnimation(1, fragment);
+    sprites->itens[SPRITE_FRUIT] = LoadAnimation(1, fruit);
+
+    loadBiomeSprites(this, LUXURIA, "assets/sprites/luxuria/chao.png", "assets/sprites/luxuria/parede.png");
+    loadBiomeSprites(this, GULA, "assets/sprites/gula/chao.png", "assets/sprites/gula/parede.png");
+    loadBiomeSprites(this, HERESIA, "assets/sprites/heresia/chao.png", "assets/sprites/heresia/parede.png");
+    loadBiomeSprites(this, VIOLENCIA, "assets/sprites/violencia/chao.png", "assets/sprites/violencia/parede.png");
+
+    const char* wind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
+    sprites->wind = LoadAnimation(2, wind);
+    sprites->mud = LoadSprite("assets/sprites/gula/lama.png");
+    sprites->grave = LoadSprite("assets/sprites/heresia/cova.png");
+    sprites->fire = LoadSprite("assets/sprites/heresia/fogo.png");
+    sprites->spike = LoadSprite("assets/sprites/violencia/espinhos.png");
 }
 
 static void saveUpdate(Game* this) {
+    updateAnimations(this);
     this->lastUpdate = this->frameCount;
     this->updateCount++;
 }
 
-static void freeSprites(Texture2D* sprites, int length){
-    for (int i = 0; i < length; i++) {
-        UnloadTexture(sprites[i]);
-    }
-}
-
 static void _free(Game* this) {
-    freeSprites(this->sprites.ghost, 8);
-    freeSprites(this->sprites.pacman, 8);
-    freeSprites(this->sprites.violencia, 3);
-    freeSprites(this->sprites.gula, 3);
-    freeSprites(this->sprites.heresia, 4);
-    freeSprites(this->sprites.luxuria, 3);
+    for (int i = 0; i < 4; i++){
+        UnloadAnimation(this->sprites.ghost[i]);
+        UnloadAnimation(this->sprites.pacman[i]);
+        UnloadSprite(this->sprites.floor[i]);
+        UnloadSprite(this->sprites.wall[i]);
+    }
+
+    for(int i = 0; i < 3; i++){
+        UnloadAnimation(this->sprites.itens[i]);
+    }
+    
+    UnloadAnimation(this->sprites.wind);
+    UnloadSprite(this->sprites.fire);
+    UnloadSprite(this->sprites.grave);
+    UnloadSprite(this->sprites.mud);
+    UnloadSprite(this->sprites.spike);
+    
     UnloadRenderTexture(this->shadowMap);
     free(this);
 }

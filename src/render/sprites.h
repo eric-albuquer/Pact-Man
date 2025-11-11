@@ -3,17 +3,24 @@
 
 #include <raylib.h>
 
+typedef struct Sprite {
+    Texture2D texture;
+} Sprite;
+
+void DrawSprite(Sprite sprite, int x, int y, int size);
+void UnloadSprite(Sprite sprite);
+Sprite LoadSprite(const char* path);
+
 typedef struct Animation {
     Texture2D* frames;
     int lenght;
     int actualFrame;
-
-    void (*free)(struct Animation*);
-    void (*draw)(struct Animation*, int, int, int);
-    void (*update)(struct Animation*);
-    
 } Animation;
 
-Animation* new_Animation(int lenght, const char** path);
+Animation LoadAnimation(int lenght, const char** path);
+void UpdateAnimation(Animation* animation);
+Texture2D GetAnimationFrame(Animation animation);
+void DrawAnimation(Animation animation, int x, int y, int size);
+void UnloadAnimation(Animation animation);
 
 #endif

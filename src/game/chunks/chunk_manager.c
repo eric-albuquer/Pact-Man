@@ -91,6 +91,8 @@ ChunkManager* new_ChunkManager(int cols, int rows, Player* p) {
 
     loadAdjacents(this);
 
+    this->player->biome = getUpdatedCell(this, p->x, p->y)->biome;
+
     this->getChunk = getChunk;
     this->getLoadedChunk = getLoadedChunk;
     this->getLoadedCell = getLoadedCell;

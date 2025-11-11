@@ -309,7 +309,6 @@ Map* new_Map(int chunkCols, int chunkRows) {
 
     this->updateCount = 0;
     this->player = new_Player(11, 21);
-    this->player->biome = 0;
 
     this->changedChunk = new_ArrayList();
     this->elapsedTime = 0.0f;
