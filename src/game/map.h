@@ -16,7 +16,7 @@
 #define COINS_TO_FRAGMENT 100
 
 #define MUD_SLOWNESS_DURATION 3
-#define SPIKE_SLOWNESS_DURATION 5
+#define SPIKE_SLOWNESS_DURATION 1 
 #define FRUIT_INVULNERABILITY_DURATION 100
 
 // Constantes para ajudar no degen dos biomas
