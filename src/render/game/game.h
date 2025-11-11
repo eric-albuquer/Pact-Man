@@ -9,27 +9,43 @@
 #define FRAMES_ANIMATION 8.0f
 
 typedef enum {
-    SPRITE_COIN,
-    SPRITE_FRAGMENT,
-    SPRITE_FRUIT
-} ItenSprites;
+    SPRITE_WALL_LUXURIA,
+    SPRITE_WALL_GULA,
+    SPRITE_WALL_HERESIA,
+    SPRITE_WALL_VIOLENCIA,
 
-typedef struct Sprites {
-    Animation ghost[4];
-    Animation pacman[4];
+    SPRITE_FLOOR_LUXURIA,
+    SPRITE_FLOOR_GULA,
+    SPRITE_FLOOR_HERESIA,
+    SPRITE_FLOOR_VIOLENCIA,
 
-    Animation itens[3];
+    SPRITE_MUD,
+    SPRITE_GRAVE,
+    SPRITE_SPIKE,
 
-    Sprite floor[4];
-    Sprite wall[4];
-    
-    Animation wind;
-    Sprite mud;
-    Sprite grave;
-    Sprite fire;
-    Sprite spike;
-    
-} Sprites;
+    SPRITE_COUNT
+} SpritesEnum;
+
+typedef enum {
+    ANIMATION_GHOST_RIGHT,
+    ANIMATION_GHOST_LEFT,
+    ANIMATION_GHOST_UP,
+    ANIMATION_GHOST_DOWN,
+
+    ANIMATION_PACMAN_RIGHT,
+    ANIMATION_PACMAN_LEFT,
+    ANIMATION_PACMAN_UP,
+    ANIMATION_PACMAN_DOWN,
+
+    ANIMATION_COIN,
+    ANIMATION_FRAGMENT,
+    ANIMATION_FRUIT,
+
+    ANIMATION_WIND,
+    ANIMATION_FIRE,
+
+    ANIMATION_COUNT
+} AnimationsEnum;
 
 typedef struct Game {
     int width;
@@ -53,7 +69,8 @@ typedef struct Game {
 
     RenderTexture2D shadowMap;
 
-    Sprites sprites;
+    Animation animations[ANIMATION_COUNT];
+    Sprite sprites[SPRITE_COUNT];
 
     void (*drawMapDebug)(struct Game*);
     void (*saveUpdate)(struct Game*);

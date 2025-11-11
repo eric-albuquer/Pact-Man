@@ -57,19 +57,19 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
         chunk->cells[i].distance = -1;
     }
 
-    int biome = chunk->x / this->biomeWidthChunks;
+    int biome = (chunk->x + 1) / this->biomeWidthChunks;
     chunk->biome = biome < 4 ? biome : 3;
 
     chunk->isBorder = chunk->y == 0 || chunk->y == (this->height - 1);
 
     chunk->type = CHUNK_NORMAL;
 
-    if (chunk->x % this->biomeWidthChunks == 0 && chunk->x > 0) {
+    if ((chunk->x + 1) % this->biomeWidthChunks == 0) {
         chunk->type = CHUNK_TRANSITION;
         return;
     }
 
-    int biomeHalfWidth = this->biomeWidthChunks >> 1;
+    int biomeHalfWidth = (this->biomeWidthChunks >> 1) - 1;
     bool isXstructure = ((chunk->x - biomeHalfWidth) % this->biomeWidthChunks) == 0;
     int templeY = ((hash2D(chunk->x, 1, this->seed) & 5) + 1);
 
@@ -117,9 +117,6 @@ static void generateBorder(ChunkLoader* this, Chunk* chunk) {
 
 static void generateBiomeTransition(ChunkLoader* this, Chunk* chunk) {
     if (chunk->type != CHUNK_TRANSITION) return;
-    int idx = chunk->x / this->biomeWidthChunks;
-
-    if (idx > 3) idx = 3;
 
     int x0 = hash2D(chunk->x, chunk->y, this->seed) & CHUNK_MASK;
     int x1 = hash2D(chunk->x, chunk->y + 1, this->seed) & CHUNK_MASK;
@@ -130,7 +127,7 @@ static void generateBiomeTransition(ChunkLoader* this, Chunk* chunk) {
         float t = y / (float)CHUNK_SIZE;
         int bx = x0 + delta * t;
         for (int x = 0; x < CHUNK_SIZE; x++) {
-            int biome = idx - 1;
+            int biome = chunk->biome - 1;
             if (x > bx) biome++;
             chunk->cellAt(chunk, x, y)->biome = biome;
         }

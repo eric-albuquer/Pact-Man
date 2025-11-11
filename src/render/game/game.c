@@ -12,28 +12,22 @@ static const Color CELL_COLORS[4] = { {30, 30, 30, 255}, {160, 0, 0, 255}, {0, 1
 static char buffer[1000];
 
 static void updateAnimations(Game* this){
-    for (int i = 0; i < 4; i++){
-        UpdateAnimation(&this->sprites.pacman[i]);
-        UpdateAnimation(&this->sprites.ghost[i]);
+    for (int i = 0; i < ANIMATION_COUNT; i++){
+        UpdateAnimation(&this->animations[i]);
     }
-
-    for (int i = 0; i < 3; i++){
-        UpdateAnimation(&this->sprites.itens[i]);
-    }
-    
-    UpdateAnimation(&this->sprites.wind);
 }
 
 static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens) {
     if (!cell) return;
     Color color = CELL_COLORS[cell->biome];
 
-    Sprites* sprites = &this->sprites;
+    Sprite* sprites = this->sprites;
+    Animation* animations = this->animations;
 
-    DrawSprite(sprites->floor[cell->biome], x, y, size);
+    DrawSprite(sprites[SPRITE_FLOOR_LUXURIA + cell->biome], x, y, size);
 
     if (cell->type == CELL_WALL) {
-        DrawSprite(sprites->wall[cell->biome], x, y, size);
+        DrawSprite(sprites[SPRITE_WALL_LUXURIA + cell->biome], x, y, size);
         color.r += 70;
         color.g += 70;
         color.b += 70;
@@ -41,7 +35,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.r *= 0.7;
         color.g += 100;
     } else if (cell->type == CELL_MUD) {
-        DrawSprite(sprites->mud, x, y, size);
+        DrawSprite(sprites[SPRITE_MUD], x, y, size);
         color.r = 79;
         color.g = 39;
         color.b = 30;
@@ -50,12 +44,12 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color.g = 185;
         color.b = 185;
     } else if (cell->type == CELL_GRAVE) {
-        DrawSprite(sprites->grave, x, y, size);
+        DrawSprite(sprites[SPRITE_GRAVE], x, y, size);
         color.r = 10;
         color.g = 10;
         color.b = 10;
     } else if (cell->type == CELL_GRAVE_INFESTED) {
-        DrawSprite(sprites->grave, x, y, size);
+        DrawSprite(sprites[SPRITE_GRAVE], x, y, size);
         color.r = 10;
         color.g = 10;
         color.b = 100;
@@ -85,17 +79,17 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     }
 
     if (cell->type == CELL_COIN) {
-        DrawAnimation(sprites->itens[SPRITE_COIN], x, y, size);
+        DrawAnimation(animations[ANIMATION_COIN], x, y, size);
     } else if (cell->type == CELL_FRAGMENT) {
-        DrawAnimation(sprites->itens[SPRITE_FRAGMENT], x, y, size);
+        DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size);
     } else if (cell->type == CELL_FRUIT) {
-        DrawAnimation(sprites->itens[SPRITE_FRUIT], x, y, size);
+        DrawAnimation(animations[ANIMATION_FRUIT], x, y, size);
     } else if (cell->type == CELL_FIRE_ON) {
-        DrawSprite(sprites->fire, x, y, size);
+        DrawAnimation(animations[ANIMATION_FIRE], x, y, size);
     } else if (isWind(cell->type)) {
-        DrawAnimation(sprites->wind, x, y, size);
+        DrawAnimation(animations[ANIMATION_WIND], x, y, size);
     } else if (cell->type == CELL_SPIKE) {
-        DrawSprite(sprites->spike, x, y, size);
+        DrawSprite(sprites[SPRITE_SPIKE], x, y, size);
     }
 
     sprintf(buffer, "%d", cell->distance);
@@ -218,8 +212,9 @@ static void drawHudDebug(Game* this) {
 }
 
 static void drawMapDebug(Game* this) {
+    Animation* animations = this->animations;
     Map* map = this->map;
-    this->sounds->updateMusic(this->sounds, map->player->biome);
+    //this->sounds->updateMusic(this->sounds, map->player->biome);
     ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
@@ -282,7 +277,7 @@ static void drawMapDebug(Game* this) {
                 EndTextureMode();
             }
 
-            DrawAnimation(this->sprites.pacman[e->dir], x, y, this->cellSize);
+            DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize);
 
             cur = cur->next;
         }
@@ -300,7 +295,7 @@ static void drawMapDebug(Game* this) {
         EndBlendMode();
     }
 
-    DrawAnimation(this->sprites.ghost[p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize);
+    DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize);
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -321,13 +316,9 @@ static void drawMapDebug(Game* this) {
     this->frameCount++;
 }
 
-static void loadBiomeSprites(Game* this, Biome biome, char* floorPath, char* wallPath) {
-    this->sprites.floor[biome] = LoadSprite(floorPath);
-    this->sprites.wall[biome] = LoadSprite(wallPath);
-}
-
 static void loadAllSprites(Game* this) {
-    Sprites* sprites = &this->sprites;
+    Sprite* sprites = this->sprites;
+    Animation* animations = this->animations;
 
     // ---------- GHOST ----------
     const char* ghostRight[] = { "assets/sprites/ghostRight1.png", "assets/sprites/ghostRight2.png" };
@@ -335,10 +326,10 @@ static void loadAllSprites(Game* this) {
     const char* ghostUp[] = { "assets/sprites/ghostUp1.png",    "assets/sprites/ghostUp2.png" };
     const char* ghostDown[] = { "assets/sprites/ghostDown1.png",  "assets/sprites/ghostDown2.png" };
 
-    sprites->ghost[RIGHT] = LoadAnimation(2, ghostRight);
-    sprites->ghost[LEFT] = LoadAnimation(2, ghostLeft);
-    sprites->ghost[UP] = LoadAnimation(2, ghostUp);
-    sprites->ghost[DOWN] = LoadAnimation(2, ghostDown);
+    animations[ANIMATION_GHOST_RIGHT] = LoadAnimation(2, ghostRight);
+    animations[ANIMATION_GHOST_LEFT] = LoadAnimation(2, ghostLeft);
+    animations[ANIMATION_GHOST_UP] = LoadAnimation(2, ghostUp);
+    animations[ANIMATION_GHOST_DOWN] = LoadAnimation(2, ghostDown);
 
     // ---------- PACMAN ----------
     const char* pacmanRight[] = { "assets/sprites/pacmanRight1.png", "assets/sprites/pacmanRight2.png" };
@@ -346,29 +337,40 @@ static void loadAllSprites(Game* this) {
     const char* pacmanUp[] = { "assets/sprites/pacmanUp1.png",    "assets/sprites/pacmanUp2.png" };
     const char* pacmanDown[] = { "assets/sprites/pacmanDown1.png",  "assets/sprites/pacmanDown2.png" };
 
-    sprites->pacman[RIGHT] = LoadAnimation(2, pacmanRight);
-    sprites->pacman[LEFT] = LoadAnimation(2, pacmanLeft);
-    sprites->pacman[UP] = LoadAnimation(2, pacmanUp);
-    sprites->pacman[DOWN] = LoadAnimation(2, pacmanDown);
+    animations[ANIMATION_PACMAN_RIGHT] = LoadAnimation(2, pacmanRight);
+    animations[ANIMATION_PACMAN_LEFT] = LoadAnimation(2, pacmanLeft);
+    animations[ANIMATION_PACMAN_UP] = LoadAnimation(2, pacmanUp);
+    animations[ANIMATION_PACMAN_DOWN] = LoadAnimation(2, pacmanDown);
 
     const char* coin[] = { "assets/sprites/coin.png" };
     const char* fragment[] = { "assets/sprites/Key.png" };
     const char* fruit[] = { "assets/sprites/apple.png" };
-    sprites->itens[SPRITE_COIN] = LoadAnimation(1, coin);
-    sprites->itens[SPRITE_FRAGMENT] = LoadAnimation(1, fragment);
-    sprites->itens[SPRITE_FRUIT] = LoadAnimation(1, fruit);
 
-    loadBiomeSprites(this, LUXURIA, "assets/sprites/luxuria/chao.png", "assets/sprites/luxuria/parede.png");
-    loadBiomeSprites(this, GULA, "assets/sprites/gula/chao.png", "assets/sprites/gula/parede.png");
-    loadBiomeSprites(this, HERESIA, "assets/sprites/heresia/chao.png", "assets/sprites/heresia/parede.png");
-    loadBiomeSprites(this, VIOLENCIA, "assets/sprites/violencia/chao.png", "assets/sprites/violencia/parede.png");
+    animations[ANIMATION_COIN] = LoadAnimation(1, coin);
+    animations[ANIMATION_FRAGMENT] = LoadAnimation(1, fragment);
+    animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
 
     const char* wind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
-    sprites->wind = LoadAnimation(2, wind);
-    sprites->mud = LoadSprite("assets/sprites/gula/lama.png");
-    sprites->grave = LoadSprite("assets/sprites/heresia/cova.png");
-    sprites->fire = LoadSprite("assets/sprites/heresia/fogo.png");
-    sprites->spike = LoadSprite("assets/sprites/violencia/espinhos.png");
+    const char* fire[] = { "assets/sprites/heresia/fogo.png" };
+
+    animations[ANIMATION_WIND] = LoadAnimation(2, wind);
+    animations[ANIMATION_FIRE] = LoadAnimation(2, fire);
+    
+    sprites[SPRITE_FLOOR_LUXURIA] = LoadSprite("assets/sprites/luxuria/chao.png");
+    sprites[SPRITE_WALL_LUXURIA] = LoadSprite("assets/sprites/luxuria/parede.png");
+
+    sprites[SPRITE_FLOOR_GULA] = LoadSprite("assets/sprites/gula/chao.png");
+    sprites[SPRITE_WALL_GULA] = LoadSprite("assets/sprites/gula/parede.png");
+
+    sprites[SPRITE_FLOOR_HERESIA] = LoadSprite("assets/sprites/heresia/chao.png");
+    sprites[SPRITE_WALL_HERESIA] = LoadSprite("assets/sprites/heresia/parede.png");
+
+    sprites[SPRITE_FLOOR_VIOLENCIA] = LoadSprite("assets/sprites/violencia/chao.png");
+    sprites[SPRITE_WALL_VIOLENCIA] = LoadSprite("assets/sprites/violencia/parede.png");
+
+    sprites[SPRITE_MUD] = LoadSprite("assets/sprites/gula/lama.png");
+    sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");
+    sprites[SPRITE_SPIKE] = LoadSprite("assets/sprites/violencia/espinhos.png");
 }
 
 static void saveUpdate(Game* this) {
@@ -378,22 +380,13 @@ static void saveUpdate(Game* this) {
 }
 
 static void _free(Game* this) {
-    for (int i = 0; i < 4; i++){
-        UnloadAnimation(this->sprites.ghost[i]);
-        UnloadAnimation(this->sprites.pacman[i]);
-        UnloadSprite(this->sprites.floor[i]);
-        UnloadSprite(this->sprites.wall[i]);
+    for (int i = 0; i < ANIMATION_COUNT; i++){
+        UnloadAnimation(this->animations[i]);
     }
 
-    for(int i = 0; i < 3; i++){
-        UnloadAnimation(this->sprites.itens[i]);
+    for (int i = 0; i < SPRITE_COUNT; i++){
+        UnloadSprite(this->sprites[i]);
     }
-    
-    UnloadAnimation(this->sprites.wind);
-    UnloadSprite(this->sprites.fire);
-    UnloadSprite(this->sprites.grave);
-    UnloadSprite(this->sprites.mud);
-    UnloadSprite(this->sprites.spike);
     
     UnloadRenderTexture(this->shadowMap);
     free(this);
