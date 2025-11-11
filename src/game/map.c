@@ -248,8 +248,7 @@ static inline void bossDestroyMap(ChunkManager* cm, int x, int y) {
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
             Cell* cell = cm->getUpdatedCell(cm, x + j, y + i);
-            if (cell)
-                cell->type = CELL_TEMPLE;
+            if (cell && cell->type != CELL_FRAGMENT) cell->type = CELL_TEMPLE;
         }
     }
 }

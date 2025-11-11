@@ -41,10 +41,10 @@ Animation LoadAnimation(int lenght, const char** path) {
     return this;
 }
 
-void DrawSprite(Sprite sprite, int x, int y, int size, Color color) {
+void DrawSprite(Sprite sprite, int x, int y, int width, int height, Color color) {
     Texture2D texture = sprite.texture;
     Rectangle source = { 0, 0, texture.width, texture.height };
-    Rectangle dest = { x, y, size, size };
+    Rectangle dest = { x, y, width, height };
     Vector2 origin = { 0, 0 };
 
     DrawTexturePro(texture, source, dest, origin, 0.0f, color);

@@ -41,6 +41,7 @@ void updateMenu() {
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
+    //ToggleFullscreen();
     InitAudioDevice();
     SetTargetFPS(60);
 

@@ -10,7 +10,7 @@ static void updateGame(Render* this) { this->game->saveUpdate(this->game); }
 
 static void updateMenu(Render* this) { this->menu->update(this->menu); }
 
-static void drawGame(Render* this) { this->game->drawMapDebug(this->game); }
+static void drawGame(Render* this) { this->game->drawMap(this->game); }
 
 static void drawMenu(Render* this) { this->menu->draw(this->menu); }
 

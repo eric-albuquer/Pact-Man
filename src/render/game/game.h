@@ -31,6 +31,9 @@ typedef enum {
     SPRITE_EFFECT_INVULNERABILITY,
     SPRITE_EFFECT_DEGENERATION,
 
+    SPRITE_MINIMAP,
+    SPRITE_LIFE_BAR,
+
     SPRITE_COUNT
 } SpritesEnum;
 
@@ -49,7 +52,8 @@ typedef enum {
     ANIMATION_FRAGMENT,
     ANIMATION_FRUIT,
 
-    ANIMATION_WIND,
+    ANIMATION_HORIZONTAL_WIND,
+    ANIMATION_VERTICAL_WIND,
     ANIMATION_MUD, 
     ANIMATION_FIRE,
 
@@ -83,7 +87,7 @@ typedef struct Game {
     Animation animations[ANIMATION_COUNT];
     Sprite sprites[SPRITE_COUNT];
 
-    void (*drawMapDebug)(struct Game*);
+    void (*drawMap)(struct Game*);
     void (*saveUpdate)(struct Game*);
     void (*free)(struct Game*);
 } Game;

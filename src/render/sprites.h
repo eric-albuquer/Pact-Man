@@ -7,7 +7,7 @@ typedef struct Sprite {
     Texture2D texture;
 } Sprite;
 
-void DrawSprite(Sprite sprite, int x, int y, int size, Color color);
+void DrawSprite(Sprite sprite, int x, int y, int width, int height, Color color);
 void UnloadSprite(Sprite sprite);
 Sprite LoadSprite(const char* path);
 

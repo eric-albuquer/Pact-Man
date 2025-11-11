@@ -10,6 +10,7 @@
 static char buffer[1000];
 
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0, 0, 255, 255}, {0, 0, 255, 255} };
+static const Color HUD_OPACITY = {0, 0, 0, 200};
 
 static void updateAnimations(Game* this) {
     for (int i = 0; i < ANIMATION_COUNT; i++) {
@@ -42,7 +43,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         color = GRAY;
     }
 
-    DrawSprite(sprite, x, y, size, color);
+    DrawSprite(sprite, x, y, size, size, color);
 
     color = WHITE;
 
@@ -50,10 +51,12 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_FIRE], x, y, size, color);
     } else if (cell->type == CELL_FIRE_OFF) {
         DrawAnimation(animations[ANIMATION_FIRE], x, y, size, DARKGRAY);
-    } else if (isWind(cell->type)) {
-        DrawAnimation(animations[ANIMATION_WIND], x, y, size, color);
+    } else if (cell->type == CELL_WIND_RIGHT || cell->type == CELL_WIND_LEFT) {
+        DrawAnimation(animations[ANIMATION_HORIZONTAL_WIND], x, y, size, color);
+    } else if (cell->type == CELL_WIND_UP || cell->type == CELL_WIND_DOWN) {
+        DrawAnimation(animations[ANIMATION_VERTICAL_WIND], x, y, size, color);
     } else if (cell->type == CELL_SPIKE) {
-        DrawSprite(sprites[SPRITE_SPIKE], x, y, size, color);
+        DrawSprite(sprites[SPRITE_SPIKE], x, y, size, size, color);
     } else if (cell->type == CELL_MUD) {
         DrawAnimation(animations[ANIMATION_MUD], x, y, size, color);
     } else if (cell->type == CELL_FONT_HEALTH) {
@@ -70,8 +73,39 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_FRUIT], x, y, size, color);
     }
 
-    sprintf(buffer, "%d", cell->distance);
+    //sprintf(buffer, "%d", cell->distance);
     //DrawText(buffer, x + 15, y + 15, 20, WHITE);
+}
+
+static inline Color LerpColor(Color a, Color b, float t) {
+    Color result;
+    result.r = a.r + (b.r - a.r) * t;
+    result.g = a.g + (b.g - a.g) * t;
+    result.b = a.b + (b.b - a.b) * t;
+    result.a = a.a + (b.a - a.a) * t;
+    return result;
+}
+
+static void drawLifeBar(Game* this, int x, int y, int width, int height){
+    int h = height / 3;
+    int w = width * 0.69f;
+    DrawRectangle(x + width / 4, y + h, w, h, HUD_OPACITY);
+    float t = this->map->player->life / (float)(START_LIFE);
+    if (t < 0.0f) t = 0.0f;
+    Color color = LerpColor(RED, GREEN, t);
+    int lx = w * t;
+    DrawRectangle(x + width / 4, y + h, lx, h, color);
+    DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
+}
+
+static void drawInfoHud(Game* this, int x, int y, int size){
+    DrawRectangle(x, y, size * 3, size * 3, HUD_OPACITY);
+    DrawAnimation(this->animations[ANIMATION_COIN], x, y, size, WHITE);
+    sprintf(buffer, "%d/%d", this->map->player->biomeCoins, COINS_TO_FRAGMENT);
+    DrawText(buffer, x + size, y + size / 3, 30, WHITE);
+    DrawAnimation(this->animations[ANIMATION_FRAGMENT], x, y + size, size, WHITE);
+    sprintf(buffer, "%d/2", this->map->player->biomeFragment);
+    DrawText(buffer, x + size, y + size / 3 + size, 30, WHITE);
 }
 
 static void drawEffects(Game* this, int x, int y, int size){
@@ -82,38 +116,40 @@ static void drawEffects(Game* this, int x, int y, int size){
     int delta = size + 20;
     int ex = x;
 
-    DrawRectangle(x - 20, y - 20, delta * 4 + 20, delta + 20, (Color){100, 100, 100, 100});
-
     if (effects.degeneration.duration > 0){
-        DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], ex, y, size, WHITE);
+        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], ex, y, size, size, WHITE);
         ex += delta;
     } 
     if (effects.regeneration.duration > 0){
-        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size, WHITE);
+        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size,size, WHITE);
         ex += delta;
     } 
     if (effects.slowness.duration > 0){
-        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size, WHITE);
+        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size,size, WHITE);
         ex += delta;
     } 
     if (effects.invulnerability.duration > 0){
-        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, WHITE);
+        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size,size, WHITE);
     } 
 }
 
-static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
+static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
     ChunkManager* cm = map->manager;
     Animation* animations = this->animations;
-    int cellSize = size / (zoom);
-    DrawRectangle(x0 - 5, y0 - 5, size + 10, size + 10, BLACK);
+    int cellSize = (size - 50) / zoom;
+    DrawRectangle(x0, y0, size, size, HUD_OPACITY);
+    DrawSprite(this->sprites[SPRITE_MINIMAP], x0, y0, size,size, WHITE);
     for (int y = 0; y < zoom; y++) {
         int py = map->player->y + y - (zoom >> 1);
         for (int x = 0; x < zoom; x++) {
             int px = map->player->x + x - (zoom >> 1);
-
             Cell* cell = cm->getLoadedCell(cm, px, py);
-            drawCell(this, cell, x0 + x * cellSize, y0 + y * cellSize, cellSize, false);
+            drawCell(this, cell, x0 + x * cellSize + 25, y0 + y * cellSize + 25, cellSize, false);
         }
     }
 
@@ -126,8 +162,8 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
         Node* cur = chunk->enemies->head;
         while (cur != NULL) {
             Enemy* e = cur->data;
-            int x = (e->x - map->player->x) * cellSize;
-            int y = (e->y - map->player->y) * cellSize;
+            int x = (e->x - map->player->x) * cellSize + 25;
+            int y = (e->y - map->player->y) * cellSize + 25;
 
             if (!e->isBoss)
                 DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset, y + y0 + offset, cellSize, BIOME_COLOR[e->biome]);
@@ -144,18 +180,16 @@ static void drawMinimapDebug(Game* this, int x0, int y0, int size, int zoom) {
         for (int j = -1; j < 2; j++) {
             int chunkX = map->player->chunkX + j;
             if (chunkX < 0 || chunkX >= map->manager->cols) continue;
-            int startChunkX =
-                x0 + offset + (chunkX * CHUNK_SIZE - map->player->x) * cellSize;
-            int startChunkY =
-                y0 + offset + (chunkY * CHUNK_SIZE - map->player->y) * cellSize;
+            int startChunkX = x0 + offset + (chunkX * CHUNK_SIZE - map->player->x) * cellSize + 25;
+            int startChunkY = y0 + offset + (chunkY * CHUNK_SIZE - map->player->y) * cellSize + 25;
             DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, cellSize* CHUNK_SIZE + 3, cellSize* CHUNK_SIZE + 3 }, 3, GREEN);
         }
     }
 
-    DrawRectangle(x0 + offset, y0 + offset, cellSize, cellSize, WHITE);
+    DrawRectangle(x0 + offset + 25, y0 + offset + 25, cellSize, cellSize, WHITE);
 }
 
-static void drawTimeHUD(Game* this) {
+static void drawTimeHUD(Game* this, int x, int y) {
     Map* map = this->map;
 
     int totalSeconds = (int)map->elapsedTime;
@@ -170,14 +204,14 @@ static void drawTimeHUD(Game* this) {
     else if (d >= 0.34f && d < 0.67f) stage = 2;
     else if (d >= 0.67f) stage = 3;
 
-    const char* stageText[] = {
+    const static char* stageText[] = {
         "STABLE",
         "UNSTABLE",
         "CRACKING",
         "COLLAPSING"
     };
 
-    Color stageColors[] = {
+    const static Color stageColors[] = {
         { 0,   228, 48,  255 },
         { 253, 249, 0,   255 },
         { 255, 161, 0,   255 },
@@ -188,8 +222,6 @@ static void drawTimeHUD(Game* this) {
 
     int boxWidth = 220;
     int boxHeight = 80;
-    int x = this->width - boxWidth - 20;
-    int y = 20;
 
     DrawRectangle(x, y, boxWidth, boxHeight, (Color) { 0, 0, 0, 200 });
 
@@ -209,19 +241,21 @@ static void drawHud(Game* this) {
         p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK,
         p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration);
 
-    DrawRectangle(this->width - 400, 200, 400, 600, (Color) { 0, 0, 0, 200 });
-    DrawText(buffer, this->width - 300, 250, 30, GREEN);
+    DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
+    DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
-    drawMinimapDebug(this, 20, 20, 500, 100);
+    drawMinimap(this, this->width - 520, 20, 500, 80);
 
-    drawTimeHUD(this);
-    drawEffects(this, 550, 50, 100);
+    drawTimeHUD(this, 30, 30);
+    drawEffects(this, 300, 50, 80);
+    drawLifeBar(this, this->offsetHalfX - 200, this->height - 150, 400, 100);
+    drawInfoHud(this, this->width - 250, 540, 80);
 }
 
-static void drawMapDebug(Game* this) {
+static void drawMap(Game* this) {
     Animation* animations = this->animations;
     Map* map = this->map;
-    this->sounds->updateMusic(this->sounds, map->player->biome);
+    //this->sounds->updateMusic(this->sounds, map->player->biome);
     ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
@@ -360,7 +394,8 @@ static void loadAllSprites(Game* this) {
     animations[ANIMATION_FRAGMENT] = LoadAnimation(1, fragment);
     animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
 
-    const char* wind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
+    const char* verticalWind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
+    const char* horizontalWind[] = { "assets/sprites/luxuria/ventania3.png", "assets/sprites/luxuria/ventania4.png" };
     const char* mud[] = { "assets/sprites/gula/lama1.png", "assets/sprites/gula/lama2.png", "assets/sprites/gula/lama3.png" };
     const char* fire[] = { "assets/sprites/heresia/fogo.png", "assets/sprites/heresia/fogo2.png", "assets/sprites/heresia/fogo3.png",
                              "assets/sprites/heresia/fogo4.png" };
@@ -368,7 +403,8 @@ static void loadAllSprites(Game* this) {
     const char* font[] = { "assets/sprites/common_cells/fonte.png", "assets/sprites/common_cells/fonte1.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte3.png",
                             "assets/sprites/common_cells/fonte3.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte1.png" };
 
-    animations[ANIMATION_WIND] = LoadAnimation(2, wind);
+    animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
+    animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
     animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
 
@@ -397,6 +433,9 @@ static void loadAllSprites(Game* this) {
     sprites[SPRITE_EFFECT_DEGENERATION] = LoadSprite("assets/sprites/effects/degeneration.png");
     sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/invulnerability.png");
     sprites[SPRITE_EFFECT_SLOWNESS] = LoadSprite("assets/sprites/effects/slowness.png");
+
+    sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/minimap.png");
+    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/life_bar.png");
 }
 
 static void saveUpdate(Game* this) {
@@ -424,7 +463,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->height = height;
     this->cellSize = cellSize;
 
-    this->sounds = new_Sounds("assets/music/heresia_trilha.mp3", "assets/music/heresia_trilha.mp3", "assets/music/violencia_trilha.mp3", "assets/music/luxuria_trilha.mp3");
+    this->sounds = new_Sounds("assets/music/gula_trilha.mp3", "assets/music/heresia_trilha.mp3", "assets/music/violencia_trilha.mp3", "assets/music/luxuria_trilha.mp3");
 
     this->renderDistX = ((width / cellSize) >> 1) + 3;
     this->renderDistY = ((height / cellSize) >> 1) + 3;
@@ -441,7 +480,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 
-    this->drawMapDebug = drawMapDebug;
+    this->drawMap = drawMap;
     this->saveUpdate = saveUpdate;
     this->free = _free;
     return this;
