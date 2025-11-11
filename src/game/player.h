@@ -40,6 +40,7 @@ typedef struct Player {
     unsigned short totalCoins;
     
     unsigned biome : 2;
+    unsigned damaged: 1;
 
     bool (*updateChunk)(struct Player*);
     void (*updateDirection)(struct Player*);

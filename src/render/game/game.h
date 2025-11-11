@@ -73,6 +73,7 @@ typedef struct Game {
 
     int offsetHalfX;
     int offsetHalfY;
+    int halfDiagonal;
 
     unsigned int lastUpdate;
     unsigned int frameCount;

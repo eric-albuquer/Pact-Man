@@ -95,6 +95,7 @@ static inline void updateDamagePlayer(Player* p, Cell* cell) {
     } else if (cell->type == CELL_SPIKE) {
         p->life -= SPIKE_DAMAGE;
     }
+    p->damaged = true;
 }
 
 //===============================================================
@@ -200,6 +201,8 @@ static inline void updatePlayer(Map* this, Input input) {
 
     updateDamagePlayer(p, cell);
     collectItens(p, cell);
+
+    p->damaged = false;
 }
 
 //===============================================================
@@ -270,6 +273,7 @@ static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Pla
                     return true;
                 } else {
                     p->life -= ENEMY_DAGAME;
+                    p->damaged = true;
                 }
                 return false;
             }

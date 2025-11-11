@@ -10,7 +10,7 @@
 static char buffer[1000];
 
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0, 0, 255, 255}, {0, 0, 255, 255} };
-static const Color HUD_OPACITY = {0, 0, 0, 200};
+static const Color HUD_OPACITY = { 0, 0, 0, 200 };
 
 static void updateAnimations(Game* this) {
     for (int i = 0; i < ANIMATION_COUNT; i++) {
@@ -86,7 +86,7 @@ static inline Color LerpColor(Color a, Color b, float t) {
     return result;
 }
 
-static void drawLifeBar(Game* this, int x, int y, int width, int height){
+static void drawLifeBar(Game* this, int x, int y, int width, int height) {
     int h = height / 3;
     int w = width * 0.69f;
     DrawRectangle(x + width / 4, y + h, w, h, HUD_OPACITY);
@@ -98,7 +98,7 @@ static void drawLifeBar(Game* this, int x, int y, int width, int height){
     DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
 }
 
-static void drawInfoHud(Game* this, int x, int y, int size){
+static void drawInfoHud(Game* this, int x, int y, int size) {
     DrawRectangle(x, y, size * 3, size * 3, HUD_OPACITY);
     DrawAnimation(this->animations[ANIMATION_COIN], x, y, size, WHITE);
     sprintf(buffer, "%d/%d", this->map->player->biomeCoins, COINS_TO_FRAGMENT);
@@ -108,33 +108,53 @@ static void drawInfoHud(Game* this, int x, int y, int size){
     DrawText(buffer, x + size, y + size / 3 + size, 30, WHITE);
 }
 
-static void drawEffects(Game* this, int x, int y, int size){
-    Sprite *sprites = this->sprites;
+static void drawActionHud(Game* this, Color color) {
+    BeginTextureMode(this->shadowMap);
+    DrawCircleGradient(this->offsetHalfX, this->offsetHalfY, this->halfDiagonal, WHITE, color);
+    EndTextureMode();
+
+    BeginBlendMode(BLEND_MULTIPLIED);
+    DrawTextureRec(this->shadowMap.texture,
+        (Rectangle) {
+        0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height
+    },
+        (Vector2) {
+        0, 0
+    }, WHITE);
+    EndBlendMode();
+}
+
+static void drawEffects(Game* this, int x, int y, int size) {
+    Sprite* sprites = this->sprites;
 
     Effects effects = this->map->player->effects;
 
     int delta = size + 20;
     int ex = x;
 
-    if (effects.degeneration.duration > 0){
+    if (effects.degeneration.duration > 0) {
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], ex, y, size, size, WHITE);
+        drawActionHud(this, BLACK);
         ex += delta;
-    } 
-    if (effects.regeneration.duration > 0){
+    }
+    if (effects.regeneration.duration > 0) {
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size,size, WHITE);
+        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size, size, WHITE);
+        drawActionHud(this, BLUE);
         ex += delta;
-    } 
-    if (effects.slowness.duration > 0){
+    }
+    if (effects.slowness.duration > 0) {
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size,size, WHITE);
+        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size, size, WHITE);
+        drawActionHud(this, GRAY);
         ex += delta;
-    } 
-    if (effects.invulnerability.duration > 0){
+    }
+    if (effects.invulnerability.duration > 0) {
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size,size, WHITE);
-    } 
+        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, size, WHITE);
+        drawActionHud(this, YELLOW);
+    }
 }
 
 static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
@@ -143,7 +163,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     Animation* animations = this->animations;
     int cellSize = (size - 50) / zoom;
     DrawRectangle(x0, y0, size, size, HUD_OPACITY);
-    DrawSprite(this->sprites[SPRITE_MINIMAP], x0, y0, size,size, WHITE);
+    DrawSprite(this->sprites[SPRITE_MINIMAP], x0, y0, size, size, WHITE);
     for (int y = 0; y < zoom; y++) {
         int py = map->player->y + y - (zoom >> 1);
         for (int x = 0; x < zoom; x++) {
@@ -250,6 +270,8 @@ static void drawHud(Game* this) {
     drawEffects(this, 300, 50, 80);
     drawLifeBar(this, this->offsetHalfX - 200, this->height - 150, 400, 100);
     drawInfoHud(this, this->width - 250, 540, 80);
+
+    if (p->damaged) drawActionHud(this, RED);
 }
 
 static void drawMap(Game* this) {
@@ -327,15 +349,11 @@ static void drawMap(Game* this) {
         }
     }
 
-    if (p->biome == 3) {
+    if (p->biome == VIOLENCIA) {
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(this->shadowMap.texture,
-            (Rectangle) {
-            0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height
-        },
-            (Vector2) {
-            0, 0
-        }, WHITE);
+            (Rectangle) { 0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height },
+            (Vector2) { 0, 0 }, WHITE);
         EndBlendMode();
     }
 
@@ -354,8 +372,7 @@ static void drawMap(Game* this) {
         }
     }
 
-    if (p->biome != 3)
-        drawHud(this);
+    drawHud(this);
 
     this->frameCount++;
 }
@@ -470,6 +487,8 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->lastUpdate = 0;
     this->frameCount = 0;
+
+    this->halfDiagonal = hypotf(width >> 1, height >> 1);
 
     this->offsetHalfX = width >> 1;
     this->offsetHalfY = height >> 1;
