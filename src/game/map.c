@@ -42,6 +42,10 @@ static inline void collectItens(Player* p, Cell* cell) {
         p->biomeFragment++;
     } else if (cell->type == CELL_FRUIT) {
         cell->type = CELL_EMPTY;
+    } else if (cell->type == CELL_INVISIBILITY) {
+        cell->type = CELL_EMPTY;
+    } else if (cell->type == CELL_REGENERATION) {
+        cell->type = CELL_EMPTY;
     }
 }
 
@@ -63,6 +67,11 @@ static inline void applyPlayerEffects(Player* p, Cell* cell) {
     } else if (isDegenerated(cell->type)) {
         p->effects.degeneration.duration = DEGENERATION_DURATION;
         p->effects.degeneration.strenght = (cell->type - CELL_DEGENERATED_1) + 1;
+    } else if (cell->type == CELL_INVISIBILITY) {
+        p->effects.invisibility.duration = INVISIBILITY_DURATION;
+    } else if (cell->type == CELL_REGENERATION) {
+        p->effects.regeneration.duration = POTION_REGENERATION_DURATION;
+        p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
     }
 }
 
@@ -73,6 +82,10 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
 
     if (p->effects.invulnerability.duration > 0) {
         p->effects.invulnerability.duration--;
+    }
+
+    if (p->effects.invisibility.duration > 0) {
+        p->effects.invisibility.duration--;
     }
 
     if (p->effects.regeneration.duration > 0) {
@@ -243,6 +256,8 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     Vec2i nextPos = normalMovement ? getBestPos(pos) : getRandomPos(pos);
     if (isFarAwayFromSpawn(p, e))
         nextPos = getCloserToSpawn(pos, e->spawnX, e->spawnY);
+    else if (p->effects.invisibility.duration > 0 && normalMovement)
+        nextPos = getRandomPos(pos);
     else if (p->effects.invulnerability.duration > 0 && normalMovement)
         nextPos = getWorstPos(pos);
 

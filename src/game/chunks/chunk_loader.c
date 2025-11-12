@@ -379,9 +379,7 @@ static void generateCoins(ChunkLoader* this, Chunk* chunk) {
     }
 }
 
-static void generateFragement(ChunkLoader* this, Chunk* chunk) {
-    if (chunk->type != CHUNK_FRAGMENT) return;
-
+static int generateIten(ChunkLoader* this, Chunk* chunk, CellType iten) {
     Cell* cell;
     int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
@@ -389,6 +387,14 @@ static void generateFragement(ChunkLoader* this, Chunk* chunk) {
         if (cell->type == CELL_EMPTY) break;
         idx = (idx + 1) & TOTAL_CELLS_MASK;
     }
+    cell->type = iten;
+    return idx;
+}
+
+static void generateFragement(ChunkLoader* this, Chunk* chunk) {
+    if (chunk->type != CHUNK_FRAGMENT) return;
+
+    int idx = generateIten(this, chunk, CELL_FRAGMENT);
 
     int keyX = idx & CHUNK_MASK;
     int keyY = idx >> CHUNK_SHIFT;
@@ -398,25 +404,29 @@ static void generateFragement(ChunkLoader* this, Chunk* chunk) {
         if (cY < 0 || cY >= CHUNK_SIZE) continue;
         for (int j = -2; j < 3; j++) {
             int cX = keyX + j;
+            if (i == 0 && j == 0) continue;
             if (cX < 0 || cX >= CHUNK_SIZE) continue;
             chunk->cells[(cY << CHUNK_SHIFT) | cX].type = CELL_EMPTY;
         }
     }
-
-    cell->type = CELL_FRAGMENT;
 }
 
 static void generateFruit(ChunkLoader* this, Chunk* chunk) {
-    if (chunk->type == CHUNK_TRANSITION || randChunk(this, chunk) % 100 > FRUIT_PROBABILITY) return;
+    if (randChunk(this, chunk) % 100 > FRUIT_PROBABILITY) return;
 
-    Cell* cell;
-    int idx = randChunk(this, chunk) & TOTAL_CELLS_MASK;
-    for (int i = 0; i < CELLS_PER_CHUNK; i++) {
-        cell = &chunk->cells[idx];
-        if (cell->type == CELL_EMPTY) break;
-        idx = (idx + 1) & TOTAL_CELLS_MASK;
-    }
-    cell->type = CELL_FRUIT;
+    generateIten(this, chunk, CELL_FRUIT);
+}
+
+static void generateInvisibility(ChunkLoader* this, Chunk* chunk){
+    if (randChunk(this, chunk) % 100 > INVISIBILITY_PROBABILITY) return;
+
+    generateIten(this, chunk, CELL_INVISIBILITY);
+}
+
+static void generateRegeneration(ChunkLoader* this, Chunk* chunk){
+    if (randChunk(this, chunk) % 100 > REGENERATION_PROBABILITY) return;
+
+    generateIten(this, chunk, CELL_REGENERATION);
 }
 
 static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
@@ -456,6 +466,8 @@ static ChunkGeneratorFn GENERATORS[] = {
     generateSpikes,
     generateFragement,
     generateFruit,
+    generateInvisibility,
+    generateRegeneration,
     generateEnemies,
     generateCoins,
 };

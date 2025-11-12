@@ -12,6 +12,10 @@ static char buffer[1000];
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0, 0, 255, 255}, {0, 0, 255, 255} };
 static const Color HUD_OPACITY = { 0, 0, 0, 200 };
 
+static inline Color getNegativeColor(Color color) {
+    return (Color) { (color.r + 128) % 255, (color.g + 128) % 255, (color.b + 128) % 255, 255 };
+}
+
 static void updateAnimations(Game* this) {
     for (int i = 0; i < ANIMATION_COUNT; i++) {
         UpdateAnimation(&this->animations[i]);
@@ -71,6 +75,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
     } else if (cell->type == CELL_FRUIT) {
         DrawAnimation(animations[ANIMATION_FRUIT], x, y, size, color);
+    } else if (cell->type == CELL_INVISIBILITY) {
+        DrawAnimation(animations[ANIMATION_INVISIBILITY], x, y, size, color);
+    } else if (cell->type == CELL_REGENERATION) {
+        DrawAnimation(animations[ANIMATION_REGENERATION], x, y, size, color);
     }
 
     //sprintf(buffer, "%d", cell->distance);
@@ -133,33 +141,41 @@ static void drawEffects(Game* this, int x, int y, int size) {
     int ex = x;
 
     if (effects.degeneration.duration > 0) {
+        drawActionHud(this, BLACK);
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], ex, y, size, size, WHITE);
-        drawActionHud(this, BLACK);
         ex += delta;
     }
     if (effects.regeneration.duration > 0) {
+        drawActionHud(this, (Color) { 0, 255, 255, 255 });
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size, size, WHITE);
-        drawActionHud(this, (Color) { 0, 255, 255, 255 });
         ex += delta;
     }
     if (effects.slowness.duration > 0) {
+        drawActionHud(this, GRAY);
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size, size, WHITE);
-        drawActionHud(this, GRAY);
+        
         ex += delta;
     }
     if (effects.invulnerability.duration > 0) {
-        DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, size, WHITE);
         if (effects.invulnerability.duration & 1)
             drawActionHud(this, YELLOW);
+        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, size, WHITE);
+        ex += delta;
+    }
+
+    if (effects.invisibility.duration > 0) {
+        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], ex, y, size, size, WHITE);
     }
 }
 
 static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
+    Player* p = map->player;
     ChunkManager* cm = map->manager;
     Animation* animations = this->animations;
     int cellSize = (size - 50) / zoom;
@@ -186,10 +202,13 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
             int x = (e->x - map->player->x) * cellSize + 25;
             int y = (e->y - map->player->y) * cellSize + 25;
 
+            Color color = BIOME_COLOR[e->biome];
+            if (p->effects.invulnerability.duration > 0 && this->updateCount & 1) color = getNegativeColor(color);
+
             if (!e->isBoss)
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset, y + y0 + offset, cellSize, BIOME_COLOR[e->biome]);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset, y + y0 + offset, cellSize, color);
             else
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, BIOME_COLOR[e->biome]);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, color);
 
             cur = cur->next;
         }
@@ -347,10 +366,13 @@ static void drawMap(Game* this) {
                 EndTextureMode();
             }
 
+            Color color = BIOME_COLOR[e->biome];
+            if (p->effects.invulnerability.duration > 0 && this->updateCount & 1) color = getNegativeColor(color);
+
             if (!e->isBoss)
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize, BIOME_COLOR[e->biome]);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize, color);
             else
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3, BIOME_COLOR[e->biome]);
+                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3, color);
 
             cur = cur->next;
         }
@@ -368,7 +390,9 @@ static void drawMap(Game* this) {
         EndBlendMode();
     }
 
-    DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, WHITE);
+    Color color = WHITE;
+    if (p->effects.invisibility.duration > 0) color.a = 100;
+    DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -416,12 +440,18 @@ static void loadAllSprites(Game* this) {
 
     const char* coin[] = { "assets/sprites/itens/coin1.png", "assets/sprites/itens/coin2.png", "assets/sprites/itens/coin3.png", "assets/sprites/itens/coin4.png",
     "assets/sprites/itens/coin5.png", "assets/sprites/itens/coin6.png" };
-    const char* fragment[] = { "assets/sprites/itens/newKey.png" , "assets/sprites/itens/newKey2.png" };
+    const char* fragment[] = { "assets/sprites/itens/newKey.png" , "assets/sprites/itens/newKey2.png", "assets/sprites/itens/newKey3.png", "assets/sprites/itens/newKey4.png",
+         "assets/sprites/itens/newKey5.png", "assets/sprites/itens/newKey4.png", "assets/sprites/itens/newKey3.png", "assets/sprites/itens/newKey2.png" };
     const char* fruit[] = { "assets/sprites/itens/apple.png" };
 
+    const char* invisibility[] = { "assets/sprites/itens/invisibility.png" };
+    const char* regeneration[] = { "assets/sprites/itens/regeneration.png" };
+
     animations[ANIMATION_COIN] = LoadAnimation(6, coin);
-    animations[ANIMATION_FRAGMENT] = LoadAnimation(2, fragment);
+    animations[ANIMATION_FRAGMENT] = LoadAnimation(8, fragment);
     animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
+    animations[ANIMATION_INVISIBILITY] = LoadAnimation(1, invisibility);
+    animations[ANIMATION_REGENERATION] = LoadAnimation(1, regeneration);
 
     const char* verticalWind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
     const char* horizontalWind[] = { "assets/sprites/luxuria/ventania3.png", "assets/sprites/luxuria/ventania4.png" };
@@ -462,6 +492,7 @@ static void loadAllSprites(Game* this) {
     sprites[SPRITE_EFFECT_DEGENERATION] = LoadSprite("assets/sprites/effects/degeneration.png");
     sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/invulnerability.png");
     sprites[SPRITE_EFFECT_SLOWNESS] = LoadSprite("assets/sprites/effects/slowness.png");
+    sprites[SPRITE_EFFECT_INVISIBILITY] = LoadSprite("assets/sprites/effects/invisibility_effect.png");
 
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/minimap.png");
     sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/life_bar.png");

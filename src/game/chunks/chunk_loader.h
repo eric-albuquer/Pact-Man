@@ -20,6 +20,10 @@
 
 #define FRUIT_PROBABILITY 8
 
+#define INVISIBILITY_PROBABILITY 8
+
+#define REGENERATION_PROBABILITY 8
+
 typedef struct ChunkLoader{
     int width, height;
     int biomeWidthChunks;
