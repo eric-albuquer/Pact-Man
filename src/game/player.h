@@ -43,6 +43,8 @@ typedef struct Player {
     unsigned biome : 2;
     unsigned damaged: 1;
 
+    CellType cellType;
+
     bool (*updateChunk)(struct Player*);
     void (*updateDirection)(struct Player*);
     void (*free)(struct Player*);

@@ -212,6 +212,7 @@ static inline void updatePlayer(Map* this, Input input) {
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
 
     p->damaged = false;
+    p->cellType = cell->type;
 
     applyPlayerEffects(p, cell);
     updatePlayerMovement(this, cell, input);
@@ -219,8 +220,6 @@ static inline void updatePlayer(Map* this, Input input) {
 
     updateDamagePlayer(p, cell);
     collectItens(p, cell);
-
-    
 }
 
 //===============================================================

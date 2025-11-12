@@ -2,7 +2,7 @@
 #define GAME_H
 
 #include <raylib.h>
-#include "sounds.h"
+#include "audio.h"
 #include "sprites.h"
 #include "map.h"
 
@@ -65,6 +65,21 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
+typedef enum {
+    MUSIC_LUXURIA,
+    MUSIC_GULA,
+    MUSIC_HERESIA,
+    MUSIC_VIOLENCIA,
+
+    MUSIC_COUNT
+} MusicEnum;
+
+typedef enum {
+    SOUND_COIN,
+
+    SOUND_COUNT
+} SoundsEnum;
+
 typedef struct Game {
     int width;
     int height;
@@ -84,7 +99,7 @@ typedef struct Game {
 
     Map* map;
 
-    Sounds* sounds;
+    Audio* audio;
 
     RenderTexture2D shadowMap;
 

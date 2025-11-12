@@ -156,7 +156,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
         drawActionHud(this, GRAY);
         DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size, size, WHITE);
-        
+
         ex += delta;
     }
     if (effects.invulnerability.duration > 0) {
@@ -300,13 +300,24 @@ static void drawHud(Game* this) {
     if (p->damaged) drawActionHud(this, RED);
 }
 
+static void playAudio(Game* this){
+    Player* p = this->map->player;
+    Audio* audio = this->audio;
+
+    audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
+
+    if (p->cellType == CELL_COIN && this->frameCount == this->lastUpdate) {
+        audio->playSound(audio, SOUND_COIN);
+    }
+}
+
 static void drawMap(Game* this) {
     Animation* animations = this->animations;
     Map* map = this->map;
-    //this->sounds->updateMusic(this->sounds, map->player->biome);
     ChunkManager* cm = map->manager;
     ClearBackground(BLACK);
     Player* p = map->player;
+
     int px = p->lastX;
     int py = p->lastY;
 
@@ -381,12 +392,8 @@ static void drawMap(Game* this) {
     if (p->biome == VIOLENCIA) {
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(this->shadowMap.texture,
-            (Rectangle) {
-            0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height
-        },
-            (Vector2) {
-            0, 0
-        }, WHITE);
+            (Rectangle) {0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height},
+            (Vector2) {0, 0}, WHITE);
         EndBlendMode();
     }
 
@@ -408,11 +415,12 @@ static void drawMap(Game* this) {
     }
 
     drawHud(this);
+    playAudio(this);
 
     this->frameCount++;
 }
 
-static void loadAllSprites(Game* this) {
+static void loadSprites(Game* this) {
     Sprite* sprites = this->sprites;
     Animation* animations = this->animations;
 
@@ -498,6 +506,18 @@ static void loadAllSprites(Game* this) {
     sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/life_bar.png");
 }
 
+static void loadSounds(Game* this) {
+    Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
+    this->audio = audio;
+   
+    audio->loadMusic(audio, "assets/music/luxuria_trilha.mp3", MUSIC_LUXURIA);
+    audio->loadMusic(audio, "assets/music/gula_trilha.mp3", MUSIC_GULA);
+    audio->loadMusic(audio, "assets/music/heresia_trilha.mp3", MUSIC_HERESIA);
+    audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_VIOLENCIA);
+    
+    audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
+}
+
 static void saveUpdate(Game* this) {
     updateAnimations(this);
     this->lastUpdate = this->frameCount;
@@ -513,6 +533,7 @@ static void _free(Game* this) {
         UnloadSprite(this->sprites[i]);
     }
 
+    this->audio->free(this->audio);
     UnloadRenderTexture(this->shadowMap);
     free(this);
 }
@@ -522,8 +543,6 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->width = width;
     this->height = height;
     this->cellSize = cellSize;
-
-    this->sounds = new_Sounds("assets/music/gula_trilha.mp3", "assets/music/heresia_trilha.mp3", "assets/music/violencia_trilha.mp3", "assets/music/luxuria_trilha.mp3");
 
     this->renderDistX = ((width / cellSize) >> 1) + 3;
     this->renderDistY = ((height / cellSize) >> 1) + 3;
@@ -538,7 +557,8 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->map = map;
 
-    loadAllSprites(this);
+    loadSounds(this);
+    loadSprites(this);
 
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 
