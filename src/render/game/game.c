@@ -75,6 +75,9 @@ typedef enum {
 
 typedef enum {
     SOUND_COIN,
+    SOUND_WIND,
+    SOUND_DAMAGE,
+    SOUND_FRAGMENT,
 
     SOUND_COUNT
 } SoundsEnum;
@@ -378,8 +381,20 @@ static void playAudio(Game* this){
 
     audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
 
-    if (p->cellType == CELL_COIN && this->frameCount == this->lastUpdate) {
+    if (this->frameCount != this->lastUpdate) return;
+
+    CellType type = p->cellType;
+
+    if (p->damaged) {
+        audio->playSound(audio, SOUND_DAMAGE);
+    }
+
+    if (type == CELL_COIN) {
         audio->playSound(audio, SOUND_COIN);
+    } else if (isWind(type)){
+        audio->playSound(audio, SOUND_WIND);
+    } else if (type == CELL_FRAGMENT){
+        audio->playSound(audio, SOUND_FRAGMENT);
     }
 }
 
@@ -588,6 +603,9 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_VIOLENCIA);
     
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
+    audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
+    audio->loadSound(audio, "assets/sounds/dano.wav", SOUND_DAMAGE);
+    audio->loadSound(audio, "assets/sounds/fragmento.wav", SOUND_FRAGMENT);
 }
 
 static void saveUpdate(Game* this) {
