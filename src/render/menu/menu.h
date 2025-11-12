@@ -6,12 +6,28 @@
 
 typedef struct Menu {
     Button* play;
+    Button* volume;
+    Button* difficulty;
 
     void (*draw)(struct Menu*);
     void (*update)(struct Menu*);
     void (*free)(struct Menu*);
 } Menu;
 
+typedef struct FlameParticle {
+    float x;
+    float y;
+    float speed;
+    float radius;
+    Color color;
+} FlameParticle;
+
+#define NUM_FLAMES 60
+
+static FlameParticle flames[NUM_FLAMES];
+static bool flamesInit = false;
+
 Menu* new_Menu();
 
 #endif
+
