@@ -3,11 +3,14 @@
 
 #include <raylib.h>
 #include "button.h"
+#include "audio.h"
 
 typedef struct Menu {
     Button* play;
     Button* volume;
     Button* difficulty;
+
+    Audio* audio;
 
     void (*draw)(struct Menu*);
     void (*update)(struct Menu*);

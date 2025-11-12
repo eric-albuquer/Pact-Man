@@ -8,78 +8,6 @@
 
 #define FRAMES_ANIMATION 8.0f
 
-typedef enum {
-    SPRITE_WALL_LUXURIA,
-    SPRITE_WALL_GULA,
-    SPRITE_WALL_HERESIA,
-    SPRITE_WALL_VIOLENCIA,
-
-    SPRITE_FLOOR_LUXURIA,
-    SPRITE_FLOOR_GULA,
-    SPRITE_FLOOR_HERESIA,
-    SPRITE_FLOOR_VIOLENCIA,
-
-    SPRITE_DEGENERATED_1,
-    SPRITE_DEGENERATED_2,
-    SPRITE_DEGENERATED_3,
-
-    SPRITE_GRAVE,
-    SPRITE_SPIKE,
-
-    SPRITE_EFFECT_REGENERATION,
-    SPRITE_EFFECT_SLOWNESS,
-    SPRITE_EFFECT_INVULNERABILITY,
-    SPRITE_EFFECT_DEGENERATION,
-    SPRITE_EFFECT_INVISIBILITY,
-
-    SPRITE_MINIMAP,
-    SPRITE_LIFE_BAR,
-
-    SPRITE_COUNT
-} SpritesEnum;
-
-typedef enum {
-    ANIMATION_GHOST_RIGHT,
-    ANIMATION_GHOST_LEFT,
-    ANIMATION_GHOST_UP,
-    ANIMATION_GHOST_DOWN,
-
-    ANIMATION_PACMAN_RIGHT,
-    ANIMATION_PACMAN_LEFT,
-    ANIMATION_PACMAN_UP,
-    ANIMATION_PACMAN_DOWN,
-
-    ANIMATION_COIN,
-    ANIMATION_FRAGMENT,
-    ANIMATION_FRUIT,
-    ANIMATION_INVISIBILITY,
-    ANIMATION_REGENERATION,
-
-    ANIMATION_HORIZONTAL_WIND,
-    ANIMATION_VERTICAL_WIND,
-    ANIMATION_MUD, 
-    ANIMATION_FIRE,
-
-    ANIMATION_FONT,
-
-    ANIMATION_COUNT
-} AnimationsEnum;
-
-typedef enum {
-    MUSIC_LUXURIA,
-    MUSIC_GULA,
-    MUSIC_HERESIA,
-    MUSIC_VIOLENCIA,
-
-    MUSIC_COUNT
-} MusicEnum;
-
-typedef enum {
-    SOUND_COIN,
-
-    SOUND_COUNT
-} SoundsEnum;
-
 typedef struct Game {
     int width;
     int height;
@@ -103,8 +31,8 @@ typedef struct Game {
 
     RenderTexture2D shadowMap;
 
-    Animation animations[ANIMATION_COUNT];
-    Sprite sprites[SPRITE_COUNT];
+    Animation animations[100];
+    Sprite sprites[100];
 
     void (*drawMap)(struct Game*);
     void (*saveUpdate)(struct Game*);

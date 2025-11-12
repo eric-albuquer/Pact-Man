@@ -6,6 +6,16 @@
 #include <raylib.h> 
 #include <math.h>
 
+typedef enum {
+    MUSIC_MENU,
+
+    MUSIC_COUNT
+} MusicEnum;
+
+typedef enum {
+    SOUND_COUNT
+} SoundEnum;
+
 static FlameParticle flames[NUM_FLAMES];
 static bool flamesInit = false;
 
@@ -23,7 +33,7 @@ void onDifficulty() {
 }
 
 // ---- Metodos do menu viu galera ---- :D
-void _free(Menu* this){
+void _free(Menu* this) {
     if (!this) return;
 
     if (this->play) {
@@ -44,9 +54,9 @@ void _free(Menu* this){
 
 static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
     f->x = (float)(rand() % screenWidth);
-    f->y = (float)(screenHeight + rand() % 100);   
-    f->speed = 40.0f + (float)(rand() % 80);       
-    f->radius = 2.0f + (float)(rand() % 4);        
+    f->y = (float)(screenHeight + rand() % 100);
+    f->speed = 40.0f + (float)(rand() % 80);
+    f->radius = 2.0f + (float)(rand() % 4);
 
     unsigned char r = 255;
     unsigned char g = 150 + rand() % 80;
@@ -56,24 +66,24 @@ static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
 }
 
 
-void draw(Menu* this){
+void draw(Menu* this) {
     if (!this) return;
 
-    ClearBackground((Color){20, 10, 10, 255}); 
+    ClearBackground((Color) { 20, 10, 10, 255 });
 
     float t = GetTime();
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
 
-    Color topColor = (Color){ (int)(40 + 20*sin(t*0.5)), 0, 0, 255 };
-    Color bottomColor = (Color){ (int)(150 + 80*sin(t*0.3)), 0, 0, 255 };
+    Color topColor = (Color){ (int)(40 + 20 * sin(t * 0.5)), 0, 0, 255 };
+    Color bottomColor = (Color){ (int)(150 + 80 * sin(t * 0.3)), 0, 0, 255 };
 
     for (int y = 0; y < screenHeight; y++) {
         float factor = (float)y / (float)screenHeight;
         Color c = {
-            (unsigned char)(topColor.r*(1.0f - factor) + bottomColor.r*factor),
-            (unsigned char)(topColor.g*(1.0f - factor) + bottomColor.g*factor),
-            (unsigned char)(topColor.b*(1.0f - factor) + bottomColor.b*factor),
+            (unsigned char)(topColor.r * (1.0f - factor) + bottomColor.r * factor),
+            (unsigned char)(topColor.g * (1.0f - factor) + bottomColor.g * factor),
+            (unsigned char)(topColor.b * (1.0f - factor) + bottomColor.b * factor),
             255
         };
         DrawLine(0, y, screenWidth, y, c);
@@ -105,9 +115,13 @@ void draw(Menu* this){
     if (this->difficulty) this->difficulty->draw(this->difficulty);
 }
 
+static void playSound(Menu* this){
+    Audio* audio = this->audio;
 
+    audio->updateMusic(audio, MUSIC_MENU);
+}
 
-void update(Menu* this){
+void update(Menu* this) {
     if (!this) return;
 
     Vector2 mouse = GetMousePosition();
@@ -124,20 +138,31 @@ void update(Menu* this){
             if (b->action) b->action();
         }
     }
+
+    playSound(this);
 }
 
-Menu* new_Menu(){
+static void loadAudio(Menu* this) {
+    Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
+    this->audio = audio;
+    
+    audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_MENU);
+}
+
+Menu* new_Menu() {
     Menu* this = malloc(sizeof(Menu));
 
-    int screenWidth  = GetScreenWidth();
+    int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
 
-    int buttonWidth  = 300;
+    int buttonWidth = 300;
     int buttonHeight = 60;
-    int spacing      = 20;
+    int spacing = 20;
 
-    int centerX = screenWidth/2  - buttonWidth/2;
-    int startY  = screenHeight/2 - (buttonHeight*3 + spacing*2)/2;
+    int centerX = screenWidth / 2 - buttonWidth / 2;
+    int startY = screenHeight / 2 - (buttonHeight * 3 + spacing * 2) / 2;
+
+    loadAudio(this);
 
     this->play = new_Button(
         centerX,
@@ -156,8 +181,12 @@ Menu* new_Menu(){
         startY + buttonHeight + spacing,
         buttonWidth,
         buttonHeight,
-        (Color){ 80,  80,  80, 255 },   // normal
-        (Color){120, 120, 120, 255 },   // hover
+        (Color) {
+        80, 80, 80, 255
+    },   // normal
+        (Color) {
+        120, 120, 120, 255
+    },   // hover
         "VOLUME",
         20,
         onVolume
@@ -165,19 +194,23 @@ Menu* new_Menu(){
 
     this->difficulty = new_Button(
         centerX,
-        startY + (buttonHeight + spacing)*2,
+        startY + (buttonHeight + spacing) * 2,
         buttonWidth,
         buttonHeight,
-        (Color){ 80,  80,  80, 255 },   // normal
-        (Color){120, 120, 120, 255 },   // hover
+        (Color) {
+        80, 80, 80, 255
+    },   // normal
+        (Color) {
+        120, 120, 120, 255
+    },   // hover
         "DIFFICULTY",
         20,
         onDifficulty
     );
 
-    this->draw   = draw;
+    this->draw = draw;
     this->update = update;
-    this->free   = _free;
+    this->free = _free;
 
     return this;
 }
