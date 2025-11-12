@@ -6,6 +6,8 @@
 #include <raylib.h> 
 #include <math.h>
 
+static FlameParticle flames[NUM_FLAMES];
+static bool flamesInit = false;
 
 // ---- Aqui sao os botoes ---- 
 void onPlay() {
@@ -56,6 +58,8 @@ static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
 
 void draw(Menu* this){
     if (!this) return;
+
+    ClearBackground((Color){20, 10, 10, 255}); 
 
     float t = GetTime();
     int screenWidth = GetScreenWidth();

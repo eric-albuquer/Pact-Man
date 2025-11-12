@@ -416,12 +416,11 @@ static void loadAllSprites(Game* this) {
 
     const char* coin[] = { "assets/sprites/itens/coin1.png", "assets/sprites/itens/coin2.png", "assets/sprites/itens/coin3.png", "assets/sprites/itens/coin4.png",
     "assets/sprites/itens/coin5.png", "assets/sprites/itens/coin6.png" };
-    const char* fragment[] = { "assets/sprites/itens/keys1.png", "assets/sprites/itens/keys2.png", "assets/sprites/itens/keys3.png", "assets/sprites/itens/keys4.png",
-    "assets/sprites/itens/keys5.png", "assets/sprites/itens/keys6.png", "assets/sprites/itens/keys7.png", "assets/sprites/itens/keys8.png", "assets/sprites/itens/keys9.png" };
+    const char* fragment[] = { "assets/sprites/itens/newKey.png" , "assets/sprites/itens/newKey2.png" };
     const char* fruit[] = { "assets/sprites/itens/apple.png" };
 
     animations[ANIMATION_COIN] = LoadAnimation(6, coin);
-    animations[ANIMATION_FRAGMENT] = LoadAnimation(9, fragment);
+    animations[ANIMATION_FRAGMENT] = LoadAnimation(2, fragment);
     animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
 
     const char* verticalWind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };

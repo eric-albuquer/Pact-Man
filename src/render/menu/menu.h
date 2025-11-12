@@ -24,9 +24,6 @@ typedef struct FlameParticle {
 
 #define NUM_FLAMES 60
 
-static FlameParticle flames[NUM_FLAMES];
-static bool flamesInit = false;
-
 Menu* new_Menu();
 
 #endif

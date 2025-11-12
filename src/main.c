@@ -35,7 +35,6 @@ void updateMenu() {
     render->updateMenu(render);
 
     BeginDrawing();
-    ClearBackground((Color){20, 10, 10, 255}); 
     render->drawMenu(render);
     EndDrawing();
 }
