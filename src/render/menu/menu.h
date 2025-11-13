@@ -4,13 +4,20 @@
 #include <raylib.h>
 #include "button.h"
 #include "audio.h"
+#include "sprites.h"
 
 typedef struct Menu {
     Button* play;
     Button* volume;
     Button* difficulty;
 
+    Animation* animations;
+    Sprite* sprites;
+
     Audio* audio;
+
+    int width;
+    int height;
 
     void (*draw)(struct Menu*);
     void (*update)(struct Menu*);
@@ -27,7 +34,7 @@ typedef struct FlameParticle {
 
 #define NUM_FLAMES 60
 
-Menu* new_Menu();
+Menu* new_Menu(int width, int height);
 
 #endif
 

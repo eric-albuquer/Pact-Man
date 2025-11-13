@@ -25,7 +25,7 @@ Render* new_Render(int width, int height, int cellSize, Map* map) {
     this->width = width;
     this->height = height;
 
-    this->menu = new_Menu();
+    this->menu = new_Menu(width, height);
     this->game = new_Game(width, height, cellSize, map);
 
     this->drawGame = drawGame;

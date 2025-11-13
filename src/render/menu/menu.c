@@ -13,8 +13,19 @@ typedef enum {
 } MusicEnum;
 
 typedef enum {
+    SOUND_CLICK_BUTTON,
     SOUND_COUNT
 } SoundEnum;
+
+typedef enum {
+    SPRITE_BACKGROUND,
+
+    SPRITE_COUNT
+} SpritesEnum;
+
+typedef enum {
+    ANIMATION_COUNT
+} AnimationsEnum;
 
 static FlameParticle flames[NUM_FLAMES];
 static bool flamesInit = false;
@@ -49,6 +60,18 @@ void _free(Menu* this) {
         b->free(b);
     }
 
+    for (int i = 0; i < ANIMATION_COUNT; i++) {
+        UnloadAnimation(this->animations[i]);
+    }
+
+    free(this->animations);
+
+    for (int i = 0; i < SPRITE_COUNT; i++) {
+        UnloadSprite(this->sprites[i]);
+    }
+
+    free(this->sprites);
+
     free(this);
 }
 
@@ -69,30 +92,28 @@ static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
 void draw(Menu* this) {
     if (!this) return;
 
-    ClearBackground((Color) { 20, 10, 10, 255 });
+    //float t = GetTime();
 
-    float t = GetTime();
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    // Color topColor = (Color){ (int)(40 + 20 * sin(t * 0.5)), 0, 0, 255 };
+    // Color bottomColor = (Color){ (int)(150 + 80 * sin(t * 0.3)), 0, 0, 255 };
 
-    Color topColor = (Color){ (int)(40 + 20 * sin(t * 0.5)), 0, 0, 255 };
-    Color bottomColor = (Color){ (int)(150 + 80 * sin(t * 0.3)), 0, 0, 255 };
+    // for (int y = 0; y < this->height; y++) {
+    //     float factor = (float)y / (float)this->height;
+    //     Color c = {
+    //         (unsigned char)(topColor.r * (1.0f - factor) + bottomColor.r * factor),
+    //         (unsigned char)(topColor.g * (1.0f - factor) + bottomColor.g * factor),
+    //         (unsigned char)(topColor.b * (1.0f - factor) + bottomColor.b * factor),
+    //         255
+    //     };
+    //     DrawLine(0, y, this->width, y, c);
+    // }
 
-    for (int y = 0; y < screenHeight; y++) {
-        float factor = (float)y / (float)screenHeight;
-        Color c = {
-            (unsigned char)(topColor.r * (1.0f - factor) + bottomColor.r * factor),
-            (unsigned char)(topColor.g * (1.0f - factor) + bottomColor.g * factor),
-            (unsigned char)(topColor.b * (1.0f - factor) + bottomColor.b * factor),
-            255
-        };
-        DrawLine(0, y, screenWidth, y, c);
-    }
+    DrawSprite(this->sprites[SPRITE_BACKGROUND], 0, 0, this->width, this->height, WHITE);
 
     if (!flamesInit) {
         for (int i = 0; i < NUM_FLAMES; i++) {
-            ResetFlame(&flames[i], screenWidth, screenHeight);
-            flames[i].y = (float)(rand() % screenHeight);
+            ResetFlame(&flames[i], this->width, this->height);
+            flames[i].y = (float)(rand() % this->height);
         }
         flamesInit = true;
     }
@@ -104,7 +125,7 @@ void draw(Menu* this) {
         f->y -= f->speed * dt;
 
         if (f->y + f->radius < 0) {
-            ResetFlame(f, screenWidth, screenHeight);
+            ResetFlame(f, this->width, this->height);
         }
 
         DrawCircle((int)f->x, (int)f->y, f->radius, f->color);
@@ -115,7 +136,7 @@ void draw(Menu* this) {
     if (this->difficulty) this->difficulty->draw(this->difficulty);
 }
 
-static void playSound(Menu* this){
+static void playSound(Menu* this) {
     Audio* audio = this->audio;
 
     audio->updateMusic(audio, MUSIC_MENU);
@@ -124,6 +145,7 @@ static void playSound(Menu* this){
 void update(Menu* this) {
     if (!this) return;
 
+    Audio* audio = this->audio;
     Vector2 mouse = GetMousePosition();
 
     Button* buttons[3] = { this->play, this->volume, this->difficulty };
@@ -135,6 +157,7 @@ void update(Menu* this) {
         b->hovered = b->isInside(b, mouse);
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
+            audio->playSound(audio, SOUND_CLICK_BUTTON);
             if (b->action) b->action();
         }
     }
@@ -145,24 +168,36 @@ void update(Menu* this) {
 static void loadAudio(Menu* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
-    
+
     audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_MENU);
+    audio->loadSound(audio, "assets/sounds/fragmento.wav", SOUND_CLICK_BUTTON);
 }
 
-Menu* new_Menu() {
+static void loadSprites(Menu* this) {
+    //Animation* animations = this->animations;
+    Sprite* sprites = this->sprites;
+
+    sprites[SPRITE_BACKGROUND] = LoadSprite("assets/sprites/menu/menu.jpg");
+}
+
+Menu* new_Menu(int width, int height) {
     Menu* this = malloc(sizeof(Menu));
 
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    this->width = width;
+    this->height = height;
 
     int buttonWidth = 300;
     int buttonHeight = 60;
     int spacing = 20;
 
-    int centerX = screenWidth / 2 - buttonWidth / 2;
-    int startY = screenHeight / 2 - (buttonHeight * 3 + spacing * 2) / 2;
+    int centerX = width / 2 - buttonWidth / 2;
+    int startY = height / 2 - (buttonHeight * 3 + spacing * 2) / 2;
+
+    this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
+    this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
 
     loadAudio(this);
+    loadSprites(this);
 
     this->play = new_Button(
         centerX,

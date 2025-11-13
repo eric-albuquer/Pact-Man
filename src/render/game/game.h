@@ -31,8 +31,8 @@ typedef struct Game {
 
     RenderTexture2D shadowMap;
 
-    Animation animations[100];
-    Sprite sprites[100];
+    Animation *animations;
+    Sprite *sprites;
 
     void (*drawMap)(struct Game*);
     void (*saveUpdate)(struct Game*);

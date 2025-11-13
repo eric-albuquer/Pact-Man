@@ -645,8 +645,8 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_EFFECT_SLOWNESS] = LoadSprite("assets/sprites/effects/slowness.png");
     sprites[SPRITE_EFFECT_INVISIBILITY] = LoadSprite("assets/sprites/effects/invisibility_effect.png");
 
-    sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/minimap.png");
-    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/life_bar.png");
+    sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
+    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/life_bar.png");
 }
 
 static void loadSounds(Game* this) {
@@ -675,9 +675,13 @@ static void _free(Game* this) {
         UnloadAnimation(this->animations[i]);
     }
 
+    free(this->animations);
+
     for (int i = 0; i < SPRITE_COUNT; i++) {
         UnloadSprite(this->sprites[i]);
     }
+
+    free(this->sprites);
 
     this->audio->free(this->audio);
     UnloadRenderTexture(this->shadowMap);
@@ -702,6 +706,9 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->offsetHalfY = height >> 1;
 
     this->map = map;
+
+    this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
+    this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
 
     loadSounds(this);
     loadSprites(this);
