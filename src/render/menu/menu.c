@@ -169,7 +169,7 @@ static void loadAudio(Menu* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
 
-    audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_MENU);
+    audio->loadMusic(audio, "assets/music/menu_music.mp3", MUSIC_MENU);
     audio->loadSound(audio, "assets/sounds/fragmento.wav", SOUND_CLICK_BUTTON);
 }
 
@@ -207,7 +207,7 @@ Menu* new_Menu(int width, int height) {
         RED,       // normal color
         GREEN,     // hover color
         "PLAY",
-        20,
+        40,
         onPlay
     );
 
@@ -223,7 +223,7 @@ Menu* new_Menu(int width, int height) {
         120, 120, 120, 255
     },   // hover
         "VOLUME",
-        20,
+        40,
         onVolume
     );
 
@@ -239,7 +239,7 @@ Menu* new_Menu(int width, int height) {
         120, 120, 120, 255
     },   // hover
         "DIFFICULTY",
-        20,
+        40,
         onDifficulty
     );
 

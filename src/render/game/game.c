@@ -189,19 +189,19 @@ static inline Color LerpColor(Color a, Color b, float t) {
 }
 
 static void drawLifeBar(Game* this, int x, int y, int width, int height) {
-    int h = height / 3;
-    int w = width * 0.69f;
-    DrawRectangle(x + width / 4, y + h, w, h, HUD_OPACITY);
+    int h = height * 0.3;
+    int w = width * 0.87;
+    //DrawRectangle(x + width / 4, y + h, w, h, HUD_OPACITY);
     float t = this->map->player->life / (float)(START_LIFE);
     if (t < 0.0f) t = 0.0f;
     Color color = LerpColor(RED, GREEN, t);
     int lx = w * t;
-    DrawRectangle(x + width / 4, y + h, lx, h, color);
+    DrawRectangle(x + 50, y + h + 10, lx, h, color);
     DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
 }
 
 static void drawInfoHud(Game* this, int x, int y, int size) {
-    DrawRectangle(x, y, size * 3, size * 3, HUD_OPACITY);
+    DrawRectangle(x, y, size * 3, size * 2, HUD_OPACITY);
     DrawAnimation(this->animations[ANIMATION_COIN], x, y, size, WHITE);
     sprintf(buffer, "%d/%d", this->map->player->biomeCoins, COINS_TO_FRAGMENT);
     DrawText(buffer, x + size, y + size / 3, 30, WHITE);
@@ -233,45 +233,45 @@ static void drawEffects(Game* this, int x, int y, int size) {
     Effects effects = this->map->player->effects;
 
     int delta = size + 20;
-    int ex = x;
+    int ey = y;
 
     if (effects.degeneration.duration > 0) {
         drawActionHud(this, BLACK);
         //DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], ex, y, size, size, WHITE);
-        ex += delta;
+        DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], x, ey, size, size, WHITE);
+        ey += delta;
     }
     if (effects.regeneration.duration > 0) {
         drawActionHud(this, (Color) { 0, 255, 255, 255 });
-        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size, size, WHITE);
-        ex += delta;
+        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, ey, size, size, WHITE);
+        ey += delta;
     }
     if (effects.slowness.duration > 0) {
         drawActionHud(this, GRAY);
-        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size, size, WHITE);
+        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], x, ey, size, size, WHITE);
 
-        ex += delta;
+        ey += delta;
     }
     if (effects.invulnerability.duration > 0) {
         if (effects.invulnerability.duration & 1)
             drawActionHud(this, YELLOW);
-        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, size, WHITE);
-        ex += delta;
+        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], x, ey, size, size, WHITE);
+        ey += delta;
     }
 
     if (effects.invisibility.duration > 0) {
-        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], ex, y, size, size, WHITE);
-        ex += delta;
+        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
+        DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], x, ey, size, size, WHITE);
+        ey += delta;
     }
 
     if (effects.freezeTime.duration > 0) {
-        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
-        DrawAnimation(animations[ANIMATION_FREEZE_TIME], ex, y, size, WHITE);
-        ex += delta;
+        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
+        DrawAnimation(animations[ANIMATION_FREEZE_TIME], x, ey, size, WHITE);
+        ey += delta;
     }
 }
 
@@ -393,14 +393,15 @@ static void drawHud(Game* this) {
     // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
-    DrawText(BIOMES[p->biome], this->offsetHalfX, 50, 60, BIOME_COLOR[p->biome]);
+    Vector2 biomeNamePos = {this->offsetHalfX, 50};
+    DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 0, BIOME_COLOR[p->biome]);
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
-    drawTimeHUD(this, 30, 30);
-    drawEffects(this, 190, 30, 80);
-    drawLifeBar(this, this->offsetHalfX - 200, this->height - 150, 400, 100);
-    drawInfoHud(this, this->width - 250, 540, 80);
+    drawTimeHUD(this, this->width - 150, this->height - 150);
+    drawEffects(this, 30, 30, 80);
+    drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
+    drawInfoHud(this, this->width - 280, 550, 80);
 
     if (p->damaged) drawActionHud(this, RED);
 }
@@ -646,7 +647,7 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_EFFECT_INVISIBILITY] = LoadSprite("assets/sprites/effects/invisibility_effect.png");
 
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
-    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/life_bar.png");
+    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar3.png");
 }
 
 static void loadSounds(Game* this) {

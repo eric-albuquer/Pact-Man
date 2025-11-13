@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <raylib.h>
+
 typedef enum {
     LUXURIA,
     GULA,
@@ -13,6 +15,8 @@ typedef enum { RIGHT, LEFT, UP, DOWN } Direction;
 typedef enum { MENU, GAME } GameState;
 
 extern GameState state;
+
+extern Font InfernoFont;
 
 static inline int max(int a, int b) { return (a > b) ? a : b; }
 

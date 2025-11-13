@@ -13,6 +13,7 @@ GameState state = MENU;
 Controler* controler;
 Map* map;
 Render* render;
+Font InfernoFont;
 
 void updateGame() {
     static float lastTime = 0;
@@ -47,6 +48,7 @@ int main(void) {
 
     ChangeDirectory(GetApplicationDirectory());
 
+    InfernoFont = LoadFont("assets/fonts/Nosifer-Regular.ttf");
     Image icon = LoadImage("assets/sprites/icon.png");   // Exemplo: 32x32 px é ideal
     SetWindowIcon(icon);
     UnloadImage(icon);  // Depois de aplicar, pode liberar a memória
@@ -64,6 +66,7 @@ int main(void) {
     render->free(render);
     controler->free(controler);
 
+    UnloadFont(InfernoFont);
     CloseAudioDevice();
     CloseWindow();
     return 0;

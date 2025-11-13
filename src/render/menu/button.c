@@ -1,6 +1,7 @@
 #include "button.h"
 #include <stdlib.h>
 #include <string.h>
+#include "common.h"
 
 void freeButton(Button* this){
     free(this);
@@ -20,6 +21,7 @@ void drawButton(Button* this) {
 
     Color textColor = this->hovered ? WHITE : this->fontColor;
 
+    //DrawTextEx(InfernoFont, this->text, (Vector2){textX, textY}, this->fontSize, 5, textColor);
     DrawText(this->text, textX, textY, this->fontSize, textColor);
 }
 

@@ -26,7 +26,7 @@
 
 #define BATERY_PROBABILITY 50
 
-#define FREEZE_TIME_PROBABILITY 2
+#define FREEZE_TIME_PROBABILITY 4
 
 typedef struct ChunkLoader{
     int width, height;
