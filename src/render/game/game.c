@@ -228,19 +228,19 @@ static void drawEffects(Game* this, int x, int y, int size) {
 
     if (effects.degeneration.duration > 0) {
         drawActionHud(this, BLACK);
-        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], ex, y, size, size, WHITE);
         ex += delta;
     }
     if (effects.regeneration.duration > 0) {
         drawActionHud(this, (Color) { 0, 255, 255, 255 });
-        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], ex, y, size, size, WHITE);
         ex += delta;
     }
     if (effects.slowness.duration > 0) {
         drawActionHud(this, GRAY);
-        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], ex, y, size, size, WHITE);
 
         ex += delta;
@@ -248,13 +248,13 @@ static void drawEffects(Game* this, int x, int y, int size) {
     if (effects.invulnerability.duration > 0) {
         if (effects.invulnerability.duration & 1)
             drawActionHud(this, YELLOW);
-        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], ex, y, size, size, WHITE);
         ex += delta;
     }
 
     if (effects.invisibility.duration > 0) {
-        DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], ex, y, size, size, WHITE);
     }
 }
@@ -318,14 +318,11 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
 static void drawTimeHUD(Game* this, int x, int y) {
     Map* map = this->map;
 
-    int totalSeconds = (int)map->biomeTime;
-    int mm = totalSeconds / 60;
-    int ss = totalSeconds % 60;
+    int remainingTime = BIOME_DEGEN_START_TIME - map->biomeTime;
+    int mm = remainingTime / 60;
+    int ss = remainingTime % 60;
 
-    static const int totalMM = (int)(BIOME_DEGEN_START_TIME) / 60;
-    static const int totalSS = (int)(BIOME_DEGEN_START_TIME) % 60;
-
-    sprintf(buffer, "%02d:%02d / %02d:%02d", mm, ss, totalMM, totalSS);
+    sprintf(buffer, "%02d:%02d", mm, ss);
 
     float d = map->degenerescence;
     int stage = 0;
@@ -349,7 +346,7 @@ static void drawTimeHUD(Game* this, int x, int y) {
 
     Color stageColor = stageColors[stage];
 
-    int boxWidth = 320;
+    int boxWidth = 120;
     int boxHeight = 80;
 
     DrawRectangle(x, y, boxWidth, boxHeight, HUD_OPACITY);
@@ -357,8 +354,6 @@ static void drawTimeHUD(Game* this, int x, int y) {
     DrawText(buffer, x + 16, y + 10, 30, WHITE);
 
     DrawText(stageText[stage], x + 16, y + 45, 20, stageColor);
-
-    DrawRectangle(x + boxWidth - 30, y + 10, 16, 16, BIOME_COLOR[map->player->biome]);
 }
 
 
@@ -379,7 +374,7 @@ static void drawHud(Game* this) {
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
     drawTimeHUD(this, 30, 30);
-    drawEffects(this, 370, 20, 80);
+    drawEffects(this, 190, 30, 80);
     drawLifeBar(this, this->offsetHalfX - 200, this->height - 150, 400, 100);
     drawInfoHud(this, this->width - 250, 540, 80);
 

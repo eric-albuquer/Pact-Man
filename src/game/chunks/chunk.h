@@ -83,7 +83,7 @@ typedef struct Chunk {
     unsigned type : 3;
     unsigned biome : 2;
     unsigned isBorder : 1;
-
+    
     unsigned int randCounter;
 
     LinkedList* enemies;

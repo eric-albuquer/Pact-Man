@@ -282,9 +282,12 @@ static inline void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedC
         for (int j = -1; j < 2; j++) {
             Cell* cell = cm->getUpdatedCell(cm, e->x + j, e->y + i);
             if (cell && cell->type != CELL_FRAGMENT) {
-                if (cell->type != CELL_FIRE_ON && e->biome >= 1) {
-                    firedCells->addLast(firedCells, cell);
+                if (e->biome >= 1) {
+                    if (cell->type != CELL_FIRE_ON)
+                        firedCells->addLast(firedCells, cell);
                     cell->type = CELL_FIRE_ON;
+                } else {
+                    cell->type = CELL_TEMPLE;
                 }
             }
         }

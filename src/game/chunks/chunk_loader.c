@@ -64,7 +64,7 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
 
     chunk->type = CHUNK_NORMAL;
 
-    if ((chunk->x + 1) % this->biomeWidthChunks == 0) {
+    if ((chunk->x + 1) % this->biomeWidthChunks == 0 && chunk->biome < 3) {
         chunk->type = CHUNK_TRANSITION;
         return;
     }
@@ -430,7 +430,7 @@ static void generateRegeneration(ChunkLoader* this, Chunk* chunk){
 }
 
 static void generateBatery(ChunkLoader* this, Chunk* chunk){
-    if (chunk->biome != VIOLENCIA) return;
+    if (chunk->biome != VIOLENCIA || chunk->type == CHUNK_TRANSITION || randChunk(this, chunk) % 100 >= BATERY_PROBABILITY) return;
 
     generateIten(this, chunk, CELL_BATERY);
 }
