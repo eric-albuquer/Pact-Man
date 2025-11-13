@@ -28,6 +28,7 @@ static void updateDegenerescence(Chunk* this, int x, int y, int biome){
 }
 
 static void updateFire(Chunk* this, int x, int y) {
+    if (this->biome != 2) return;
     Cell* cell = cellAt(this, x, y);
     if (!isFire(cell)) return;
     CellType switchFire = cell->type == CELL_FIRE_ON ? CELL_FIRE_OFF : CELL_FIRE_ON;

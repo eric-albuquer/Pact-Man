@@ -13,19 +13,6 @@ static void updateMusic(Audio* this, int idx) {
     UpdateMusicStream(this->musics[idx]);
 }
 
-static void loadMusics(Audio* this, const char** path){
-    for (int i = 0; i < this->musicsLength; i++){
-        this->musics[i] = LoadMusicStream(path[i]);
-        PlayMusicStream(this->musics[i]);
-    }
-}
-
-static void loadSounds(Audio* this, const char** path){
-    for (int i = 0; i < this->soundsLength; i++){
-        this->sounds[i] = LoadSound(path[i]);
-    }
-}
-
 static void loadSound(Audio* this, const char* path, int idx){
     this->sounds[idx] = LoadSound(path);
 }
@@ -67,8 +54,6 @@ Audio* new_Audio(const int musicsLength, const int soundsLength) {
     this->resumeMusic = resumeMusic;
     this->pauseMusic = pauseMusic;
     this->updateMusic = updateMusic;
-    this->loadMusics = loadMusics;
-    this->loadSounds = loadSounds;
     this->playSound = playSound;
     this->loadMusic = loadMusic;
     this->loadSound = loadSound;

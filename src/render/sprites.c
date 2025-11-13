@@ -19,6 +19,15 @@ Texture2D GetAnimationFrame(Animation animation) {
     return animation.frames[animation.actualFrame];
 }
 
+void DrawAnimationFrame(Animation animation, int x, int y, int size, Color color, int frameIdx) {
+    Texture2D frame = animation.frames[frameIdx];
+    Rectangle source = { 0, 0, frame.width, frame.height };
+    Rectangle dest = { x, y, size, size };
+    Vector2 origin = { 0, 0 };
+
+    DrawTexturePro(frame, source, dest, origin, 0.0f, color);
+}
+
 void UnloadAnimation(Animation animation) {
     for (int i = 0; i < animation.lenght; i++) {
         UnloadTexture(animation.frames[i]);

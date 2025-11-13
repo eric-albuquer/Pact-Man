@@ -245,6 +245,7 @@ static inline bool isFarAwayFromSpawn(Player* p, Enemy* e) {
 static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
+
     NextPos pos = getNextPos(cm, e->x, e->y, e->biome);
     if (pos.moves == 0) return;
 
@@ -266,11 +267,15 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->updateDirection(e);
 }
 
-static inline void bossDestroyMap(ChunkManager* cm, int x, int y) {
+static inline void bossDestroyMap(ChunkManager* cm, int x, int y, LinkedList* firedCells) {
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
             Cell* cell = cm->getUpdatedCell(cm, x + j, y + i);
-            if (cell && cell->type != CELL_FRAGMENT) cell->type = CELL_TEMPLE;
+            if (cell && cell->type != CELL_FRAGMENT) {
+                if (cell->type != CELL_FIRE_ON)
+                    firedCells->addLast(firedCells, cell);
+                cell->type = CELL_FIRE_ON;
+            }
         }
     }
 }
@@ -301,10 +306,10 @@ static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Pla
     return false;
 }
 
-static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk) {
+static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk, LinkedList* firedCells) {
     Enemy* e = node->data;
     if (e->isBoss)
-        bossDestroyMap(cm, e->x, e->y);
+        bossDestroyMap(cm, e->x, e->y, firedCells);
     if (checkPlayerEnemyColision(node, list, p)) return;
     updateEnemyMovement(cm, e, p);
     updateEnemyChunk(cm, node, list, changedChunk);
@@ -331,7 +336,7 @@ static inline void updateEnemies(Map* this) {
             Node* next = cur->next;
             Enemy* e = cur->data;
             if (e->changedChunk) break;
-            updateEnemy(cm, cur, enemies, p, changedChunk);
+            updateEnemy(cm, cur, enemies, p, changedChunk, this->firedCells);
             cur = next;
         }
     }
@@ -360,11 +365,20 @@ static void updateTime(Map* this) {
     this->degenerescence = t / duration;
 }
 
+static void inline removeBossFire(LinkedList* firedCells){
+    while (firedCells->length > BOSS_FIRE_DURATION){
+        Cell* cell = firedCells->removeFirst(firedCells);
+        cell->type = CELL_TEMPLE;
+    }
+}
+
 static void update(Map* this, Controler* controler) {
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
     updatePlayer(this, controler->input);
     updateEnemies(this);
+
+    removeBossFire(this->firedCells);
 
     updateTime(this);
 
@@ -376,6 +390,7 @@ static void _free(Map* this) {
     Player* p = this->player;
     p->free(p);
     this->changedChunk->free(this->changedChunk);
+    this->firedCells->free(this->firedCells);
     free(this);
 }
 
@@ -386,6 +401,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     this->player = new_Player(11, 21);
 
     this->changedChunk = new_ArrayList();
+    this->firedCells = new_LinkedList();
     this->elapsedTime = 0.0f;
     this->biomeTime = 0.0f;
     this->degenerescence = 0.0f;

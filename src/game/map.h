@@ -32,6 +32,8 @@
 #define MAX_PERSUIT_RADIUS 40
 #define BEST_PATH_PROBABILITY 60
 
+#define BOSS_FIRE_DURATION 40
+
 // Constantes para ajudar no degen dos biomas
 #define MAP_UPDATE_DT 0.15f
 #define BIOME_DEGEN_START_TIME 180.0f
@@ -40,6 +42,7 @@
 typedef struct Map {
     ChunkManager* manager;
     ArrayList* changedChunk;
+    LinkedList* firedCells;
 
     float degenerescence;
     float elapsedTime;

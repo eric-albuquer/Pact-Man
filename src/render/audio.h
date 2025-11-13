@@ -13,8 +13,6 @@ typedef struct Audio {
 
   void (*loadSound)(struct Audio*, const char*, int);
   void (*loadMusic)(struct Audio*, const char*, int);
-  void (*loadMusics)(struct Audio*, const char**);
-  void (*loadSounds)(struct Audio*, const char**);
 
   void (*resumeMusic)(struct Audio*, int);
   void (*pauseMusic)(struct Audio*, int);

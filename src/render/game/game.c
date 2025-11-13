@@ -102,6 +102,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     Sprite* sprites = this->sprites;
     Animation* animations = this->animations;
+    Player* p = this->map->player;
 
     Sprite sprite = sprites[SPRITE_FLOOR_LUXURIA + cell->biome];
     Color color = WHITE;
@@ -139,7 +140,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     } else if (cell->type == CELL_MUD) {
         DrawAnimation(animations[ANIMATION_MUD], x, y, size, color);
     } else if (cell->type == CELL_FONT_HEALTH) {
-        DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
+        if (p->cellType == CELL_FONT_HEALTH)
+            DrawAnimationFrame(animations[ANIMATION_FONT], x, y, size, color, 3);
+        else
+            DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
     }
 
     if (!itens) return;
@@ -307,7 +311,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
 static void drawTimeHUD(Game* this, int x, int y) {
     Map* map = this->map;
 
-    int totalSeconds = (int)map->elapsedTime;
+    int totalSeconds = (int)map->biomeTime;
     int mm = totalSeconds / 60;
     int ss = totalSeconds % 60;
 

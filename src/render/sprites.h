@@ -20,6 +20,7 @@ typedef struct Animation {
 Animation LoadAnimation(int lenght, const char** path);
 void UpdateAnimation(Animation* animation);
 Texture2D GetAnimationFrame(Animation animation);
+void DrawAnimationFrame(Animation animation, int x, int y, int size, Color color, int frameIdx);
 void DrawAnimation(Animation animation, int x, int y, int size, Color color);
 void UnloadAnimation(Animation animation);
 
