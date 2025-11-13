@@ -24,6 +24,8 @@
 
 #define REGENERATION_PROBABILITY 8
 
+#define BATERY_PROBABILITY 50
+
 typedef struct ChunkLoader{
     int width, height;
     int biomeWidthChunks;

@@ -418,15 +418,21 @@ static void generateFruit(ChunkLoader* this, Chunk* chunk) {
 }
 
 static void generateInvisibility(ChunkLoader* this, Chunk* chunk){
-    if (randChunk(this, chunk) % 100 > INVISIBILITY_PROBABILITY) return;
+    if (randChunk(this, chunk) % 100 >= INVISIBILITY_PROBABILITY) return;
 
     generateIten(this, chunk, CELL_INVISIBILITY);
 }
 
 static void generateRegeneration(ChunkLoader* this, Chunk* chunk){
-    if (randChunk(this, chunk) % 100 > REGENERATION_PROBABILITY) return;
+    if (randChunk(this, chunk) % 100 >= REGENERATION_PROBABILITY) return;
 
     generateIten(this, chunk, CELL_REGENERATION);
+}
+
+static void generateBatery(ChunkLoader* this, Chunk* chunk){
+    if (chunk->biome != VIOLENCIA) return;
+
+    generateIten(this, chunk, CELL_BATERY);
 }
 
 static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
@@ -468,13 +474,15 @@ static ChunkGeneratorFn GENERATORS[] = {
     generateFruit,
     generateInvisibility,
     generateRegeneration,
+    generateBatery,
     generateEnemies,
     generateCoins,
 };
 
 void generate(ChunkLoader* this, Chunk* chunk) {
     preLoad(this, chunk);
-    for (int i = 0; i < sizeof(GENERATORS) / sizeof(GENERATORS[0]); i++) {
+    static const int size = sizeof(GENERATORS) / sizeof(GENERATORS[0]);
+    for (int i = 0; i < size; i++) {
         GENERATORS[i](this, chunk);
     }
 }

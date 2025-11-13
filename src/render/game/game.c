@@ -54,6 +54,8 @@ typedef enum {
     ANIMATION_INVISIBILITY,
     ANIMATION_REGENERATION,
 
+    ANIMATION_BATERY,
+
     ANIMATION_HORIZONTAL_WIND,
     ANIMATION_VERTICAL_WIND,
     ANIMATION_MUD, 
@@ -161,6 +163,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_REGENERATION], x, y, size, color);
     } else if (cell->type == CELL_TENTACLE) {
         DrawAnimation(animations[ANIMATION_TENTACLE], x, y, size, color);
+    } else if (cell->type == CELL_BATERY) {
+        DrawAnimation(animations[ANIMATION_BATERY], x, y, size, color);
     }
 
     //sprintf(buffer, "%d", cell->distance);
@@ -447,7 +451,8 @@ static void drawMap(Game* this) {
     if (p->biome == 3) {
         BeginTextureMode(this->shadowMap);
         ClearBackground(BLACK);
-        DrawCircleGradient(this->offsetHalfX, this->offsetHalfY, 400, WHITE, BLANK);
+        const int halfCell = this->cellSize >> 1;
+        DrawCircleGradient(this->offsetHalfX + halfCell, this->offsetHalfY + halfCell, this->offsetHalfX * p->batery + 200, WHITE, BLANK);
         EndTextureMode();
     }
 
@@ -567,11 +572,14 @@ static void loadSprites(Game* this) {
     const char* font[] = { "assets/sprites/common_cells/fonte.png", "assets/sprites/common_cells/fonte1.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte3.png",
                             "assets/sprites/common_cells/fonte3.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte1.png" };
 
+    const char* batery[] = { "assets/sprites/itens/batery1.png", "assets/sprites/itens/batery2.png", "assets/sprites/itens/batery3.png", "assets/sprites/itens/batery4.png"};
+
     animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
     animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
     animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
     animations[ANIMATION_TENTACLE] = LoadAnimation(4, tentacle);
+    animations[ANIMATION_BATERY] = LoadAnimation(4, batery);
 
     animations[ANIMATION_FONT] = LoadAnimation(7, font);
 

@@ -43,6 +43,8 @@
 #define BIOME_DEGEN_START_TIME 180.0f
 #define BIOME_DEGEN_FULL_TIME 360.0f
 
+#define BATERY_DECAY 0.003f
+
 typedef struct Map {
     ChunkManager* manager;
     ArrayList* changedChunk;

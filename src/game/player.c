@@ -41,6 +41,7 @@ Player* new_Player(int x, int y) {
     this->effects = (Effects){0};
     this->biome = 0;
     this->damaged = false;
+    this->batery = 1.0f;
 
     this->dir = RIGHT;
 

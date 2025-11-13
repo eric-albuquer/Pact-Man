@@ -21,6 +21,7 @@ static inline void updatePlayerBiome(Map* this, Cell* cell) {
     p->biomeCoins = 0;
     p->biomeFragment = 0;
     p->fragmentByCoins = false;
+    p->batery = 1.0f;
 
     this->biomeTime = 0.0f;
     this->degenerescence = 0.0f;
@@ -46,6 +47,9 @@ static inline void collectItens(Player* p, Cell* cell) {
         cell->type = CELL_EMPTY;
     } else if (cell->type == CELL_REGENERATION) {
         cell->type = CELL_EMPTY;
+    } else if (cell->type == CELL_BATERY) {
+        cell->type = CELL_EMPTY;
+        p->batery = 1.0f;
     }
 }
 
@@ -101,6 +105,9 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
         p->effects.degeneration.duration--;
     } else
         p->effects.degeneration.strenght = 0;
+
+    if (p->batery >= BATERY_DECAY)
+        p->batery -= BATERY_DECAY;
 }
 
 static inline void updateDamagePlayer(Player* p, Cell* cell) {
@@ -436,7 +443,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(111, 21);
+    this->player = new_Player(300, 21);
 
     this->changedChunk = new_ArrayList();
     this->firedCells = new_LinkedList();
