@@ -435,6 +435,12 @@ static void generateBatery(ChunkLoader* this, Chunk* chunk){
     generateIten(this, chunk, CELL_BATERY);
 }
 
+static void generateFreezeTime(ChunkLoader* this, Chunk* chunk){
+    if (randChunk(this, chunk) % 100 >= FREEZE_TIME_PROBABILITY) return;
+
+    generateIten(this, chunk, CELL_FREEZE_TIME);
+}
+
 static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
     if (isStructure(chunk->type) || chunk->isBorder) return;
     if (randChunk(this, chunk) % 100 >= BIOME_ENEMY_PROBABILITY[chunk->biome]) return;
@@ -475,6 +481,7 @@ static ChunkGeneratorFn GENERATORS[] = {
     generateInvisibility,
     generateRegeneration,
     generateBatery,
+    generateFreezeTime,
     generateEnemies,
     generateCoins,
 };

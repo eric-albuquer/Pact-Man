@@ -25,6 +25,8 @@ typedef enum {
     SPRITE_GRAVE,
     SPRITE_SPIKE,
 
+    SPRITE_ICE,
+
     SPRITE_EFFECT_REGENERATION,
     SPRITE_EFFECT_SLOWNESS,
     SPRITE_EFFECT_INVULNERABILITY,
@@ -53,12 +55,13 @@ typedef enum {
     ANIMATION_FRUIT,
     ANIMATION_INVISIBILITY,
     ANIMATION_REGENERATION,
+    ANIMATION_FREEZE_TIME,
 
     ANIMATION_BATERY,
 
     ANIMATION_HORIZONTAL_WIND,
     ANIMATION_VERTICAL_WIND,
-    ANIMATION_MUD, 
+    ANIMATION_MUD,
     ANIMATION_FIRE,
     ANIMATION_TENTACLE,
 
@@ -151,12 +154,15 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     if (!itens) return;
 
+
     if (cell->type == CELL_COIN) {
         DrawAnimation(animations[ANIMATION_COIN], x, y, size, color);
     } else if (cell->type == CELL_FRAGMENT) {
         DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
     } else if (cell->type == CELL_FRUIT) {
         DrawAnimation(animations[ANIMATION_FRUIT], x, y, size, color);
+        if (p->effects.freezeTime.duration > 0)
+            DrawSprite(sprites[SPRITE_ICE], x, y, size, size, (Color) { 255, 255, 255, 150 });
     } else if (cell->type == CELL_INVISIBILITY) {
         DrawAnimation(animations[ANIMATION_INVISIBILITY], x, y, size, color);
     } else if (cell->type == CELL_REGENERATION) {
@@ -165,6 +171,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_TENTACLE], x, y, size, color);
     } else if (cell->type == CELL_BATERY) {
         DrawAnimation(animations[ANIMATION_BATERY], x, y, size, color);
+    } else if (cell->type == CELL_FREEZE_TIME) {
+        DrawAnimation(animations[ANIMATION_FREEZE_TIME], x, y, size, color);
     }
 
     //sprintf(buffer, "%d", cell->distance);
@@ -220,6 +228,7 @@ static void drawActionHud(Game* this, Color color) {
 
 static void drawEffects(Game* this, int x, int y, int size) {
     Sprite* sprites = this->sprites;
+    Animation* animations = this->animations;
 
     Effects effects = this->map->player->effects;
 
@@ -256,6 +265,13 @@ static void drawEffects(Game* this, int x, int y, int size) {
     if (effects.invisibility.duration > 0) {
         //DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], ex, y, size, size, WHITE);
+        ex += delta;
+    }
+
+    if (effects.freezeTime.duration > 0) {
+        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
+        DrawAnimation(animations[ANIMATION_FREEZE_TIME], ex, y, size, WHITE);
+        ex += delta;
     }
 }
 
@@ -264,6 +280,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     Player* p = map->player;
     ChunkManager* cm = map->manager;
     Animation* animations = this->animations;
+    Sprite* sprites = this->sprites;
     int cellSize = (size - 50) / zoom;
     DrawRectangle(x0, y0, size, size, HUD_OPACITY);
     DrawSprite(this->sprites[SPRITE_MINIMAP], x0, y0, size, size, WHITE);
@@ -285,16 +302,23 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
         Node* cur = chunk->enemies->head;
         while (cur != NULL) {
             Enemy* e = cur->data;
-            int x = (e->x - map->player->x) * cellSize + 25;
-            int y = (e->y - map->player->y) * cellSize + 25;
+            int x = (e->x - map->player->x) * cellSize + 25 + x0 + offset;
+            int y = (e->y - map->player->y) * cellSize + 25 + y0 + offset;
+            int size = cellSize;
 
             Color color = BIOME_COLOR[e->biome];
             if (p->effects.invulnerability.duration > 0 && this->updateCount & 1) color = getNegativeColor(color);
 
-            if (!e->isBoss)
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset, y + y0 + offset, cellSize, color);
-            else
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x + x0 + offset - cellSize, y + y0 + offset - cellSize, cellSize * 3, color);
+            if (e->isBoss) {
+                x -= cellSize;
+                y -= cellSize;
+                size *= 3;
+            }
+
+            DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, size, color);
+
+            if (p->effects.freezeTime.duration > 0)
+                DrawSprite(sprites[SPRITE_ICE], x, y, size, size, (Color) { 255, 255, 255, 150 });
 
             cur = cur->next;
         }
@@ -381,7 +405,7 @@ static void drawHud(Game* this) {
     if (p->damaged) drawActionHud(this, RED);
 }
 
-static void playAudio(Game* this){
+static void playAudio(Game* this) {
     Player* p = this->map->player;
     Audio* audio = this->audio;
 
@@ -397,14 +421,15 @@ static void playAudio(Game* this){
 
     if (type == CELL_COIN) {
         audio->playSound(audio, SOUND_COIN);
-    } else if (isWind(type)){
+    } else if (isWind(type)) {
         audio->playSound(audio, SOUND_WIND);
-    } else if (type == CELL_FRAGMENT){
+    } else if (type == CELL_FRAGMENT) {
         audio->playSound(audio, SOUND_FRAGMENT);
     }
 }
 
 static void drawMap(Game* this) {
+    Sprite* sprites = this->sprites;
     Animation* animations = this->animations;
     Map* map = this->map;
     ChunkManager* cm = map->manager;
@@ -474,10 +499,18 @@ static void drawMap(Game* this) {
             Color color = BIOME_COLOR[e->biome];
             if (p->effects.invulnerability.duration > 0 && this->updateCount & 1) color = getNegativeColor(color);
 
-            if (!e->isBoss)
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, this->cellSize, color);
-            else
-                DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x - this->cellSize, y - this->cellSize, this->cellSize * 3, color);
+            int size = this->cellSize;
+
+            if (e->isBoss){
+                x -= size;
+                y -= size;
+                size *= 3;
+            }
+
+            DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, size, color);
+
+            if (p->effects.freezeTime.duration > 0)
+                DrawSprite(sprites[SPRITE_ICE], x, y, size, size, (Color) { 255, 255, 255, 150 });
 
             cur = cur->next;
         }
@@ -486,8 +519,12 @@ static void drawMap(Game* this) {
     if (p->biome == VIOLENCIA) {
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(this->shadowMap.texture,
-            (Rectangle) {0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height},
-            (Vector2) {0, 0}, WHITE);
+            (Rectangle) {
+            0, 0, this->shadowMap.texture.width, -this->shadowMap.texture.height
+        },
+            (Vector2) {
+            0, 0
+        }, WHITE);
         EndBlendMode();
     }
 
@@ -567,7 +604,9 @@ static void loadSprites(Game* this) {
     const char* font[] = { "assets/sprites/common_cells/fonte.png", "assets/sprites/common_cells/fonte1.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte3.png",
                             "assets/sprites/common_cells/fonte3.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte1.png" };
 
-    const char* batery[] = { "assets/sprites/itens/batery1.png", "assets/sprites/itens/batery2.png", "assets/sprites/itens/batery3.png", "assets/sprites/itens/batery4.png"};
+    const char* batery[] = { "assets/sprites/itens/batery1.png", "assets/sprites/itens/batery2.png", "assets/sprites/itens/batery3.png", "assets/sprites/itens/batery4.png" };
+
+    const char* freezeTime[] = { "assets/sprites/itens/time.png" };
 
     animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
     animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
@@ -575,6 +614,7 @@ static void loadSprites(Game* this) {
     animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
     animations[ANIMATION_TENTACLE] = LoadAnimation(4, tentacle);
     animations[ANIMATION_BATERY] = LoadAnimation(4, batery);
+    animations[ANIMATION_FREEZE_TIME] = LoadAnimation(1, freezeTime);
 
     animations[ANIMATION_FONT] = LoadAnimation(7, font);
 
@@ -597,6 +637,8 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");
     sprites[SPRITE_SPIKE] = LoadSprite("assets/sprites/violencia/espinhos.png");
 
+    sprites[SPRITE_ICE] = LoadSprite("assets/sprites/common_cells/ice.png");
+
     sprites[SPRITE_EFFECT_REGENERATION] = LoadSprite("assets/sprites/effects/regeneration.png");
     sprites[SPRITE_EFFECT_DEGENERATION] = LoadSprite("assets/sprites/effects/degeneration.png");
     sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/invulnerability.png");
@@ -610,12 +652,12 @@ static void loadSprites(Game* this) {
 static void loadSounds(Game* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
-   
+
     audio->loadMusic(audio, "assets/music/luxuria_trilha.mp3", MUSIC_LUXURIA);
     audio->loadMusic(audio, "assets/music/gula_trilha.mp3", MUSIC_GULA);
     audio->loadMusic(audio, "assets/music/heresia_trilha.mp3", MUSIC_HERESIA);
     audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_VIOLENCIA);
-    
+
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
     audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
     audio->loadSound(audio, "assets/sounds/dano.wav", SOUND_DAMAGE);

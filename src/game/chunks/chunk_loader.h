@@ -26,6 +26,8 @@
 
 #define BATERY_PROBABILITY 50
 
+#define FREEZE_TIME_PROBABILITY 2
+
 typedef struct ChunkLoader{
     int width, height;
     int biomeWidthChunks;

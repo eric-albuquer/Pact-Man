@@ -41,15 +41,17 @@ static inline void collectItens(Player* p, Cell* cell) {
         cell->type = CELL_EMPTY;
         p->totalFragment++;
         p->biomeFragment++;
-    } else if (cell->type == CELL_FRUIT) {
+    }  else if (cell->type == CELL_BATERY) {
         cell->type = CELL_EMPTY;
-    } else if (cell->type == CELL_INVISIBILITY) {
+        p->batery = 1.0f;
+    } else if (cell->type == CELL_FREEZE_TIME) {
+        cell->type = CELL_EMPTY;
+    }  else if (cell->type == CELL_INVISIBILITY) {
         cell->type = CELL_EMPTY;
     } else if (cell->type == CELL_REGENERATION) {
         cell->type = CELL_EMPTY;
-    } else if (cell->type == CELL_BATERY) {
+    } else if (cell->type == CELL_FRUIT && p->effects.freezeTime.duration == 0) {
         cell->type = CELL_EMPTY;
-        p->batery = 1.0f;
     }
 }
 
@@ -63,7 +65,7 @@ static inline void applyPlayerEffects(Player* p, Cell* cell) {
         p->effects.slowness.duration = mudDuration;
     } else if (cell->type == CELL_SPIKE && p->effects.slowness.duration < spikeDurationLimit) {
         p->effects.slowness.duration = spikeDuration;
-    } else if (cell->type == CELL_FRUIT) {
+    } else if (cell->type == CELL_FRUIT && p->effects.freezeTime.duration == 0) {
         p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
     } else if (cell->type == CELL_FONT_HEALTH) {
         p->effects.regeneration.duration = FONT_REGENERATION_DURATION;
@@ -78,12 +80,18 @@ static inline void applyPlayerEffects(Player* p, Cell* cell) {
         p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
     } else if (cell->type == CELL_TENTACLE && p->effects.slowness.duration < spikeDurationLimit) {
         p->effects.slowness.duration = spikeDuration;
+    } else if (cell->type == CELL_FREEZE_TIME) {
+        p->effects.freezeTime.duration = FREEZE_TIME_DURATION;
     }
 }
 
 static inline void updatePlayerEffects(Player* p, Cell* cell) {
     if (p->effects.slowness.duration > 0) {
         p->effects.slowness.duration--;
+    }
+
+    if (p->effects.freezeTime.duration > 0) {
+        p->effects.freezeTime.duration--;
     }
 
     if (p->effects.invulnerability.duration > 0) {
@@ -255,6 +263,8 @@ static inline bool isFarAwayFromSpawn(Player* p, Enemy* e) {
 static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
+
+    if (p->effects.freezeTime.duration > 0) return;
 
     NextPos pos = getNextPos(cm, e->x, e->y, e->biome);
     if (pos.moves == 0) return;
@@ -446,11 +456,12 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(300, 21);
+    this->player = new_Player(11, 21);
 
     this->changedChunk = new_ArrayList();
     this->firedCells = new_LinkedList();
     this->tentacleCells = new_LinkedList();
+
     this->elapsedTime = 0.0f;
     this->biomeTime = 0.0f;
     this->degenerescence = 0.0f;

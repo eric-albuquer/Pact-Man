@@ -18,6 +18,7 @@ typedef struct Effects {
     Effect regeneration;
     Effect degeneration;
     Effect invisibility;
+    Effect freezeTime;
 } Effects;
 
 typedef struct Player {

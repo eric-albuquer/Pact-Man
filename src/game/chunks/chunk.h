@@ -32,6 +32,7 @@ typedef enum {
     CELL_INVISIBILITY,
     CELL_REGENERATION,
     CELL_BATERY,
+    CELL_FREEZE_TIME,
     CELL_WIND_RIGHT,
     CELL_WIND_LEFT,
     CELL_WIND_UP,
@@ -53,9 +54,9 @@ inline bool isPassable(CellType type) {
     return type != CELL_WALL && type != CELL_GRAVE && type != CELL_GRAVE_INFESTED;
 }
 
-inline bool isSafe(CellType type) {
-    return type != CELL_FIRE_ON && type != CELL_SPIKE;
-}
+// inline bool isSafe(CellType type) {
+//     return type != CELL_FIRE_ON && type != CELL_SPIKE;
+// }
 
 typedef struct {
     unsigned type : 5;
@@ -83,7 +84,7 @@ typedef struct Chunk {
     unsigned type : 3;
     unsigned biome : 2;
     unsigned isBorder : 1;
-    
+
     unsigned int randCounter;
 
     LinkedList* enemies;
