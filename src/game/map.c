@@ -72,6 +72,8 @@ static inline void applyPlayerEffects(Player* p, Cell* cell) {
     } else if (cell->type == CELL_REGENERATION) {
         p->effects.regeneration.duration = POTION_REGENERATION_DURATION;
         p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
+    } else if (cell->type == CELL_TENTACLE && p->effects.slowness.duration < spikeDurationLimit) {
+        p->effects.slowness.duration = spikeDuration;
     }
 }
 
@@ -135,7 +137,8 @@ static inline Cell* movePlayer(Map* this, Vec2i newDir) {
     if (nextCell == NULL) return NULL;
 
     bool cantPassBiome = p->biomeFragment < 2 && nextCell->biome > p->biome;
-    if (!isPassable(nextCell->type) || cantPassBiome || nextCell->biome < p->biome) return NULL;
+    if (cantPassBiome || nextCell->biome < p->biome) return NULL;
+    if (p->effects.invisibility.duration == 0 && !isPassable(nextCell->type) && isPassable(p->cellType)) return NULL;
 
     p->x = playerNextX;
     p->y = playerNextY;
@@ -267,17 +270,33 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->updateDirection(e);
 }
 
-static inline void bossDestroyMap(ChunkManager* cm, int x, int y, LinkedList* firedCells) {
+static inline void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedCells) {
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
-            Cell* cell = cm->getUpdatedCell(cm, x + j, y + i);
+            Cell* cell = cm->getUpdatedCell(cm, e->x + j, e->y + i);
             if (cell && cell->type != CELL_FRAGMENT) {
-                if (cell->type != CELL_FIRE_ON)
+                if (cell->type != CELL_FIRE_ON && e->biome >= 1) {
                     firedCells->addLast(firedCells, cell);
-                cell->type = CELL_FIRE_ON;
+                    cell->type = CELL_FIRE_ON;
+                }
             }
         }
     }
+}
+
+static inline void bossTentacle(ChunkManager* cm, Enemy* e, LinkedList* tentacleCells) {
+    int x = e->x + (rand() & 31) - 16;
+    int y = e->y + (rand() & 31) - 16;
+    Cell* cell = cm->getLoadedCell(cm, x, y);
+    if (cell) {
+        tentacleCells->addLast(tentacleCells, cell);
+        cell->type = CELL_TENTACLE;
+    }
+}
+
+static inline void bossMecanics(ChunkManager* cm, Enemy* e, LinkedList* firedCells, LinkedList* tentacleCells) {
+    bossDestroyMap(cm, e, firedCells);
+    bossTentacle(cm, e, tentacleCells);
 }
 
 static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Player* p) {
@@ -292,6 +311,9 @@ static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Pla
                         p->biomeFragment++;
                         p->totalFragment++;
                     }
+                    p->biomeCoins += PACMAN_KILL_COINS;
+                    p->totalCoins += PACMAN_KILL_COINS;
+                    p->life = min(p->life + PACMAN_KILL_HEALTH, START_LIFE);
                     e->free(e);
                     enemies->removeNode(enemies, node);
                     return true;
@@ -306,10 +328,10 @@ static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Pla
     return false;
 }
 
-static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk, LinkedList* firedCells) {
+static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk, LinkedList* firedCells, LinkedList* tentacleCells) {
     Enemy* e = node->data;
     if (e->isBoss)
-        bossDestroyMap(cm, e->x, e->y, firedCells);
+        bossMecanics(cm, e, firedCells, tentacleCells);
     if (checkPlayerEnemyColision(node, list, p)) return;
     updateEnemyMovement(cm, e, p);
     updateEnemyChunk(cm, node, list, changedChunk);
@@ -336,7 +358,7 @@ static inline void updateEnemies(Map* this) {
             Node* next = cur->next;
             Enemy* e = cur->data;
             if (e->changedChunk) break;
-            updateEnemy(cm, cur, enemies, p, changedChunk, this->firedCells);
+            updateEnemy(cm, cur, enemies, p, changedChunk, this->firedCells, this->tentacleCells);
             cur = next;
         }
     }
@@ -365,10 +387,25 @@ static void updateTime(Map* this) {
     this->degenerescence = t / duration;
 }
 
-static void inline removeBossFire(LinkedList* firedCells){
-    while (firedCells->length > BOSS_FIRE_DURATION){
+static void inline removeBossMecanics(LinkedList* firedCells, LinkedList* tentacleCells) {
+    while (firedCells->length > BOSS_FIRE_QUANTITY) {
         Cell* cell = firedCells->removeFirst(firedCells);
         cell->type = CELL_TEMPLE;
+    }
+
+    while (tentacleCells->length > BOSS_TENTACLE_QUANTITY) {
+        Cell* cell = tentacleCells->removeFirst(tentacleCells);
+        int prob = rand() % 100;
+        if (prob < 70)
+            cell->type = CELL_TEMPLE;
+        else if (prob < 97)
+            cell->type = CELL_COIN;
+        else if (prob < 98)
+            cell->type = CELL_REGENERATION;
+        else if (prob < 99)
+            cell->type = CELL_INVISIBILITY;
+        else if (prob < 100)
+            cell->type = CELL_FRUIT;
     }
 }
 
@@ -378,7 +415,7 @@ static void update(Map* this, Controler* controler) {
     updatePlayer(this, controler->input);
     updateEnemies(this);
 
-    removeBossFire(this->firedCells);
+    removeBossMecanics(this->firedCells, this->tentacleCells);
 
     updateTime(this);
 
@@ -391,6 +428,7 @@ static void _free(Map* this) {
     p->free(p);
     this->changedChunk->free(this->changedChunk);
     this->firedCells->free(this->firedCells);
+    this->tentacleCells->free(this->tentacleCells);
     free(this);
 }
 
@@ -398,10 +436,11 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(11, 21);
+    this->player = new_Player(111, 21);
 
     this->changedChunk = new_ArrayList();
     this->firedCells = new_LinkedList();
+    this->tentacleCells = new_LinkedList();
     this->elapsedTime = 0.0f;
     this->biomeTime = 0.0f;
     this->degenerescence = 0.0f;

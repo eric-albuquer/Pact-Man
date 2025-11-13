@@ -58,6 +58,7 @@ typedef enum {
     ANIMATION_VERTICAL_WIND,
     ANIMATION_MUD, 
     ANIMATION_FIRE,
+    ANIMATION_TENTACLE,
 
     ANIMATION_FONT,
 
@@ -158,6 +159,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_INVISIBILITY], x, y, size, color);
     } else if (cell->type == CELL_REGENERATION) {
         DrawAnimation(animations[ANIMATION_REGENERATION], x, y, size, color);
+    } else if (cell->type == CELL_TENTACLE) {
+        DrawAnimation(animations[ANIMATION_TENTACLE], x, y, size, color);
     }
 
     //sprintf(buffer, "%d", cell->distance);
@@ -558,6 +561,9 @@ static void loadSprites(Game* this) {
     const char* fire[] = { "assets/sprites/heresia/fogo.png", "assets/sprites/heresia/fogo2.png", "assets/sprites/heresia/fogo3.png",
                              "assets/sprites/heresia/fogo4.png" };
 
+    const char* tentacle[] = { "assets/sprites/common_cells/tentacle1.png", "assets/sprites/common_cells/tentacle2.png", "assets/sprites/common_cells/tentacle3.png",
+    "assets/sprites/common_cells/tentacle4.png" };
+
     const char* font[] = { "assets/sprites/common_cells/fonte.png", "assets/sprites/common_cells/fonte1.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte3.png",
                             "assets/sprites/common_cells/fonte3.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte1.png" };
 
@@ -565,6 +571,7 @@ static void loadSprites(Game* this) {
     animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
     animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
+    animations[ANIMATION_TENTACLE] = LoadAnimation(4, tentacle);
 
     animations[ANIMATION_FONT] = LoadAnimation(7, font);
 

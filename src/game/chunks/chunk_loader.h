@@ -7,7 +7,7 @@
 
 #define WALL_DENSITY 70
 
-#define MUD_DENSITY 10
+#define MUD_DENSITY 7
 
 #define GRAVE_DENSITY 5
 #define GRAVE_INFESTED_PROBABILITY 5

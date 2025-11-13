@@ -32,7 +32,11 @@
 #define MAX_PERSUIT_RADIUS 40
 #define BEST_PATH_PROBABILITY 60
 
-#define BOSS_FIRE_DURATION 40
+#define BOSS_FIRE_QUANTITY 60
+#define BOSS_TENTACLE_QUANTITY 15
+
+#define PACMAN_KILL_COINS 10
+#define PACMAN_KILL_HEALTH 20
 
 // Constantes para ajudar no degen dos biomas
 #define MAP_UPDATE_DT 0.15f
@@ -42,7 +46,9 @@
 typedef struct Map {
     ChunkManager* manager;
     ArrayList* changedChunk;
+
     LinkedList* firedCells;
+    LinkedList* tentacleCells;
 
     float degenerescence;
     float elapsedTime;

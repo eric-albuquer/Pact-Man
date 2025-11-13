@@ -26,6 +26,7 @@ typedef enum {
     CELL_SPIKE,
     CELL_FIRE_OFF,
     CELL_FIRE_ON,
+    CELL_TENTACLE,
     CELL_FRAGMENT,
     CELL_FRUIT,
     CELL_INVISIBILITY,
