@@ -84,6 +84,12 @@ typedef enum {
     SOUND_WIND,
     SOUND_DAMAGE,
     SOUND_FRAGMENT,
+    SOUND_FRUIT,
+    SOUND_SPIKE,
+    SOUND_FREEZE_TIME,
+    SOUND_POTION,
+    SOUND_BATERY,
+    SOUND_MUD,
 
     SOUND_COUNT
 } SoundsEnum;
@@ -156,7 +162,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
 
     if (cell->type == CELL_COIN) {
-        DrawAnimation(animations[ANIMATION_COIN], x, y, size, color);
+        static const float coinSize = 0.7f;
+        float w = (1 - coinSize) * size;
+        float hw = w * 0.5;
+        DrawAnimation(animations[ANIMATION_COIN], x + hw, y + hw, size * coinSize, color);
     } else if (cell->type == CELL_FRAGMENT) {
         DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
     } else if (cell->type == CELL_FRUIT) {
@@ -416,7 +425,7 @@ static void playAudio(Game* this) {
 
     CellType type = p->cellType;
 
-    if (p->damaged) {
+    if (p->damaged && this->frameCount & 1) {
         audio->playSound(audio, SOUND_DAMAGE);
     }
 
@@ -426,6 +435,18 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_WIND);
     } else if (type == CELL_FRAGMENT) {
         audio->playSound(audio, SOUND_FRAGMENT);
+    } else if (type == CELL_FRUIT) {
+        audio->playSound(audio, SOUND_FRUIT);
+    } else if (type == CELL_SPIKE) {
+        audio->playSound(audio, SOUND_SPIKE);
+    } else if (type == CELL_FREEZE_TIME) {
+        audio->playSound(audio, SOUND_FREEZE_TIME);
+    } else if (type == CELL_BATERY) {
+        audio->playSound(audio, SOUND_BATERY);
+    } else if (type == CELL_MUD) {
+        audio->playSound(audio, SOUND_MUD);
+    } else if (type == CELL_INVISIBILITY  || type == CELL_REGENERATION) {
+        audio->playSound(audio, SOUND_POTION);
     }
     
     if (IsKeyDown(KEY_EQUAL)) {
@@ -543,6 +564,7 @@ static void drawMap(Game* this) {
     }
 
     Color color = WHITE;
+    if (p->damaged && this->frameCount & 1) color = RED;
     if (p->effects.invisibility.duration > 0) color.a = 100;
     DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
 
@@ -666,7 +688,7 @@ static void loadSprites(Game* this) {
 static void loadSounds(Game* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
-    audio->setSoundVolume(audio, 0.2);
+    audio->setSoundVolume(audio, 0.5);
 
     audio->loadMusic(audio, "assets/music/luxuria_trilha.mp3", MUSIC_LUXURIA);
     audio->loadMusic(audio, "assets/music/gula_trilha.mp3", MUSIC_GULA);
@@ -677,6 +699,12 @@ static void loadSounds(Game* this) {
     audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
     audio->loadSound(audio, "assets/sounds/dano.wav", SOUND_DAMAGE);
     audio->loadSound(audio, "assets/sounds/fragmento.wav", SOUND_FRAGMENT);
+    audio->loadSound(audio, "assets/sounds/fruit.wav", SOUND_FRUIT);
+    audio->loadSound(audio, "assets/sounds/spike.wav", SOUND_SPIKE);
+    audio->loadSound(audio, "assets/sounds/time.wav", SOUND_FREEZE_TIME);
+    audio->loadSound(audio, "assets/sounds/potion.wav", SOUND_POTION);
+    audio->loadSound(audio, "assets/sounds/batery.wav", SOUND_BATERY);
+    audio->loadSound(audio, "assets/sounds/mud.wav", SOUND_MUD);
 }
 
 static void saveUpdate(Game* this) {
