@@ -10,6 +10,7 @@ static void resumeMusic(Audio* this, int idx) {
 }
 
 static void updateMusic(Audio* this, int idx) {
+    SetMusicVolume(this->musics[idx], this->musicVolume);
     UpdateMusicStream(this->musics[idx]);
 }
 
@@ -22,8 +23,30 @@ static void loadMusic(Audio* this, const char* path, int idx){
     PlayMusicStream(this->musics[idx]);
 }
 
+static void setSoundVolume(Audio* this, float soundVolume){
+    if (soundVolume > 1){
+        this->soundVolume = 1.0;
+    } else if (soundVolume < 0){
+        this->soundVolume = 0;
+    } else {
+        this->soundVolume = soundVolume;
+    }
+}
+
+static void setMusicVolume(Audio* this, float musicVolume){
+    if (musicVolume > 1){
+        this->musicVolume = 1.0;
+    } else if (musicVolume < 0){
+        this->musicVolume = 0;
+    } else {
+        this->musicVolume = musicVolume;
+    }
+}
+
 static void playSound(Audio* this, int idx){
-    PlayAudioStream(this->sounds[idx].stream);
+    AudioStream stream = this->sounds[idx].stream;
+    SetAudioStreamVolume(stream, this->soundVolume);
+    PlayAudioStream(stream);
 }
 
 static void _free(Audio* this) {
@@ -51,6 +74,11 @@ Audio* new_Audio(const int musicsLength, const int soundsLength) {
     this->soundsLength = soundsLength;
     this->sounds = malloc(sizeof(Sound) * soundsLength);
 
+    this->soundVolume = 1.0f;
+    this->musicVolume = 1.0f;
+
+    this->setMusicVolume = setMusicVolume;
+    this->setSoundVolume = setSoundVolume;
     this->resumeMusic = resumeMusic;
     this->pauseMusic = pauseMusic;
     this->updateMusic = updateMusic;

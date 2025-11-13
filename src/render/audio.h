@@ -11,6 +11,9 @@ typedef struct Audio {
   Sound* sounds;
   int soundsLength;
 
+  float soundVolume;
+  float musicVolume;
+
   void (*loadSound)(struct Audio*, const char*, int);
   void (*loadMusic)(struct Audio*, const char*, int);
 
@@ -19,6 +22,8 @@ typedef struct Audio {
 
   void (*updateMusic)(struct Audio*, int);
 
+  void (*setSoundVolume)(struct Audio*, float);
+  void (*setMusicVolume)(struct Audio*, float);
   void (*playSound)(struct Audio*, int);
   void (*free)(struct Audio*);
 } Audio;

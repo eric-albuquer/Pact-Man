@@ -191,11 +191,11 @@ static inline Color LerpColor(Color a, Color b, float t) {
 static void drawLifeBar(Game* this, int x, int y, int width, int height) {
     int h = height * 0.3;
     int w = width * 0.87;
-    //DrawRectangle(x + width / 4, y + h, w, h, HUD_OPACITY);
     float t = this->map->player->life / (float)(START_LIFE);
     if (t < 0.0f) t = 0.0f;
     Color color = LerpColor(RED, GREEN, t);
     int lx = w * t;
+    DrawRectangle(x + 50, y + h + 10, w, h, HUD_OPACITY);
     DrawRectangle(x + 50, y + h + 10, lx, h, color);
     DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
 }
@@ -427,6 +427,19 @@ static void playAudio(Game* this) {
     } else if (type == CELL_FRAGMENT) {
         audio->playSound(audio, SOUND_FRAGMENT);
     }
+    
+    if (IsKeyDown(KEY_EQUAL)) {
+        audio->setSoundVolume(audio, audio->soundVolume + DELTA_VOLUME);        
+    } 
+    if (IsKeyDown(KEY_MINUS)){
+        audio->setSoundVolume(audio, audio->soundVolume - DELTA_VOLUME);
+    }
+    if (IsKeyDown(KEY_N)) {
+        audio->setMusicVolume(audio, audio->musicVolume + DELTA_VOLUME);        
+    } 
+    if (IsKeyDown(KEY_B)){
+        audio->setMusicVolume(audio, audio->musicVolume - DELTA_VOLUME);
+    }
 }
 
 static void drawMap(Game* this) {
@@ -653,6 +666,7 @@ static void loadSprites(Game* this) {
 static void loadSounds(Game* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
+    audio->setSoundVolume(audio, 0.2);
 
     audio->loadMusic(audio, "assets/music/luxuria_trilha.mp3", MUSIC_LUXURIA);
     audio->loadMusic(audio, "assets/music/gula_trilha.mp3", MUSIC_GULA);

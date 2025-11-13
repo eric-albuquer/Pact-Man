@@ -6,6 +6,7 @@
 #include "sprites.h"
 #include "map.h"
 
+#define DELTA_VOLUME 0.01f
 #define FRAMES_ANIMATION 8.0f
 
 typedef struct Game {
