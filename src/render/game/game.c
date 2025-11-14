@@ -32,6 +32,7 @@ typedef enum {
     SPRITE_EFFECT_INVULNERABILITY,
     SPRITE_EFFECT_DEGENERATION,
     SPRITE_EFFECT_INVISIBILITY,
+    SPRITE_EFFECT_FREEZE_TIME,
 
     SPRITE_MINIMAP,
     SPRITE_LIFE_BAR,
@@ -52,10 +53,6 @@ typedef enum {
 
     ANIMATION_COIN,
     ANIMATION_FRAGMENT,
-    ANIMATION_FRUIT,
-    ANIMATION_INVISIBILITY,
-    ANIMATION_REGENERATION,
-    ANIMATION_FREEZE_TIME,
 
     ANIMATION_BATERY,
 
@@ -121,10 +118,6 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     if (cell->type == CELL_WALL) {
         sprite = sprites[SPRITE_WALL_LUXURIA + cell->biome];
-    } else if (cell->type == CELL_GRAVE) {
-        sprite = sprites[SPRITE_GRAVE];
-    } else if (cell->type == CELL_GRAVE_INFESTED) {
-        sprite = sprites[SPRITE_GRAVE];
     } else if (cell->type == CELL_DEGENERATED_1) {
         sprite = sprites[SPRITE_DEGENERATED_1];
     } else if (cell->type == CELL_DEGENERATED_2) {
@@ -156,6 +149,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
             DrawAnimationFrame(animations[ANIMATION_FONT], x, y, size, color, 3);
         else
             DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
+    } else if (cell->type == CELL_GRAVE) {
+       DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, color);
+    } else if (cell->type == CELL_GRAVE_INFESTED) {
+       DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, (Color){ 0, 255, 255, 255 });
     }
 
     if (!itens) return;
@@ -169,19 +166,19 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     } else if (cell->type == CELL_FRAGMENT) {
         DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
     } else if (cell->type == CELL_FRUIT) {
-        DrawAnimation(animations[ANIMATION_FRUIT], x, y, size, color);
+        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], x, y, size, size, color);
         if (p->effects.freezeTime.duration > 0)
             DrawSprite(sprites[SPRITE_ICE], x, y, size, size, (Color) { 255, 255, 255, 150 });
     } else if (cell->type == CELL_INVISIBILITY) {
-        DrawAnimation(animations[ANIMATION_INVISIBILITY], x, y, size, color);
+        DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], x, y, size, size, color);
     } else if (cell->type == CELL_REGENERATION) {
-        DrawAnimation(animations[ANIMATION_REGENERATION], x, y, size, color);
+        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, y, size, size, color);
     } else if (cell->type == CELL_TENTACLE) {
         DrawAnimation(animations[ANIMATION_TENTACLE], x, y, size, color);
     } else if (cell->type == CELL_BATERY) {
         DrawAnimation(animations[ANIMATION_BATERY], x, y, size, color);
     } else if (cell->type == CELL_FREEZE_TIME) {
-        DrawAnimation(animations[ANIMATION_FREEZE_TIME], x, y, size, color);
+       DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, y, size, size, color);
     }
 
     //sprintf(buffer, "%d", cell->distance);
@@ -237,7 +234,7 @@ static void drawActionHud(Game* this, Color color) {
 
 static void drawEffects(Game* this, int x, int y, int size) {
     Sprite* sprites = this->sprites;
-    Animation* animations = this->animations;
+    //Animation* animations = this->animations;
 
     Effects effects = this->map->player->effects;
 
@@ -279,7 +276,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
 
     if (effects.freezeTime.duration > 0) {
         //DrawRectangle(ey, y, size, size, HUD_OPACITY);
-        DrawAnimation(animations[ANIMATION_FREEZE_TIME], x, ey, size, WHITE);
+        DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, ey, size, size, WHITE);
         ey += delta;
     }
 }
@@ -617,16 +614,9 @@ static void loadSprites(Game* this) {
     "assets/sprites/itens/coin5.png", "assets/sprites/itens/coin6.png" };
     const char* fragment[] = { "assets/sprites/itens/newKey.png" , "assets/sprites/itens/newKey2.png", "assets/sprites/itens/newKey3.png", "assets/sprites/itens/newKey4.png",
          "assets/sprites/itens/newKey5.png", "assets/sprites/itens/newKey4.png", "assets/sprites/itens/newKey3.png", "assets/sprites/itens/newKey2.png" };
-    const char* fruit[] = { "assets/sprites/itens/apple.png" };
-
-    const char* invisibility[] = { "assets/sprites/itens/invisibility.png" };
-    const char* regeneration[] = { "assets/sprites/itens/regeneration.png" };
 
     animations[ANIMATION_COIN] = LoadAnimation(6, coin);
     animations[ANIMATION_FRAGMENT] = LoadAnimation(8, fragment);
-    animations[ANIMATION_FRUIT] = LoadAnimation(1, fruit);
-    animations[ANIMATION_INVISIBILITY] = LoadAnimation(1, invisibility);
-    animations[ANIMATION_REGENERATION] = LoadAnimation(1, regeneration);
 
     const char* verticalWind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
     const char* horizontalWind[] = { "assets/sprites/luxuria/ventania3.png", "assets/sprites/luxuria/ventania4.png" };
@@ -642,15 +632,12 @@ static void loadSprites(Game* this) {
 
     const char* batery[] = { "assets/sprites/itens/batery1.png", "assets/sprites/itens/batery2.png", "assets/sprites/itens/batery3.png", "assets/sprites/itens/batery4.png" };
 
-    const char* freezeTime[] = { "assets/sprites/itens/time.png" };
-
     animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
     animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
     animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
     animations[ANIMATION_TENTACLE] = LoadAnimation(4, tentacle);
     animations[ANIMATION_BATERY] = LoadAnimation(4, batery);
-    animations[ANIMATION_FREEZE_TIME] = LoadAnimation(1, freezeTime);
 
     animations[ANIMATION_FONT] = LoadAnimation(7, font);
 
@@ -677,9 +664,10 @@ static void loadSprites(Game* this) {
 
     sprites[SPRITE_EFFECT_REGENERATION] = LoadSprite("assets/sprites/effects/regeneration.png");
     sprites[SPRITE_EFFECT_DEGENERATION] = LoadSprite("assets/sprites/effects/degeneration.png");
-    sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/invulnerability.png");
     sprites[SPRITE_EFFECT_SLOWNESS] = LoadSprite("assets/sprites/effects/slowness.png");
-    sprites[SPRITE_EFFECT_INVISIBILITY] = LoadSprite("assets/sprites/effects/invisibility_effect.png");
+    sprites[SPRITE_EFFECT_INVISIBILITY] = LoadSprite("assets/sprites/effects/invisibility.png");
+    sprites[SPRITE_EFFECT_FREEZE_TIME] = LoadSprite("assets/sprites/effects/time.png");
+    sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/star.png");
 
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
     sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar3.png");

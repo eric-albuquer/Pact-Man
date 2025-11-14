@@ -323,17 +323,17 @@ static inline void findNewCell(ChunkManager* cm, Enemy* e) {
     int idx = rand() & 7;
     Chunk** adjacents = cm->adjacents;
 
-    for (int i = 0; i < 7; i++){
+    for (int i = 0; i < 7; i++) {
         if (adjacents[ADJACENT_IDX[idx]] != NULL) break;
         idx = (idx + 1) & 7;
     }
-    
+
     Chunk* chunk = adjacents[ADJACENT_IDX[idx]];
 
     int cIdx = rand() & TOTAL_CELLS_MASK;
 
-    for (int i = 0; i < 255; i++){
-        if(isPassable(chunk->cells[cIdx].type)) break;
+    for (int i = 0; i < 255; i++) {
+        if (isPassable(chunk->cells[cIdx].type)) break;
         cIdx = (cIdx + 1) & TOTAL_CELLS_MASK;
     }
 
@@ -362,7 +362,8 @@ static inline bool checkPlayerEnemyColision(ChunkManager* cm, Node* node, Linked
                 } else {
                     p->life -= ENEMY_DAGAME;
                     p->damaged = true;
-                    findNewCell(cm, e);
+                    if (!e->isBoss)
+                        findNewCell(cm, e);
                 }
                 return false;
             }
@@ -479,7 +480,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(300, 21);
+    this->player = new_Player(250, 21);
 
     this->changedChunk = new_ArrayList();
     this->firedCells = new_LinkedList();
