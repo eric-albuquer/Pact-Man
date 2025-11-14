@@ -43,6 +43,7 @@ typedef struct Player {
     
     unsigned biome : 2;
     unsigned damaged: 1;
+    unsigned hitEnemy: 1;
     float batery;
 
     CellType cellType;

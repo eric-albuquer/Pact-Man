@@ -74,6 +74,8 @@ typedef enum {
     MUSIC_HERESIA,
     MUSIC_VIOLENCIA,
 
+    MUSIC_INVULNERABILITY,
+
     MUSIC_COUNT
 } MusicEnum;
 
@@ -81,6 +83,7 @@ typedef enum {
     SOUND_COIN,
     SOUND_WIND,
     SOUND_DAMAGE,
+    SOUND_KILL_ENEMY,
     SOUND_FRAGMENT,
     SOUND_FRUIT,
     SOUND_SPIKE,
@@ -257,7 +260,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
     int ey = y;
 
     if (effects.degeneration.duration > 0) {
-        drawActionHud(this, BLACK);
+        drawActionHud(this, RED);
         DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], x, ey, size, size, WHITE);
         ey += delta;
     }
@@ -417,7 +420,7 @@ static void drawHud(Game* this) {
     drawTimeHUD(this, this->width - 150, this->height - 150);
     drawEffects(this, 30, 30, 80);
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
-    if (p->biome == 3) 
+    if (p->biome == 3)
         drawBateryBar(this, this->offsetHalfX - 170, this->height - 180, 400, 30);
     drawInfoHud(this, this->width - 280, 550, 80);
 
@@ -428,14 +431,23 @@ static void playAudio(Game* this) {
     Player* p = this->map->player;
     Audio* audio = this->audio;
 
-    audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
+    if (p->effects.invulnerability.duration > 0)
+        audio->updateMusic(audio, MUSIC_INVULNERABILITY);
+    else
+        audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
+
+    if (p->effects.invulnerability.duration == FRUIT_INVULNERABILITY_DURATION - 1)
+        audio->restartMusic(audio, MUSIC_INVULNERABILITY);
 
     if (this->frameCount != this->lastUpdate) return;
 
     CellType type = p->cellType;
 
-    if (p->damaged && this->frameCount == this->lastUpdate) {
+    if (p->damaged) {
         audio->playSound(audio, SOUND_DAMAGE);
+    }
+    if (p->hitEnemy) {
+        audio->playSound(audio, SOUND_KILL_ENEMY);
     }
 
     if (type == CELL_COIN) {
@@ -698,9 +710,12 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/heresia_trilha.mp3", MUSIC_HERESIA);
     audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_VIOLENCIA);
 
+    audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_INVULNERABILITY);
+
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
     audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
     audio->loadSound(audio, "assets/sounds/dano.wav", SOUND_DAMAGE);
+    audio->loadSound(audio, "assets/sounds/killEnemy.wav", SOUND_KILL_ENEMY);
     audio->loadSound(audio, "assets/sounds/fragmento.wav", SOUND_FRAGMENT);
     audio->loadSound(audio, "assets/sounds/fruit.wav", SOUND_FRUIT);
     audio->loadSound(audio, "assets/sounds/spike.wav", SOUND_SPIKE);

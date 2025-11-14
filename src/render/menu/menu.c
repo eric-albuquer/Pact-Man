@@ -211,8 +211,8 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        RED,       // normal color
-        GREEN,     // hover color
+        (Color) {255, 0, 0, 150},       // normal color
+        (Color) {0, 255, 0, 150},     // hover color
         "PLAY",
         40,
         onPlay
@@ -223,8 +223,8 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {80, 80, 80, 255},   // normal
-        (Color) {120, 120, 120, 255},   // hover
+        (Color) {80, 80, 80, 150},   // normal
+        (Color) {255, 255, 255, 150},   // hover
         "TUTORIAL",
         40,
         onTutorial
@@ -235,8 +235,8 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {80, 80, 80, 255},   // normal
-        (Color) {120, 120, 120, 255},   // hover
+        (Color) {80, 80, 80, 150},   // normal
+        (Color) {255, 255, 255, 150},   // hover
         "VOLUME",
         40,
         onVolume
@@ -247,8 +247,8 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {80, 80, 80, 255},   // normal
-        (Color) {120, 120, 120, 255},   // hover
+        (Color) {80, 80, 80, 150},   // normal
+        (Color) {255, 255, 255, 150},   // hover
         "DIFFICULTY",
         40,
         onDifficulty

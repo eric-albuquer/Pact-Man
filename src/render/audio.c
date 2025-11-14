@@ -23,6 +23,10 @@ static void loadMusic(Audio* this, const char* path, int idx){
     PlayMusicStream(this->musics[idx]);
 }
 
+static void restartMusic(Audio* this, int idx){
+    SeekMusicStream(this->musics[idx], 0.0f);
+}
+
 static void setSoundVolume(Audio* this, float soundVolume){
     if (soundVolume > 1){
         this->soundVolume = 1.0;
@@ -82,6 +86,9 @@ Audio* new_Audio(const int musicsLength, const int soundsLength) {
     this->resumeMusic = resumeMusic;
     this->pauseMusic = pauseMusic;
     this->updateMusic = updateMusic;
+
+    this->restartMusic = restartMusic;
+
     this->playSound = playSound;
     this->loadMusic = loadMusic;
     this->loadSound = loadSound;

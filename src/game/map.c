@@ -110,6 +110,7 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
 
     if (p->effects.degeneration.duration > 0) {
         p->life -= DEGENERATION_DAMAGE;
+        p->damaged = true;
         p->effects.degeneration.duration--;
     } else
         p->effects.degeneration.strenght = 0;
@@ -229,6 +230,7 @@ static inline void updatePlayer(Map* this, Input input) {
     ChunkManager* cm = this->manager;
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
 
+    p->hitEnemy = false;
     p->damaged = false;
     p->cellType = cell->type;
 
@@ -264,7 +266,7 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
 
-    if (p->effects.freezeTime.duration > 0) return;
+    //if (p->effects.freezeTime.duration > 0) return;
 
     NextPos pos = getNextPos(cm, e->x, e->y, e->biome);
     if (pos.moves == 0) return;
@@ -324,7 +326,7 @@ static inline void findNewCell(ChunkManager* cm, Enemy* e) {
     Chunk** adjacents = cm->adjacents;
 
     for (int i = 0; i < 7; i++) {
-        if (adjacents[ADJACENT_IDX[idx]] != NULL) break;
+        if (adjacents[ADJACENT_IDX[idx]] != NULL && adjacents[ADJACENT_IDX[idx]]->biome == e->biome) break;
         idx = (idx + 1) & 7;
     }
 
@@ -353,6 +355,7 @@ static inline bool checkPlayerEnemyColision(ChunkManager* cm, Node* node, Linked
                         p->biomeFragment++;
                         p->totalFragment++;
                     }
+                    p->hitEnemy = true;
                     p->biomeCoins += PACMAN_KILL_COINS;
                     p->totalCoins += PACMAN_KILL_COINS;
                     p->life = min(p->life + PACMAN_KILL_HEALTH, START_LIFE);
@@ -374,6 +377,7 @@ static inline bool checkPlayerEnemyColision(ChunkManager* cm, Node* node, Linked
 
 static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk, LinkedList* firedCells, LinkedList* tentacleCells) {
     Enemy* e = node->data;
+    if (p->effects.freezeTime.duration > 0) return;
     if (e->isBoss)
         bossMecanics(cm, e, firedCells, tentacleCells);
     if (checkPlayerEnemyColision(cm, node, list, p)) return;
@@ -480,7 +484,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(210, 21);
+    this->player = new_Player(270, 21);
 
     this->changedChunk = new_ArrayList();
     this->firedCells = new_LinkedList();
