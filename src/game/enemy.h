@@ -25,6 +25,8 @@ typedef struct Enemy {
 
     unsigned biome: 2;
 
+    unsigned needToTeleport: 1;
+
     bool (*updateChunk)(struct Enemy*);
     void (*updateDirection)(struct Enemy*);
     void (*free)(struct Enemy*);

@@ -99,7 +99,7 @@ typedef enum {
 
 static char buffer[1000];
 
-static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0, 0, 255, 255}, {0, 0, 255, 255} };
+static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0, 0, 255, 255}, {0, 255, 255, 255} };
 static const Color HUD_OPACITY = { 0, 0, 0, 200 };
 
 static inline Color getNegativeColor(Color color) {
@@ -267,7 +267,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
         ey += delta;
     }
     if (effects.regeneration.duration > 0) {
-        drawActionHud(this, (Color) { 0, 255, 255, 255 });
+        drawActionHud(this, (Color) { 0, 255, 0, 255 });
         DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, ey, size, size, WHITE);
         ey += delta;
     }
@@ -285,11 +285,13 @@ static void drawEffects(Game* this, int x, int y, int size) {
     }
 
     if (effects.invisibility.duration > 0) {
+        drawActionHud(this, (Color) { 0, 255, 255, 255 });
         DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], x, ey, size, size, WHITE);
         ey += delta;
     }
 
     if (effects.freezeTime.duration > 0) {
+        drawActionHud(this, (Color) { 0, 0, 255, 255 });
         DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, ey, size, size, WHITE);
         ey += delta;
     }
@@ -721,8 +723,8 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_VIOLENCIA);
 
     audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_INVULNERABILITY);
-    audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_INVISIBILITY);
-    audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_FREEZE_TIME);
+    audio->loadMusic(audio, "assets/music/invisibility.mp3", MUSIC_INVISIBILITY);
+    audio->loadMusic(audio, "assets/music/freeze.mp3", MUSIC_FREEZE_TIME);
 
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
     audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
