@@ -266,7 +266,7 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
 
-    //if (p->effects.freezeTime.duration > 0) return;
+    if (p->effects.freezeTime.duration > 0) return;
 
     NextPos pos = getNextPos(cm, e->x, e->y, e->biome);
     if (pos.moves == 0) return;
@@ -377,8 +377,7 @@ static inline bool checkPlayerEnemyColision(ChunkManager* cm, Node* node, Linked
 
 static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk, LinkedList* firedCells, LinkedList* tentacleCells) {
     Enemy* e = node->data;
-    if (p->effects.freezeTime.duration > 0) return;
-    if (e->isBoss)
+    if (e->isBoss && p->effects.freezeTime.duration == 0)
         bossMecanics(cm, e, firedCells, tentacleCells);
     if (checkPlayerEnemyColision(cm, node, list, p)) return;
     updateEnemyMovement(cm, e, p);

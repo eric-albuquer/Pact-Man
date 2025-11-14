@@ -75,6 +75,8 @@ typedef enum {
     MUSIC_VIOLENCIA,
 
     MUSIC_INVULNERABILITY,
+    MUSIC_INVISIBILITY,
+    MUSIC_FREEZE_TIME,
 
     MUSIC_COUNT
 } MusicEnum;
@@ -433,11 +435,19 @@ static void playAudio(Game* this) {
 
     if (p->effects.invulnerability.duration > 0)
         audio->updateMusic(audio, MUSIC_INVULNERABILITY);
+    else if (p->effects.freezeTime.duration > 0)
+        audio->updateMusic(audio, MUSIC_FREEZE_TIME);
+    else if (p->effects.invisibility.duration > 0)
+        audio->updateMusic(audio, MUSIC_INVISIBILITY);
     else
         audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
 
     if (p->effects.invulnerability.duration == FRUIT_INVULNERABILITY_DURATION - 1)
         audio->restartMusic(audio, MUSIC_INVULNERABILITY);
+    if (p->effects.freezeTime.duration == FREEZE_TIME_DURATION - 1)
+        audio->restartMusic(audio, MUSIC_FREEZE_TIME);
+    if (p->effects.invisibility.duration == INVISIBILITY_DURATION - 1)
+        audio->restartMusic(audio, MUSIC_INVISIBILITY);
 
     if (this->frameCount != this->lastUpdate) return;
 
@@ -711,6 +721,8 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/violencia_trilha.mp3", MUSIC_VIOLENCIA);
 
     audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_INVULNERABILITY);
+    audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_INVISIBILITY);
+    audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_FREEZE_TIME);
 
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
     audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
