@@ -480,7 +480,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(350, 21);
+    this->player = new_Player(210, 21);
 
     this->changedChunk = new_ArrayList();
     this->firedCells = new_LinkedList();

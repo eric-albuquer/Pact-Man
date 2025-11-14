@@ -575,6 +575,7 @@ static void drawMap(Game* this) {
     Color color = WHITE;
     if (p->damaged && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = RED;
     if (p->effects.invisibility.duration > 0) color.a = 100;
+    if (p->effects.invulnerability.duration > 0 && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = PURPLE;
     DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
 
     for (int i = -1; i < 2; i++) {
