@@ -100,7 +100,7 @@ static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0
 static const Color HUD_OPACITY = { 0, 0, 0, 200 };
 
 static inline Color getNegativeColor(Color color) {
-    return (Color) { (color.r + 128) % 255, (color.g + 128) % 255, (color.b + 128) % 255, 255 };
+    return (Color) { (color.r + 128) & 255, (color.g + 128) & 255, (color.b + 128) & 255, 255 };
 }
 
 static void updateAnimations(Game* this) {
@@ -425,7 +425,7 @@ static void playAudio(Game* this) {
 
     CellType type = p->cellType;
 
-    if (p->damaged && this->frameCount & 1) {
+    if (p->damaged && this->frameCount == this->lastUpdate) {
         audio->playSound(audio, SOUND_DAMAGE);
     }
 
@@ -564,7 +564,7 @@ static void drawMap(Game* this) {
     }
 
     Color color = WHITE;
-    if (p->damaged && this->frameCount & 1) color = RED;
+    if (p->damaged && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = RED;
     if (p->effects.invisibility.duration > 0) color.a = 100;
     DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
 
@@ -688,7 +688,8 @@ static void loadSprites(Game* this) {
 static void loadSounds(Game* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
-    audio->setSoundVolume(audio, 0.5);
+    audio->setSoundVolume(audio, 0.3);
+    audio->setMusicVolume(audio, 0.4);
 
     audio->loadMusic(audio, "assets/music/luxuria_trilha.mp3", MUSIC_LUXURIA);
     audio->loadMusic(audio, "assets/music/gula_trilha.mp3", MUSIC_GULA);

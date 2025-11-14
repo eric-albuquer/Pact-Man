@@ -4,6 +4,7 @@
 #include <time.h>
 
 const int CLOSER_IDX[9] = {16, 17, 18, 23, 24, 25, 30, 31, 32};
+const int ADJACENT_IDX[8] = {16, 17, 18, 23, 25, 30, 31, 32};
 
 static void loadAdjacents(ChunkManager* this){
     int cx = this->player->chunkX;

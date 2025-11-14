@@ -41,12 +41,12 @@ static inline void collectItens(Player* p, Cell* cell) {
         cell->type = CELL_EMPTY;
         p->totalFragment++;
         p->biomeFragment++;
-    }  else if (cell->type == CELL_BATERY) {
+    } else if (cell->type == CELL_BATERY) {
         cell->type = CELL_EMPTY;
         p->batery = 1.0f;
     } else if (cell->type == CELL_FREEZE_TIME) {
         cell->type = CELL_EMPTY;
-    }  else if (cell->type == CELL_INVISIBILITY) {
+    } else if (cell->type == CELL_INVISIBILITY) {
         cell->type = CELL_EMPTY;
     } else if (cell->type == CELL_REGENERATION) {
         cell->type = CELL_EMPTY;
@@ -319,7 +319,29 @@ static inline void bossMecanics(ChunkManager* cm, Enemy* e, LinkedList* firedCel
     bossTentacle(cm, e, tentacleCells);
 }
 
-static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Player* p) {
+static inline void findNewCell(ChunkManager* cm, Enemy* e) {
+    int idx = rand() & 7;
+    Chunk** adjacents = cm->adjacents;
+
+    for (int i = 0; i < 7; i++){
+        if (adjacents[ADJACENT_IDX[idx]] != NULL) break;
+        idx = (idx + 1) & 7;
+    }
+    
+    Chunk* chunk = adjacents[ADJACENT_IDX[idx]];
+
+    int cIdx = rand() & TOTAL_CELLS_MASK;
+
+    for (int i = 0; i < 255; i++){
+        if(isPassable(chunk->cells[cIdx].type)) break;
+        cIdx = (cIdx + 1) & TOTAL_CELLS_MASK;
+    }
+
+    e->x = (cIdx & CHUNK_MASK) + (chunk->x << CHUNK_SHIFT);
+    e->y = (cIdx >> CHUNK_SHIFT) + (chunk->y << CHUNK_SHIFT);
+}
+
+static inline bool checkPlayerEnemyColision(ChunkManager* cm, Node* node, LinkedList* enemies, Player* p) {
     Enemy* e = node->data;
 
     int start = e->isBoss;
@@ -340,6 +362,7 @@ static inline bool checkPlayerEnemyColision(Node* node, LinkedList* enemies, Pla
                 } else {
                     p->life -= ENEMY_DAGAME;
                     p->damaged = true;
+                    findNewCell(cm, e);
                 }
                 return false;
             }
@@ -352,7 +375,7 @@ static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, P
     Enemy* e = node->data;
     if (e->isBoss)
         bossMecanics(cm, e, firedCells, tentacleCells);
-    if (checkPlayerEnemyColision(node, list, p)) return;
+    if (checkPlayerEnemyColision(cm, node, list, p)) return;
     updateEnemyMovement(cm, e, p);
     updateEnemyChunk(cm, node, list, changedChunk);
 }
@@ -456,7 +479,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(250, 21);
+    this->player = new_Player(300, 21);
 
     this->changedChunk = new_ArrayList();
     this->firedCells = new_LinkedList();

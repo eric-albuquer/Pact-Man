@@ -8,6 +8,7 @@
 
 #define DELTA_VOLUME 0.01f
 #define FRAMES_ANIMATION 8.0f
+#define HALF_FRAMES_ANIMATION 4.0f
 
 typedef struct Game {
     int width;

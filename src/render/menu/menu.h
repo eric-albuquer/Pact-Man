@@ -8,6 +8,7 @@
 
 typedef struct Menu {
     Button* play;
+    Button* tutorial;
     Button* volume;
     Button* difficulty;
 

@@ -6,6 +6,7 @@
 #include "chunk_loader.h"
 
 extern const int CLOSER_IDX[9];
+extern const int ADJACENT_IDX[8];
 
 typedef struct ChunkManager {
     int rows;

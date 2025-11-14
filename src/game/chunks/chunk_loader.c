@@ -64,7 +64,7 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
 
     chunk->type = CHUNK_NORMAL;
 
-    if ((chunk->x + 1) % this->biomeWidthChunks == 0 && chunk->biome < 3) {
+    if ((chunk->x + 1) % this->biomeWidthChunks == 0) {
         chunk->type = CHUNK_TRANSITION;
         return;
     }

@@ -35,6 +35,10 @@ void onPlay() {
     state = GAME;
 }
 
+void onTutorial() {
+    printf("[MENU] Rapaz, clicaram no botão de tutorial\n");
+}
+
 void onVolume() {
     printf("[MENU] Rapaz, clicaram no botão de volume\n");
 }
@@ -132,6 +136,7 @@ void draw(Menu* this) {
     }
 
     if (this->play)       this->play->draw(this->play);
+    if (this->tutorial)   this->tutorial->draw(this->tutorial);
     if (this->volume)     this->volume->draw(this->volume);
     if (this->difficulty) this->difficulty->draw(this->difficulty);
 }
@@ -148,9 +153,9 @@ void update(Menu* this) {
     Audio* audio = this->audio;
     Vector2 mouse = GetMousePosition();
 
-    Button* buttons[3] = { this->play, this->volume, this->difficulty };
+    Button* buttons[4] = { this->play, this->tutorial, this->volume, this->difficulty };
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         Button* b = buttons[i];
         if (!b) continue;
 
@@ -190,6 +195,8 @@ Menu* new_Menu(int width, int height) {
     int buttonHeight = 60;
     int spacing = 20;
 
+    int delta = buttonHeight + spacing;
+
     int centerX = width / 2 - buttonWidth / 2;
     int startY = height / 2 - (buttonHeight * 3 + spacing * 2) / 2;
 
@@ -201,7 +208,7 @@ Menu* new_Menu(int width, int height) {
 
     this->play = new_Button(
         centerX,
-        startY,
+        startY += delta,
         buttonWidth,
         buttonHeight,
         RED,       // normal color
@@ -211,17 +218,25 @@ Menu* new_Menu(int width, int height) {
         onPlay
     );
 
-    this->volume = new_Button(
+    this->tutorial = new_Button(
         centerX,
-        startY + buttonHeight + spacing,
+        startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {
-        80, 80, 80, 255
-    },   // normal
-        (Color) {
-        120, 120, 120, 255
-    },   // hover
+        (Color) {80, 80, 80, 255},   // normal
+        (Color) {120, 120, 120, 255},   // hover
+        "TUTORIAL",
+        40,
+        onTutorial
+    );
+
+    this->volume = new_Button(
+        centerX,
+        startY += delta,
+        buttonWidth,
+        buttonHeight,
+        (Color) {80, 80, 80, 255},   // normal
+        (Color) {120, 120, 120, 255},   // hover
         "VOLUME",
         40,
         onVolume
@@ -229,15 +244,11 @@ Menu* new_Menu(int width, int height) {
 
     this->difficulty = new_Button(
         centerX,
-        startY + (buttonHeight + spacing) * 2,
+        startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {
-        80, 80, 80, 255
-    },   // normal
-        (Color) {
-        120, 120, 120, 255
-    },   // hover
+        (Color) {80, 80, 80, 255},   // normal
+        (Color) {120, 120, 120, 255},   // hover
         "DIFFICULTY",
         40,
         onDifficulty
