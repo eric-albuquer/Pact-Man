@@ -36,6 +36,7 @@ typedef enum {
 
     SPRITE_MINIMAP,
     SPRITE_LIFE_BAR,
+    SPRITE_BATERY_BAR,
 
     SPRITE_COUNT
 } SpritesEnum;
@@ -150,9 +151,9 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         else
             DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
     } else if (cell->type == CELL_GRAVE) {
-       DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, color);
+        DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, color);
     } else if (cell->type == CELL_GRAVE_INFESTED) {
-       DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, (Color){ 0, 255, 255, 255 });
+        DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, (Color) { 0, 255, 255, 255 });
     }
 
     if (!itens) return;
@@ -178,7 +179,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     } else if (cell->type == CELL_BATERY) {
         DrawAnimation(animations[ANIMATION_BATERY], x, y, size, color);
     } else if (cell->type == CELL_FREEZE_TIME) {
-       DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, y, size, size, color);
+        DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, y, size, size, color);
     }
 
     //sprintf(buffer, "%d", cell->distance);
@@ -204,6 +205,20 @@ static void drawLifeBar(Game* this, int x, int y, int width, int height) {
     DrawRectangle(x + 50, y + h + 10, w, h, HUD_OPACITY);
     DrawRectangle(x + 50, y + h + 10, lx, h, color);
     DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
+}
+
+static void drawBateryBar(Game* this, int x, int y, int width, int height) {
+    int w = width * 0.95;
+    int h = height * 0.9;
+    int startW = width * 0.025 + height + 20;
+    int startH = height * 0.05;
+    float t = this->map->player->batery;
+    Color color = LerpColor(RED, GREEN, t);
+    int lx = w * t;
+    DrawRectangle(startW + x, y, w, startH + h, HUD_OPACITY);
+    DrawRectangle(startW + x, y, lx, startH + h, color);
+    DrawSprite(this->sprites[SPRITE_BATERY_BAR], x + height + 20, y, width, height, WHITE);
+    DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
 }
 
 static void drawInfoHud(Game* this, int x, int y, int size) {
@@ -243,19 +258,16 @@ static void drawEffects(Game* this, int x, int y, int size) {
 
     if (effects.degeneration.duration > 0) {
         drawActionHud(this, BLACK);
-        //DrawRectangle(ex, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], x, ey, size, size, WHITE);
         ey += delta;
     }
     if (effects.regeneration.duration > 0) {
         drawActionHud(this, (Color) { 0, 255, 255, 255 });
-        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, ey, size, size, WHITE);
         ey += delta;
     }
     if (effects.slowness.duration > 0) {
         drawActionHud(this, GRAY);
-        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], x, ey, size, size, WHITE);
 
         ey += delta;
@@ -263,19 +275,16 @@ static void drawEffects(Game* this, int x, int y, int size) {
     if (effects.invulnerability.duration > 0) {
         if (effects.invulnerability.duration & 1)
             drawActionHud(this, YELLOW);
-        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], x, ey, size, size, WHITE);
         ey += delta;
     }
 
     if (effects.invisibility.duration > 0) {
-        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], x, ey, size, size, WHITE);
         ey += delta;
     }
 
     if (effects.freezeTime.duration > 0) {
-        //DrawRectangle(ey, y, size, size, HUD_OPACITY);
         DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, ey, size, size, WHITE);
         ey += delta;
     }
@@ -390,16 +399,17 @@ static void drawTimeHUD(Game* this, int x, int y) {
 static void drawHud(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
+    //Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
     // sprintf(buffer,
-    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\n",
-    //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK,
+    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\n",
+    //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
     //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration);
 
     // DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
     // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
-    Vector2 biomeNamePos = {this->offsetHalfX, 50};
+    Vector2 biomeNamePos = { this->offsetHalfX, 50 };
     DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 0, BIOME_COLOR[p->biome]);
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
@@ -407,6 +417,8 @@ static void drawHud(Game* this) {
     drawTimeHUD(this, this->width - 150, this->height - 150);
     drawEffects(this, 30, 30, 80);
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
+    if (p->biome == 3) 
+        drawBateryBar(this, this->offsetHalfX - 170, this->height - 180, 400, 30);
     drawInfoHud(this, this->width - 280, 550, 80);
 
     if (p->damaged) drawActionHud(this, RED);
@@ -442,20 +454,20 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_BATERY);
     } else if (type == CELL_MUD) {
         audio->playSound(audio, SOUND_MUD);
-    } else if (type == CELL_INVISIBILITY  || type == CELL_REGENERATION) {
+    } else if (type == CELL_INVISIBILITY || type == CELL_REGENERATION) {
         audio->playSound(audio, SOUND_POTION);
     }
-    
+
     if (IsKeyDown(KEY_EQUAL)) {
-        audio->setSoundVolume(audio, audio->soundVolume + DELTA_VOLUME);        
-    } 
-    if (IsKeyDown(KEY_MINUS)){
+        audio->setSoundVolume(audio, audio->soundVolume + DELTA_VOLUME);
+    }
+    if (IsKeyDown(KEY_MINUS)) {
         audio->setSoundVolume(audio, audio->soundVolume - DELTA_VOLUME);
     }
     if (IsKeyDown(KEY_N)) {
-        audio->setMusicVolume(audio, audio->musicVolume + DELTA_VOLUME);        
-    } 
-    if (IsKeyDown(KEY_B)){
+        audio->setMusicVolume(audio, audio->musicVolume + DELTA_VOLUME);
+    }
+    if (IsKeyDown(KEY_B)) {
         audio->setMusicVolume(audio, audio->musicVolume - DELTA_VOLUME);
     }
 }
@@ -533,7 +545,7 @@ static void drawMap(Game* this) {
 
             int size = this->cellSize;
 
-            if (e->isBoss){
+            if (e->isBoss) {
                 x -= size;
                 y -= size;
                 size *= 3;
@@ -671,6 +683,7 @@ static void loadSprites(Game* this) {
 
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
     sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar3.png");
+    sprites[SPRITE_BATERY_BAR] = LoadSprite("assets/sprites/hud/batery_hud.png");
 }
 
 static void loadSounds(Game* this) {
