@@ -6,6 +6,8 @@
 #include "audio.h"
 #include "sprites.h"
 
+#define CUTSCENE_IMAGE_TIME 10.0f
+
 typedef struct Menu {
     Button* play;
     Button* tutorial;
@@ -19,6 +21,8 @@ typedef struct Menu {
 
     int width;
     int height;
+
+    int cutsceneIdx;
 
     void (*draw)(struct Menu*);
     void (*update)(struct Menu*);

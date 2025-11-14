@@ -713,7 +713,7 @@ static void loadSounds(Game* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
     audio->setSoundVolume(audio, 0.3);
-    audio->setMusicVolume(audio, 0.4);
+    audio->setMusicVolume(audio, 1.0);
 
     audio->loadMusic(audio, "assets/music/luxuria_trilha.mp3", MUSIC_LUXURIA);
     audio->loadMusic(audio, "assets/music/gula_trilha.mp3", MUSIC_GULA);

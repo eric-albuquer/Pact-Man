@@ -476,6 +476,7 @@ static void _free(Map* this) {
     this->changedChunk->free(this->changedChunk);
     this->firedCells->free(this->firedCells);
     this->tentacleCells->free(this->tentacleCells);
+
     free(this);
 }
 
@@ -486,6 +487,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     this->player = new_Player(270, 21);
 
     this->changedChunk = new_ArrayList();
+
     this->firedCells = new_LinkedList();
     this->tentacleCells = new_LinkedList();
 

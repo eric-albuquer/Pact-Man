@@ -20,6 +20,11 @@ typedef enum {
 typedef enum {
     SPRITE_BACKGROUND,
 
+    SPRITE_CUTSCENE1,
+    SPRITE_CUTSCENE2,
+    SPRITE_CUTSCENE3,
+    SPRITE_CUTSCENE4,
+
     SPRITE_COUNT
 } SpritesEnum;
 
@@ -27,12 +32,19 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
+typedef enum {
+    MAIN_CONTENT,
+    CUTSCENE
+} MenuState;
+
+static MenuState menuState = MAIN_CONTENT;
+
 static FlameParticle flames[NUM_FLAMES];
 static bool flamesInit = false;
 
 // ---- Aqui sao os botoes ---- 
 void onPlay() {
-    state = GAME;
+    menuState = CUTSCENE;
 }
 
 void onTutorial() {
@@ -92,26 +104,25 @@ static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
     f->color = (Color){ r, g, b, a };
 }
 
+static void drawCutscene(Menu* this) {
+    static const char* cutsceneTexts[] = {
+        "Após perseguir Pac-Man sem sucesso pelos vários labirintos do famoso jogo clássico,\n a Gangue dos Fantasmas foi condenada a viver eternamente no Inferno de Dante.\n Para reverter essa triste e injusta punição,\n Pac-Man fez um pacto com Lúcifer visando libertar os pobres fantasmas.",
 
-void draw(Menu* this) {
-    if (!this) return;
+        "Enfurecido, Lúcifer só permite que os fantasmas escapem\n se conseguirem encontrar as saídas de pelo menos quatro círculos do Inferno.",
 
-    //float t = GetTime();
+        "Além disso, ele transforma Pac-Man em Pact-Man,\n que, junto com seus clones,\n deve impedir que os fantasmas escapem.",
 
-    // Color topColor = (Color){ (int)(40 + 20 * sin(t * 0.5)), 0, 0, 255 };
-    // Color bottomColor = (Color){ (int)(150 + 80 * sin(t * 0.3)), 0, 0, 255 };
+        "O feitiço só será quebrado se os fantasmas completarem a difícil jornada."
+    };
 
-    // for (int y = 0; y < this->height; y++) {
-    //     float factor = (float)y / (float)this->height;
-    //     Color c = {
-    //         (unsigned char)(topColor.r * (1.0f - factor) + bottomColor.r * factor),
-    //         (unsigned char)(topColor.g * (1.0f - factor) + bottomColor.g * factor),
-    //         (unsigned char)(topColor.b * (1.0f - factor) + bottomColor.b * factor),
-    //         255
-    //     };
-    //     DrawLine(0, y, this->width, y, c);
-    // }
+    int idx = min(this->cutsceneIdx, 3);
 
+    DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
+    DrawRectangle(0, this->height - 210, this->width, 250, (Color){0, 0, 0, 150});
+    DrawText(cutsceneTexts[idx], 100, this->height - 200, 40, WHITE);
+}
+
+static void drawMainContent(Menu* this) {
     DrawSprite(this->sprites[SPRITE_BACKGROUND], 0, 0, this->width, this->height, WHITE);
 
     if (!flamesInit) {
@@ -141,15 +152,20 @@ void draw(Menu* this) {
     if (this->difficulty) this->difficulty->draw(this->difficulty);
 }
 
+void draw(Menu* this) {
+    if (menuState == MAIN_CONTENT)
+        drawMainContent(this);
+    else
+        drawCutscene(this);
+}
+
 static void playSound(Menu* this) {
     Audio* audio = this->audio;
 
     audio->updateMusic(audio, MUSIC_MENU);
 }
 
-void update(Menu* this) {
-    if (!this) return;
-
+static void updateMainContent(Menu* this) {
     Audio* audio = this->audio;
     Vector2 mouse = GetMousePosition();
 
@@ -170,6 +186,25 @@ void update(Menu* this) {
     playSound(this);
 }
 
+static void updateCutscene(Menu* this) {
+    playSound(this);
+    if (IsKeyPressed(KEY_SPACE)) {
+        this->cutsceneIdx++;
+
+        if (this->cutsceneIdx > 3)
+            state = GAME;
+    }
+}
+
+void update(Menu* this) {
+    if (!this) return;
+
+    if (menuState == MAIN_CONTENT)
+        updateMainContent(this);
+    else
+        updateCutscene(this);
+}
+
 static void loadAudio(Menu* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
@@ -183,6 +218,11 @@ static void loadSprites(Menu* this) {
     Sprite* sprites = this->sprites;
 
     sprites[SPRITE_BACKGROUND] = LoadSprite("assets/sprites/menu/menu.jpg");
+
+    sprites[SPRITE_CUTSCENE1] = LoadSprite("assets/sprites/menu/cutscene1.jpg");
+    sprites[SPRITE_CUTSCENE2] = LoadSprite("assets/sprites/menu/cutscene2.jpg");
+    sprites[SPRITE_CUTSCENE3] = LoadSprite("assets/sprites/menu/cutscene3.jpg");
+    sprites[SPRITE_CUTSCENE4] = LoadSprite("assets/sprites/menu/cutscene4.jpg");
 }
 
 Menu* new_Menu(int width, int height) {
@@ -211,8 +251,12 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {255, 0, 0, 150},       // normal color
-        (Color) {0, 255, 0, 150},     // hover color
+        (Color) {
+        255, 0, 0, 150
+    },       // normal color
+        (Color) {
+        0, 255, 0, 150
+    },     // hover color
         "PLAY",
         40,
         onPlay
@@ -223,8 +267,12 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {80, 80, 80, 150},   // normal
-        (Color) {255, 255, 255, 150},   // hover
+        (Color) {
+        80, 80, 80, 150
+    },   // normal
+        (Color) {
+        255, 255, 255, 150
+    },   // hover
         "TUTORIAL",
         40,
         onTutorial
@@ -235,8 +283,12 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {80, 80, 80, 150},   // normal
-        (Color) {255, 255, 255, 150},   // hover
+        (Color) {
+        80, 80, 80, 150
+    },   // normal
+        (Color) {
+        255, 255, 255, 150
+    },   // hover
         "VOLUME",
         40,
         onVolume
@@ -247,12 +299,18 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {80, 80, 80, 150},   // normal
-        (Color) {255, 255, 255, 150},   // hover
+        (Color) {
+        80, 80, 80, 150
+    },   // normal
+        (Color) {
+        255, 255, 255, 150
+    },   // hover
         "DIFFICULTY",
         40,
         onDifficulty
     );
+
+    this->cutsceneIdx = 0;
 
     this->draw = draw;
     this->update = update;
