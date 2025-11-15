@@ -1,4 +1,5 @@
 #include "menu.h"
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -42,17 +43,36 @@ static MenuState menuState = MAIN_CONTENT;
 static FlameParticle flames[NUM_FLAMES];
 static bool flamesInit = false;
 
+static bool showTutorial = false;
+static Button* volumeButtonRef = NULL;
+static int volumeLevel = 2;
+
 // ---- Aqui sao os botoes ---- 
 void onPlay() {
     menuState = CUTSCENE;
 }
 
 void onTutorial() {
+    showTutorial = true;
     printf("[MENU] Rapaz, clicaram no botão de tutorial\n");
 }
 
 void onVolume() {
-    printf("[MENU] Rapaz, clicaram no botão de volume\n");
+    volumeLevel = (volumeLevel + 1) % 3;
+
+    float vol = 1.0f;
+    if (volumeLevel == 0) vol = 0.0f;      
+    else if (volumeLevel == 1) vol = 0.5f; 
+    else vol = 1.0f;                       
+
+    SetMasterVolume(vol);
+
+    if (volumeButtonRef) {
+        snprintf(volumeButtonRef->text, sizeof(volumeButtonRef->text),
+                 "VOLUME: %d%%", (int)(vol * 100));
+    }
+
+    printf("[MENU] Volume agora em %d%%\n", (int)(vol * 100));
 }
 
 void onDifficulty() {
@@ -146,11 +166,63 @@ static void drawMainContent(Menu* this) {
         DrawCircle((int)f->x, (int)f->y, f->radius, f->color);
     }
 
+    if (showTutorial) {
+        int sw = this->width;
+        int sh = this->height;
+
+        int panelW = (int)(sw * 0.7f);
+        int panelH = (int)(sh * 0.7f);
+        int panelX = (sw - panelW) / 2;
+        int panelY = (sh - panelH) / 2;
+
+        DrawRectangle(panelX, panelY, panelW, panelH, (Color){0, 0, 0, 200});
+        DrawRectangleLines(panelX, panelY, panelW, panelH, (Color){255, 120, 80, 255});
+
+        int titleSize = 40;
+        const char* title = "TUTORIAL";
+        int titleWidth = MeasureText(title, titleSize);
+        DrawText(title,
+                 panelX + (panelW - titleWidth)/2,
+                 panelY + 20,
+                 titleSize,
+                 (Color){255, 200, 150, 255});
+
+        int textSize = 20;
+        int textX = panelX + 40;
+        int textY = panelY + 90;
+
+        DrawText("MOVIMENTACAO:", textX, textY, textSize, RAYWHITE);
+        textY += 30;
+        DrawText("- WASD ou Setas para mover o fantasma", textX, textY, textSize, RAYWHITE);
+        textY += 30;
+        DrawText("- Evite o Pact-Man e seus clones", textX, textY, textSize, RAYWHITE);
+        textY += 30;
+        DrawText("- Colete moedas e fragmentos para progredir", textX, textY, textSize, RAYWHITE);
+        textY += 40;
+        DrawText("DICAS:", textX, textY, textSize, RAYWHITE);
+        textY += 30;
+        DrawText("- Observe o mapa e planeje sua rota", textX, textY, textSize, RAYWHITE);
+        textY += 30;
+        DrawText("- Fique atento aos biomas se desintegrando com o tempo", textX, textY, textSize, RAYWHITE);
+
+        const char* backMsg = "Pressione ESC ou clique para voltar";
+        int backSize = 18;
+        int backWidth = MeasureText(backMsg, backSize);
+        DrawText(backMsg,
+                 panelX + (panelW - backWidth)/2,
+                 panelY + panelH - 40,
+                 backSize,
+                 (Color){255, 180, 120, 255});
+
+        return;
+    }
+
     if (this->play)       this->play->draw(this->play);
     if (this->tutorial)   this->tutorial->draw(this->tutorial);
     if (this->volume)     this->volume->draw(this->volume);
     if (this->difficulty) this->difficulty->draw(this->difficulty);
 }
+
 
 void draw(Menu* this) {
     if (menuState == MAIN_CONTENT)
@@ -169,6 +241,14 @@ static void updateMainContent(Menu* this) {
     Audio* audio = this->audio;
     Vector2 mouse = GetMousePosition();
 
+    if (showTutorial) {
+        if (IsKeyPressed(KEY_ESCAPE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            showTutorial = false;
+        }
+        playSound(this);
+        return;
+    }
+
     Button* buttons[4] = { this->play, this->tutorial, this->volume, this->difficulty };
 
     for (int i = 0; i < 4; i++) {
@@ -185,6 +265,7 @@ static void updateMainContent(Menu* this) {
 
     playSound(this);
 }
+
 
 static void updateCutscene(Menu* this) {
     playSound(this);
@@ -289,10 +370,11 @@ Menu* new_Menu(int width, int height) {
         (Color) {
         255, 255, 255, 150
     },   // hover
-        "VOLUME",
+        "VOLUME: 100%",
         40,
         onVolume
     );
+    volumeButtonRef = this->volume;
 
     this->difficulty = new_Button(
         centerX,
