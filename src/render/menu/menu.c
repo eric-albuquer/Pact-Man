@@ -39,6 +39,7 @@ typedef enum {
 } MenuState;
 
 static MenuState menuState = MAIN_CONTENT;
+static Menu* currentMenu = NULL;
 
 static FlameParticle flames[NUM_FLAMES];
 static bool flamesInit = false;
@@ -79,37 +80,62 @@ void onDifficulty() {
     printf("[MENU] Rapaz, clicaram no botão de dificuldade\n");
 }
 
+void onCutsceneNext() {
+    if (!currentMenu) return;
+    if (menuState != CUTSCENE) return;
+
+    if (currentMenu->cutsceneIdx < 3) {
+        currentMenu->cutsceneIdx++;
+    } else {
+        state = GAME;
+    }
+}
+
+void onCutscenePrev() {
+    if (!currentMenu) return;
+    if (menuState != CUTSCENE) return;
+
+    if (currentMenu->cutsceneIdx > 0) {
+        currentMenu->cutsceneIdx--;
+    }
+}
+
 // ---- Metodos do menu viu galera ---- :D
 void _free(Menu* this) {
     if (!this) return;
 
     if (this->play) {
-        Button* b = this->play;
-        b->free(b);
+        this->play->free(this->play);
+    }
+    if (this->tutorial) {
+        this->tutorial->free(this->tutorial);
     }
     if (this->volume) {
-        Button* b = this->volume;
-        b->free(b);
+        this->volume->free(this->volume);
     }
     if (this->difficulty) {
-        Button* b = this->difficulty;
-        b->free(b);
+        this->difficulty->free(this->difficulty);
+    }
+    if (this->cutscenePrev) {
+        this->cutscenePrev->free(this->cutscenePrev);
+    }
+    if (this->cutsceneNext) {
+        this->cutsceneNext->free(this->cutsceneNext);
     }
 
     for (int i = 0; i < ANIMATION_COUNT; i++) {
         UnloadAnimation(this->animations[i]);
     }
-
     free(this->animations);
 
     for (int i = 0; i < SPRITE_COUNT; i++) {
         UnloadSprite(this->sprites[i]);
     }
-
     free(this->sprites);
 
     free(this);
 }
+
 
 static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
     f->x = (float)(rand() % screenWidth);
@@ -140,6 +166,9 @@ static void drawCutscene(Menu* this) {
     DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
     DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
     DrawText(cutsceneTexts[idx], 100, this->height - 200, 40, WHITE);
+
+    if (this->cutscenePrev) this->cutscenePrev->draw(this->cutscenePrev);
+    if (this->cutsceneNext) this->cutsceneNext->draw(this->cutsceneNext);
 }
 
 static void drawMainContent(Menu* this) {
@@ -273,13 +302,32 @@ static void updateMainContent(Menu* this) {
 
 static void updateCutscene(Menu* this) {
     playSound(this);
-    if (IsKeyPressed(KEY_SPACE)) {
-        this->cutsceneIdx++;
 
-        if (this->cutsceneIdx > 3)
-            state = GAME;
+    if (IsKeyPressed(KEY_SPACE)) {
+        onCutsceneNext();
+    }
+    if (IsKeyPressed(KEY_BACKSPACE)) {
+        onCutscenePrev();
+    }
+
+    Vector2 mouse = GetMousePosition();
+    Audio* audio = this->audio;
+
+    Button* buttons[2] = { this->cutscenePrev, this->cutsceneNext };
+
+    for (int i = 0; i < 2; i++) {
+        Button* b = buttons[i];
+        if (!b) continue;
+
+        b->hovered = b->isInside(b, mouse);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
+            audio->playSound(audio, SOUND_CLICK_BUTTON);
+            if (b->action) b->action();
+        }
     }
 }
+
 
 void update(Menu* this) {
     if (!this) return;
@@ -385,15 +433,40 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color) {
-        80, 80, 80, 150
-    },   // normal
-        (Color) {
-        255, 255, 255, 150
-    },   // hover
+        (Color){ 80, 80, 80, 150 },
+        (Color){ 255, 255, 255, 150 },
         "DIFFICULTY",
         40,
         onDifficulty
+    );
+
+    int btnW = 160;
+    int btnH = 50;
+    int margin = 40;
+    int y = height - btnH - margin;
+
+    this->cutscenePrev = new_Button(
+        margin,
+        y,
+        btnW,
+        btnH,
+        (Color){ 0, 0, 0, 180 },
+        (Color){ 255, 255, 255, 200 },
+        "< BACK",
+        30,
+        onCutscenePrev
+    );
+
+    this->cutsceneNext = new_Button(
+        width - btnW - margin,
+        y,
+        btnW,
+        btnH,
+        (Color){ 0, 0, 0, 180 },
+        (Color){ 255, 255, 255, 200 },
+        "NEXT >",
+        30,
+        onCutsceneNext
     );
 
     this->cutsceneIdx = 0;
@@ -402,6 +475,9 @@ Menu* new_Menu(int width, int height) {
     this->update = update;
     this->free = _free;
 
+    currentMenu = this;
+
     return this;
 }
+
 
