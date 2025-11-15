@@ -61,15 +61,15 @@ void onVolume() {
     volumeLevel = (volumeLevel + 1) % 3;
 
     float vol = 1.0f;
-    if (volumeLevel == 0) vol = 0.0f;      
-    else if (volumeLevel == 1) vol = 0.5f; 
-    else vol = 1.0f;                       
+    if (volumeLevel == 0) vol = 0.0f;
+    else if (volumeLevel == 1) vol = 0.5f;
+    else vol = 1.0f;
 
     SetMasterVolume(vol);
 
     if (volumeButtonRef) {
         snprintf(volumeButtonRef->text, sizeof(volumeButtonRef->text),
-                 "VOLUME: %d%%", (int)(vol * 100));
+            "VOLUME: %d%%", (int)(vol * 100));
     }
 
     printf("[MENU] Volume agora em %d%%\n", (int)(vol * 100));
@@ -138,7 +138,7 @@ static void drawCutscene(Menu* this) {
     int idx = min(this->cutsceneIdx, 3);
 
     DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
-    DrawRectangle(0, this->height - 210, this->width, 250, (Color){0, 0, 0, 150});
+    DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
     DrawText(cutsceneTexts[idx], 100, this->height - 200, 40, WHITE);
 }
 
@@ -175,17 +175,19 @@ static void drawMainContent(Menu* this) {
         int panelX = (sw - panelW) / 2;
         int panelY = (sh - panelH) / 2;
 
-        DrawRectangle(panelX, panelY, panelW, panelH, (Color){0, 0, 0, 200});
-        DrawRectangleLines(panelX, panelY, panelW, panelH, (Color){255, 120, 80, 255});
+        DrawRectangle(panelX, panelY, panelW, panelH, (Color) { 0, 0, 0, 200 });
+        DrawRectangleLines(panelX, panelY, panelW, panelH, (Color) { 255, 120, 80, 255 });
 
         int titleSize = 40;
         const char* title = "TUTORIAL";
         int titleWidth = MeasureText(title, titleSize);
         DrawText(title,
-                 panelX + (panelW - titleWidth)/2,
-                 panelY + 20,
-                 titleSize,
-                 (Color){255, 200, 150, 255});
+            panelX + (panelW - titleWidth) / 2,
+            panelY + 20,
+            titleSize,
+            (Color) {
+            255, 200, 150, 255
+        });
 
         int textSize = 20;
         int textX = panelX + 40;
@@ -205,14 +207,16 @@ static void drawMainContent(Menu* this) {
         textY += 30;
         DrawText("- Fique atento aos biomas se desintegrando com o tempo", textX, textY, textSize, RAYWHITE);
 
-        const char* backMsg = "Pressione ESC ou clique para voltar";
+        const char* backMsg = "Pressione BACKSPACE (<-) ou clique para voltar";
         int backSize = 18;
         int backWidth = MeasureText(backMsg, backSize);
         DrawText(backMsg,
-                 panelX + (panelW - backWidth)/2,
-                 panelY + panelH - 40,
-                 backSize,
-                 (Color){255, 180, 120, 255});
+            panelX + (panelW - backWidth) / 2,
+            panelY + panelH - 40,
+            backSize,
+            (Color) {
+            255, 180, 120, 255
+        });
 
         return;
     }
@@ -242,7 +246,7 @@ static void updateMainContent(Menu* this) {
     Vector2 mouse = GetMousePosition();
 
     if (showTutorial) {
-        if (IsKeyPressed(KEY_ESCAPE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (IsKeyPressed(KEY_BACKSPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             showTutorial = false;
         }
         playSound(this);
