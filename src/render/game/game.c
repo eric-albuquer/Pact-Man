@@ -84,6 +84,7 @@ typedef enum {
     MUSIC_FREEZE_TIME,
 
     MUSIC_DEGENERATION,
+    MUSIC_HEAVEN,
 
     MUSIC_COUNT
 } MusicEnum;
@@ -101,6 +102,7 @@ typedef enum {
     SOUND_POTION,
     SOUND_BATERY,
     SOUND_MUD,
+    SOUND_BIOME_FREE,
 
     SOUND_COUNT
 } SoundsEnum;
@@ -423,6 +425,9 @@ static void drawHud(Game* this) {
         p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
         p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType);
 
+    if (p->damaged) drawActionHud(this, RED);
+    drawEffects(this, 30, 30, 80);
+    
     DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
     DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
@@ -440,17 +445,21 @@ static void drawHud(Game* this) {
         drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
     drawInfoHud(this, this->width - 280, 550, 80);
 
-    if (p->damaged) drawActionHud(this, RED);
-    drawEffects(this, 30, 30, 80);
 
     if (p->biomeFragment >= 2 && this->updateCount & 4)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
+   
 }
 
 static void playAudio(Game* this) {
     Player* p = this->map->player;
     Audio* audio = this->audio;
 
+    if (p->cellType == CELL_HEAVEN) {
+        audio->updateMusic(audio, MUSIC_HEAVEN);
+        return;
+    }
+    
     if (p->effects.invulnerability.duration > 0)
         audio->updateMusic(audio, MUSIC_INVULNERABILITY);
     else if (p->effects.freezeTime.duration > 0)
@@ -480,6 +489,10 @@ static void playAudio(Game* this) {
     }
     if (p->hitEnemy) {
         audio->playSound(audio, SOUND_KILL_ENEMY);
+    }
+
+    if (p->biomeFragment >= 2) {
+        audio->playSound(audio, SOUND_BIOME_FREE);
     }
 
     if (p->effects.regeneration.duration > 0 && p->life < START_LIFE)
@@ -769,6 +782,7 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/freeze.mp3", MUSIC_FREEZE_TIME);
 
     audio->loadMusic(audio, "assets/music/earthquake.mp3", MUSIC_DEGENERATION);
+    audio->loadMusic(audio, "assets/music/heaven.mp3", MUSIC_HEAVEN);
 
     audio->loadSound(audio, "assets/sounds/regenerate.wav", SOUND_REGENERATE);
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
@@ -782,6 +796,7 @@ static void loadSounds(Game* this) {
     audio->loadSound(audio, "assets/sounds/potion.wav", SOUND_POTION);
     audio->loadSound(audio, "assets/sounds/batery.wav", SOUND_BATERY);
     audio->loadSound(audio, "assets/sounds/mud.wav", SOUND_MUD);
+    audio->loadSound(audio, "assets/sounds/biomeFree.wav", SOUND_BIOME_FREE);
 }
 
 static void saveUpdate(Game* this) {

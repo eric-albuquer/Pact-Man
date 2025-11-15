@@ -12,6 +12,8 @@
 #define CELLS_PER_CHUNK 256
 #define TOTAL_CELLS_MASK 0xff
 
+#define HEAVEN_SPEED 4
+
 #define DEGENERATION_PROBABILITY 50
 
 typedef enum {

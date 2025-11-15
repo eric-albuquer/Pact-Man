@@ -97,8 +97,14 @@ static void update(Chunk* this, int biome, bool heaven) {
     updateDegenerescence(this, x, y, biome);
     updateFire(this, x, y);
     updateGraveInfested(this, x, y);
-    if (heaven)
-        updateHeaven(this, x, y);
+    if (heaven){
+        for (int i = 0; i < HEAVEN_SPEED; i++){
+            y = rand() & CHUNK_MASK;
+            x = rand() & CHUNK_MASK;
+            updateHeaven(this, x, y);
+        } 
+    }
+        
 }
 
 static void _free(Chunk* this) {
