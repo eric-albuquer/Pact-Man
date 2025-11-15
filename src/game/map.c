@@ -428,14 +428,10 @@ static void updateTime(Map* this) {
     this->elapsedTime += MAP_UPDATE_DT;
     this->biomeTime += MAP_UPDATE_DT;
 
+    this->degenerescence = this->biomeTime / BIOME_DEGEN_START_TIME;
+
     if (this->biomeTime < BIOME_DEGEN_START_TIME) return;
-
     this->manager->degenerated = this->player->biome;
-
-    float t = this->biomeTime - BIOME_DEGEN_START_TIME;
-    float duration = BIOME_DEGEN_FULL_TIME - BIOME_DEGEN_START_TIME;
-    if (t > duration) t = duration;
-    this->degenerescence = t / duration;
 }
 
 static void inline removeBossMecanics(LinkedList* firedCells, LinkedList* tentacleCells) {
@@ -449,8 +445,10 @@ static void inline removeBossMecanics(LinkedList* firedCells, LinkedList* tentac
         int prob = rand() % 100;
         if (prob < 70)
             cell->type = CELL_EMPTY;
-        else if (prob < 97)
+        else if (prob < 96)
             cell->type = CELL_COIN;
+        else if (prob < 97)
+            cell->type = CELL_FREEZE_TIME;
         else if (prob < 98)
             cell->type = CELL_REGENERATION;
         else if (prob < 99)

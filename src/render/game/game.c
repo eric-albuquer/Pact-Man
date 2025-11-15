@@ -78,6 +78,8 @@ typedef enum {
     MUSIC_INVISIBILITY,
     MUSIC_FREEZE_TIME,
 
+    MUSIC_DEGENERATION,
+
     MUSIC_COUNT
 } MusicEnum;
 
@@ -262,10 +264,6 @@ static void drawEffects(Game* this, int x, int y, int size) {
     int delta = size + 20;
     int ey = y;
 
-    if (this->map->player->damaged){
-        drawActionHud(this, RED);
-    }
-
     if (effects.degeneration.duration > 0) {
         drawActionHud(this, RED);
         DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], x, ey, size, size, WHITE);
@@ -279,7 +277,6 @@ static void drawEffects(Game* this, int x, int y, int size) {
     if (effects.slowness.duration > 0) {
         drawActionHud(this, GRAY);
         DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], x, ey, size, size, WHITE);
-
         ey += delta;
     }
     if (effects.invulnerability.duration > 0) {
@@ -376,10 +373,7 @@ static void drawTimeHUD(Game* this, int x, int y) {
     sprintf(buffer, "%02d:%02d", mm, ss);
 
     float d = map->degenerescence;
-    int stage = 0;
-    if (d > 0.0f && d < 0.34f) stage = 1;
-    else if (d >= 0.34f && d < 0.67f) stage = 2;
-    else if (d >= 0.67f) stage = 3;
+    int stage = min(d * 4.0f, 3);
 
     const static char* stageText[] = {
         "STABLE",
@@ -427,13 +421,13 @@ static void drawHud(Game* this) {
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
     drawTimeHUD(this, this->width - 150, this->height - 150);
-    drawEffects(this, 30, 30, 80);
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
     if (p->biome == 3)
         drawBateryBar(this, this->offsetHalfX - 170, this->height - 180, 400, 30);
     drawInfoHud(this, this->width - 280, 550, 80);
 
     if (p->damaged) drawActionHud(this, RED);
+    drawEffects(this, 30, 30, 80);
 }
 
 static void playAudio(Game* this) {
@@ -446,8 +440,12 @@ static void playAudio(Game* this) {
         audio->updateMusic(audio, MUSIC_FREEZE_TIME);
     else if (p->effects.invisibility.duration > 0)
         audio->updateMusic(audio, MUSIC_INVISIBILITY);
-    else
-        audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
+    else {
+        if (this->map->degenerescence < 1.0)
+            audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
+        else 
+            audio->updateMusic(audio, MUSIC_DEGENERATION);
+    }
 
     if (p->effects.invulnerability.duration == FRUIT_INVULNERABILITY_DURATION - 1)
         audio->restartMusic(audio, MUSIC_INVULNERABILITY);
@@ -467,6 +465,9 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_KILL_ENEMY);
     }
 
+    if (p->effects.regeneration.duration > 0 && p->life < START_LIFE)
+        audio->playSound(audio, SOUND_REGENERATE);
+
     if (type == CELL_COIN) {
         audio->playSound(audio, SOUND_COIN);
     } else if (isWind(type)) {
@@ -485,8 +486,6 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_MUD);
     } else if (type == CELL_INVISIBILITY || type == CELL_REGENERATION) {
         audio->playSound(audio, SOUND_POTION);
-    } else if (type == CELL_FONT_HEALTH) {
-        audio->playSound(audio, SOUND_REGENERATE);
     }
 
     if (IsKeyDown(KEY_EQUAL)) {
@@ -503,7 +502,7 @@ static void playAudio(Game* this) {
     }
 }
 
-static inline void drawPlayer(Game* this){
+static inline void drawPlayer(Game* this) {
     Player* p = this->map->player;
     Color color = WHITE;
     if (p->damaged) color = RED;
@@ -681,7 +680,7 @@ static void loadSprites(Game* this) {
 
     const char* batery[] = { "assets/sprites/itens/batery1.png", "assets/sprites/itens/batery2.png", "assets/sprites/itens/batery3.png", "assets/sprites/itens/batery4.png" };
 
-    const char* spike[] = { "assets/sprites/violencia/spike1.png", "assets/sprites/violencia/spike2.png", "assets/sprites/violencia/spike3.png"};
+    const char* spike[] = { "assets/sprites/violencia/spike1.png", "assets/sprites/violencia/spike2.png", "assets/sprites/violencia/spike3.png" };
 
     animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
     animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
@@ -739,6 +738,8 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/Invincibility_mario.mp3", MUSIC_INVULNERABILITY);
     audio->loadMusic(audio, "assets/music/invisibility.mp3", MUSIC_INVISIBILITY);
     audio->loadMusic(audio, "assets/music/freeze.mp3", MUSIC_FREEZE_TIME);
+
+    audio->loadMusic(audio, "assets/music/earthquake.mp3", MUSIC_DEGENERATION);
 
     audio->loadSound(audio, "assets/sounds/regenerate.wav", SOUND_REGENERATE);
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
