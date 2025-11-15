@@ -221,6 +221,12 @@ static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
     updatePlayerWind(this, cell);
 }
 
+static inline void updatePlayerEndGame(Player* p, Cell* cell) {
+    p->effects = (Effects){ 0 };
+    if (cell->type != CELL_PORTAL)
+        cell->type = CELL_HEAVEN;
+}
+
 //===============================================================
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
@@ -232,9 +238,13 @@ static inline void updatePlayer(Map* this, Input input) {
 
     p->hitEnemy = false;
     p->damaged = false;
+
+    if (cm->heaven)
+        updatePlayerEndGame(p, cell);
+    applyPlayerEffects(p, cell);
+
     p->cellType = cell->type;
 
-    applyPlayerEffects(p, cell);
     updatePlayerMovement(this, cell, input);
     updatePlayerEffects(p, cell);
 
@@ -289,7 +299,7 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
 
-    if (e->needToTeleport){
+    if (e->needToTeleport) {
         findNewCell(cm, e);
         return;
     }
@@ -349,6 +359,30 @@ static inline void bossMecanics(ChunkManager* cm, Enemy* e, LinkedList* firedCel
     bossTentacle(cm, e, tentacleCells);
 }
 
+static inline void generatePortal(ChunkManager* cm) {
+    static bool generated = false;
+    if (generated) return;
+    int idx = rand() & 7;
+    Chunk** adjacents = cm->adjacents;
+    Chunk* chunk;
+
+    for (int i = 0; i < 8; i++) {
+        chunk = adjacents[ADJACENT_IDX[idx]];
+        if (chunk != NULL) break;
+        idx = (idx + 1) & 7;
+    }
+
+    int cx = rand() % 7 + 5;
+    int cy = rand() % 7 + 5;
+
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
+            chunk->cellAt(chunk, cx + j, cy + i)->type = CELL_PORTAL;
+        }
+    }
+    generated = true;
+}
+
 static inline bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, LinkedList* enemies, Player* p) {
     Enemy* e = node->data;
 
@@ -360,6 +394,8 @@ static inline bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, Linke
                     if (e->isBoss) {
                         p->biomeFragment++;
                         p->totalFragment++;
+                        if (e->biome == VIOLENCIA)
+                            cm->heaven = true;
                     }
                     p->hitEnemy = true;
                     p->biomeCoins += PACMAN_KILL_COINS;
@@ -434,7 +470,7 @@ static void updateTime(Map* this) {
     this->manager->degenerated = this->player->biome;
 }
 
-static void inline removeBossMecanics(LinkedList* firedCells, LinkedList* tentacleCells) {
+static void inline removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, LinkedList* tentacleCells) {
     while (firedCells->length > BOSS_FIRE_QUANTITY) {
         Cell* cell = firedCells->removeFirst(firedCells);
         cell->type = CELL_EMPTY;
@@ -456,6 +492,18 @@ static void inline removeBossMecanics(LinkedList* firedCells, LinkedList* tentac
         else if (prob < 100)
             cell->type = CELL_FRUIT;
     }
+
+    if (cm->heaven) {
+        while (firedCells->head) {
+            Cell* cell = firedCells->removeFirst(firedCells);
+            cell->type = CELL_HEAVEN;
+        }
+
+        while (tentacleCells->head) {
+            Cell* cell = tentacleCells->removeFirst(tentacleCells);
+            cell->type = CELL_HEAVEN;
+        }
+    }
 }
 
 static void update(Map* this, Controler* controler) {
@@ -464,7 +512,9 @@ static void update(Map* this, Controler* controler) {
     updatePlayer(this, controler->input);
     updateEnemies(this);
 
-    removeBossMecanics(this->firedCells, this->tentacleCells);
+    removeBossMecanics(cm, this->firedCells, this->tentacleCells);
+
+    if (cm->heaven) generatePortal(cm);
 
     updateTime(this);
 
@@ -486,7 +536,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(11, 51);
+    this->player = new_Player(351, 51);
 
     this->changedChunk = new_ArrayList();
 

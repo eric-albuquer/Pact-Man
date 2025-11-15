@@ -40,6 +40,8 @@ typedef enum {
     CELL_DEGENERATED_1,
     CELL_DEGENERATED_2,
     CELL_DEGENERATED_3,
+    CELL_HEAVEN,
+    CELL_PORTAL,
 } CellType;
 
 inline bool isDegenerated(CellType type){
@@ -90,7 +92,7 @@ typedef struct Chunk {
     LinkedList* enemies;
     Cell cells[CELLS_PER_CHUNK];
 
-    void (*update)(struct Chunk*, int);
+    void (*update)(struct Chunk*, int, bool);
     void (*resetDistance)(struct Chunk*);
     Cell* (*cellAt)(struct Chunk*, int, int);
     void (*free)(struct Chunk*);

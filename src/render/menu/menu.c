@@ -104,7 +104,7 @@ void onCutscenePrev() {
 
     if (currentMenu->cutsceneIdx > 0) {
         currentMenu->cutsceneIdx--;
-    } else 
+    } else
         menuState = MAIN_CONTENT;
 }
 
@@ -279,12 +279,11 @@ static void playSound(Menu* this) {
 
     audio->updateMusic(audio, MUSIC_MENU);
 
-    if (menuState == CUTSCENE){
+    if (menuState == CUTSCENE) {
         if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx))
             audio->updateMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx);
-        else {
+        else
             this->cutsceneIdx = min(this->cutsceneIdx + 1, 4);
-        }
     }
 }
 
@@ -460,8 +459,12 @@ Menu* new_Menu(int width, int height) {
         startY += delta,
         buttonWidth,
         buttonHeight,
-        (Color){ 80, 80, 80, 150 },
-        (Color){ 255, 255, 255, 150 },
+        (Color) {
+        80, 80, 80, 150
+    },
+        (Color) {
+        255, 255, 255, 150
+    },
         "DIFFICULTY",
         40,
         onDifficulty
@@ -477,8 +480,12 @@ Menu* new_Menu(int width, int height) {
         y,
         btnW,
         btnH,
-        (Color){ 0, 0, 0, 180 },
-        (Color){ 255, 255, 255, 200 },
+        (Color) {
+        0, 0, 0, 180
+    },
+        (Color) {
+        255, 255, 255, 200
+    },
         "< BACK",
         30,
         onCutscenePrev
@@ -489,8 +496,12 @@ Menu* new_Menu(int width, int height) {
         y,
         btnW,
         btnH,
-        (Color){ 0, 0, 0, 180 },
-        (Color){ 255, 255, 255, 200 },
+        (Color) {
+        0, 0, 0, 180
+    },
+        (Color) {
+        255, 255, 255, 200
+    },
         "NEXT >",
         30,
         onCutsceneNext

@@ -22,6 +22,8 @@ typedef enum {
     SPRITE_DEGENERATED_2,
     SPRITE_DEGENERATED_3,
 
+    SPRITE_HEAVEN,
+
     SPRITE_GRAVE,
 
     SPRITE_ICE,
@@ -36,6 +38,7 @@ typedef enum {
     SPRITE_MINIMAP,
     SPRITE_LIFE_BAR,
     SPRITE_BATERY_BAR,
+    SPRITE_ARROW_NEXT_BIOME,
 
     SPRITE_COUNT
 } SpritesEnum;
@@ -55,6 +58,8 @@ typedef enum {
     ANIMATION_FRAGMENT,
 
     ANIMATION_BATERY,
+
+    ANIMATION_PORTAL,
 
     ANIMATION_HORIZONTAL_WIND,
     ANIMATION_VERTICAL_WIND,
@@ -135,6 +140,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         sprite = sprites[SPRITE_DEGENERATED_3];
     } else if (cell->type == CELL_TEMPLE) {
         color = GRAY;
+    } if (cell->type == CELL_HEAVEN) {
+        sprite = sprites[SPRITE_HEAVEN];
     }
 
     DrawSprite(sprite, x, y, size, size, color);
@@ -162,6 +169,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, color);
     } else if (cell->type == CELL_GRAVE_INFESTED) {
         DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, (Color) { 0, 255, 255, 255 });
+    } else if (cell->type == CELL_PORTAL) {
+        DrawAnimation(animations[ANIMATION_PORTAL], x, y, size, color);
     }
 
     if (!itens) return;
@@ -400,6 +409,10 @@ static void drawTimeHUD(Game* this, int x, int y) {
     DrawText(stageText[stage], x + 16, y + 45, 20, stageColor);
 }
 
+static void drawArrowToNextBiome(Game* this, int x, int y, int width, int height) {
+    DrawSprite(this->sprites[SPRITE_ARROW_NEXT_BIOME], x, y, width, height, WHITE);
+    DrawText("BIOMA LIBERÁDO", x + width * 0.2, y + height * 0.41, 30, PURPLE);
+}
 
 static void drawHud(Game* this) {
     Map* map = this->map;
@@ -429,6 +442,9 @@ static void drawHud(Game* this) {
 
     if (p->damaged) drawActionHud(this, RED);
     drawEffects(this, 30, 30, 80);
+
+    if (p->biomeFragment >= 2 && this->updateCount & 4)
+        drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
 }
 
 static void playAudio(Game* this) {
@@ -616,7 +632,7 @@ static void drawMap(Game* this) {
         }
     }
 
-    if (p->biome == VIOLENCIA) {
+    if (p->biome == VIOLENCIA && !map->manager->heaven) {
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(this->shadowMap.texture,
             (Rectangle) {
@@ -688,6 +704,8 @@ static void loadSprites(Game* this) {
 
     const char* spike[] = { "assets/sprites/violencia/spike1.png", "assets/sprites/violencia/spike2.png", "assets/sprites/violencia/spike3.png" };
 
+    const char* portal[] = { "assets/sprites/common_cells/portal1.png", "assets/sprites/common_cells/portal2.png", "assets/sprites/common_cells/portal3.png" };
+
     animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
     animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
@@ -697,6 +715,8 @@ static void loadSprites(Game* this) {
 
     animations[ANIMATION_FONT] = LoadAnimation(7, font);
     animations[ANIMATION_SPIKE] = LoadAnimation(3, spike);
+
+    animations[ANIMATION_PORTAL] = LoadAnimation(3, portal);
 
     sprites[SPRITE_FLOOR_LUXURIA] = LoadSprite("assets/sprites/luxuria/chao.png");
     sprites[SPRITE_WALL_LUXURIA] = LoadSprite("assets/sprites/luxuria/parede.png");
@@ -714,6 +734,8 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_DEGENERATED_2] = LoadSprite("assets/sprites/common_cells/degenerated2.png");
     sprites[SPRITE_DEGENERATED_3] = LoadSprite("assets/sprites/common_cells/degenerated3.png");
 
+    sprites[SPRITE_HEAVEN] = LoadSprite("assets/sprites/common_cells/heaven.png");
+
     sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");
 
     sprites[SPRITE_ICE] = LoadSprite("assets/sprites/common_cells/ice.png");
@@ -728,6 +750,7 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
     sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar.png");
     sprites[SPRITE_BATERY_BAR] = LoadSprite("assets/sprites/hud/batery_hud.png");
+    sprites[SPRITE_ARROW_NEXT_BIOME] = LoadSprite("assets/sprites/hud/biomeNextArrow.png");
 }
 
 static void loadSounds(Game* this) {

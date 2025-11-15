@@ -32,7 +32,7 @@ static void updateChunks(ChunkManager* this){
         int idx = CLOSER_IDX[i];
         Chunk* chunk = this->adjacents[idx];
         if (!chunk) continue;
-        chunk->update(chunk, this->degenerated);
+        chunk->update(chunk, this->degenerated, this->heaven);
     }
 }
 
@@ -89,6 +89,8 @@ ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
     this->player = p;
 
     this->degenerated = -1;
+
+    this->heaven = false;
 
     this->player->updateChunk(this->player);
 

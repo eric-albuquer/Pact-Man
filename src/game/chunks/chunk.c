@@ -13,11 +13,11 @@ static void resetDistance(Chunk* this) {
     }
 }
 
-static bool inline isFire(Cell* cell){
+static bool inline isFire(Cell* cell) {
     return cell->type == CELL_FIRE_OFF || cell->type == CELL_FIRE_ON;
 }
 
-static void updateDegenerescence(Chunk* this, int x, int y, int biome){
+static void updateDegenerescence(Chunk* this, int x, int y, int biome) {
     Cell* cell = cellAt(this, x, y);
     if (cell->type == CELL_FRAGMENT || rand() % 100 >= DEGENERATION_PROBABILITY) return;
     if (cell->biome > biome) return;
@@ -78,12 +78,27 @@ static void updateGraveInfested(Chunk* this, int x, int y) {
     cell->type = CELL_GRAVE_INFESTED;
 }
 
-static void update(Chunk* this, int biome) {
+static void updateHeaven(Chunk* this, int x, int y) {
+    Cell* cell = this->cellAt(this, x, y);
+    if (cell->type == CELL_PORTAL) return;
+    cell->biome = VIOLENCIA;
+    cell->type = CELL_HEAVEN;
+
+    LinkedList* enemies = this->enemies;
+    while (enemies->head) {
+        Enemy* e = enemies->removeFirst(enemies);
+        free(e);
+    }
+}
+
+static void update(Chunk* this, int biome, bool heaven) {
     int y = rand() & CHUNK_MASK;
     int x = rand() & CHUNK_MASK;
     updateDegenerescence(this, x, y, biome);
     updateFire(this, x, y);
     updateGraveInfested(this, x, y);
+    if (heaven)
+        updateHeaven(this, x, y);
 }
 
 static void _free(Chunk* this) {
