@@ -10,6 +10,12 @@
 typedef enum {
     MUSIC_MENU,
 
+    MUSIC_CUTSCENE1,
+    MUSIC_CUTSCENE2,
+    MUSIC_CUTSCENE3,
+    MUSIC_CUTSCENE4,
+    MUSIC_CUTSCENE5,
+
     MUSIC_COUNT
 } MusicEnum;
 
@@ -25,6 +31,7 @@ typedef enum {
     SPRITE_CUTSCENE2,
     SPRITE_CUTSCENE3,
     SPRITE_CUTSCENE4,
+    SPRITE_CUTSCENE5,
 
     SPRITE_COUNT
 } SpritesEnum;
@@ -84,7 +91,7 @@ void onCutsceneNext() {
     if (!currentMenu) return;
     if (menuState != CUTSCENE) return;
 
-    if (currentMenu->cutsceneIdx < 3) {
+    if (currentMenu->cutsceneIdx < 4) {
         currentMenu->cutsceneIdx++;
     } else {
         state = GAME;
@@ -97,7 +104,8 @@ void onCutscenePrev() {
 
     if (currentMenu->cutsceneIdx > 0) {
         currentMenu->cutsceneIdx--;
-    }
+    } else 
+        menuState = MAIN_CONTENT;
 }
 
 // ---- Metodos do menu viu galera ---- :D
@@ -152,16 +160,18 @@ static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
 
 static void drawCutscene(Menu* this) {
     static const char* cutsceneTexts[] = {
-        "Após perseguir Pac-Man sem sucesso pelos vários labirintos do famoso jogo clássico,\n a Gangue dos Fantasmas foi condenada a viver eternamente no Inferno de Dante.\n Para reverter essa triste e injusta punição,\n Pac-Man fez um pacto com Lúcifer visando libertar os pobres fantasmas.",
+        "Após perseguir Pac-Man sem sucesso pelos vários labirintos do famoso jogo clássico,\na Gangue dos Fantasmas foi condenada a viver eternamente no Inferno de Dante.",
 
-        "Enfurecido, Lúcifer só permite que os fantasmas escapem\n se conseguirem encontrar as saídas de pelo menos quatro círculos do Inferno.",
+        "Para reverter essa triste e injusta punição,\nPac-Man fez um pacto com Lúcifer visando libertar os pobres fantasmas.",
 
-        "Além disso, ele transforma Pac-Man em Pact-Man,\n que, junto com seus clones,\n deve impedir que os fantasmas escapem.",
+        "Enfurecido, Lúcifer só permite que os fantasmas escapem\nse conseguirem encontrar as saídas de pelo menos quatro círculos do Inferno.",
+
+        "Além disso, ele transforma Pac-Man em Pact-Man,\nque, junto com seus clones,\ndeve impedir que os fantasmas escapem.",
 
         "O feitiço só será quebrado se os fantasmas completarem a difícil jornada."
     };
 
-    int idx = min(this->cutsceneIdx, 3);
+    int idx = min(this->cutsceneIdx, 4);
 
     DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
     DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
@@ -268,6 +278,11 @@ static void playSound(Menu* this) {
     Audio* audio = this->audio;
 
     audio->updateMusic(audio, MUSIC_MENU);
+
+    if (menuState == CUTSCENE){
+        if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx))
+            audio->updateMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx);
+    }
 }
 
 static void updateMainContent(Menu* this) {
@@ -324,6 +339,7 @@ static void updateCutscene(Menu* this) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
             audio->playSound(audio, SOUND_CLICK_BUTTON);
             if (b->action) b->action();
+            audio->restartMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx);
         }
     }
 }
@@ -343,6 +359,13 @@ static void loadAudio(Menu* this) {
     this->audio = audio;
 
     audio->loadMusic(audio, "assets/music/menu_music.mp3", MUSIC_MENU);
+
+    audio->loadMusic(audio, "assets/music/cutscene1.mp3", MUSIC_CUTSCENE1);
+    audio->loadMusic(audio, "assets/music/cutscene2.mp3", MUSIC_CUTSCENE2);
+    audio->loadMusic(audio, "assets/music/cutscene3.mp3", MUSIC_CUTSCENE3);
+    audio->loadMusic(audio, "assets/music/cutscene4.mp3", MUSIC_CUTSCENE4);
+    audio->loadMusic(audio, "assets/music/cutscene5.mp3", MUSIC_CUTSCENE5);
+
     audio->loadSound(audio, "assets/sounds/fragmento.wav", SOUND_CLICK_BUTTON);
 }
 
@@ -356,6 +379,7 @@ static void loadSprites(Menu* this) {
     sprites[SPRITE_CUTSCENE2] = LoadSprite("assets/sprites/menu/cutscene2.jpg");
     sprites[SPRITE_CUTSCENE3] = LoadSprite("assets/sprites/menu/cutscene3.jpg");
     sprites[SPRITE_CUTSCENE4] = LoadSprite("assets/sprites/menu/cutscene4.jpg");
+    sprites[SPRITE_CUTSCENE5] = LoadSprite("assets/sprites/menu/cutscene5.jpg");
 }
 
 Menu* new_Menu(int width, int height) {

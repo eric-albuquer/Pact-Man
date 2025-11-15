@@ -47,6 +47,11 @@ static void setMusicVolume(Audio* this, float musicVolume){
     }
 }
 
+static bool hasEndMusic(Audio* this, int idx){
+    Music music = this->musics[idx];
+    return GetMusicTimePlayed(music) >= GetMusicTimeLength(music) - 0.15f;
+}
+
 static void playSound(Audio* this, int idx){
     AudioStream stream = this->sounds[idx].stream;
     SetAudioStreamVolume(stream, this->soundVolume);
@@ -88,6 +93,7 @@ Audio* new_Audio(const int musicsLength, const int soundsLength) {
     this->updateMusic = updateMusic;
 
     this->restartMusic = restartMusic;
+    this->hasEndMusic = hasEndMusic;
 
     this->playSound = playSound;
     this->loadMusic = loadMusic;

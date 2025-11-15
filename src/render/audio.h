@@ -25,6 +25,7 @@ typedef struct Audio {
   void (*setSoundVolume)(struct Audio*, float);
   void (*setMusicVolume)(struct Audio*, float);
 
+  bool (*hasEndMusic)(struct Audio*, int);
   void (*restartMusic)(struct Audio*, int);
 
   void (*playSound)(struct Audio*, int);

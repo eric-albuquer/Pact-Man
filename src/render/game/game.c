@@ -444,7 +444,7 @@ static void playAudio(Game* this) {
     else {
         if (this->map->degenerescence < 1.0)
             audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
-        else 
+        else
             audio->updateMusic(audio, MUSIC_DEGENERATION);
     }
 
@@ -510,6 +510,22 @@ static inline void drawPlayer(Game* this) {
     if (p->effects.invisibility.duration > 0) color.a = 100;
     if (p->effects.invulnerability.duration > 0 && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = PURPLE;
     DrawAnimation(this->animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
+}
+
+static void inline drawChunksMap(Game* this, int x, int y) {
+    Map* map = this->map;
+    for (int i = -1; i < 2; i++) {
+        int chunkY = map->player->chunkY + i;
+        if (chunkY < 0 || chunkY >= map->manager->rows) continue;
+        for (int j = -1; j < 2; j++) {
+            int chunkX = map->player->chunkX + j;
+            if (chunkX < 0 || chunkX >= map->manager->cols) continue;
+
+            int startChunkX = x + (chunkX * CHUNK_SIZE - map->player->lastX) * this->cellSize;
+            int startChunkY = y + (chunkY * CHUNK_SIZE - map->player->lastY) * this->cellSize;
+            DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, this->cellSize* CHUNK_SIZE + 5, this->cellSize* CHUNK_SIZE + 5 }, 5, GREEN);
+        }
+    }
 }
 
 static void drawMap(Game* this) {
@@ -614,18 +630,7 @@ static void drawMap(Game* this) {
 
     drawPlayer(this);
 
-    for (int i = -1; i < 2; i++) {
-        int chunkY = map->player->chunkY + i;
-        if (chunkY < 0 || chunkY >= map->manager->rows) continue;
-        for (int j = -1; j < 2; j++) {
-            int chunkX = map->player->chunkX + j;
-            if (chunkX < 0 || chunkX >= map->manager->cols) continue;
-
-            int startChunkX = offsetHalfXAnimated + (chunkX * CHUNK_SIZE - px) * this->cellSize;
-            int startChunkY = offsetHalfYAnimated + (chunkY * CHUNK_SIZE - py) * this->cellSize;
-            DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, this->cellSize* CHUNK_SIZE + 5, this->cellSize* CHUNK_SIZE + 5 }, 5, GREEN);
-        }
-    }
+    drawChunksMap(this, offsetHalfXAnimated, offsetHalfYAnimated);
 
     drawHud(this);
     playAudio(this);
