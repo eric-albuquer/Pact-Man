@@ -282,6 +282,9 @@ static void playSound(Menu* this) {
     if (menuState == CUTSCENE){
         if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx))
             audio->updateMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx);
+        else {
+            this->cutsceneIdx = min(this->cutsceneIdx + 1, 4);
+        }
     }
 }
 
