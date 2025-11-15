@@ -204,11 +204,11 @@ static inline Color LerpColor(Color a, Color b, float t) {
 }
 
 static void drawLifeBar(Game* this, int x, int y, int width, int height) {
-    int h = height * 0.3;
-    int w = width * 0.87;
+    int h = height * 0.26;
+    int w = width * 0.88;
     float t = this->map->player->life / (float)(START_LIFE);
     if (t < 0.0f) t = 0.0f;
-    Color color = LerpColor(RED, GREEN, t);
+    Color color = RED;
     int lx = w * t;
     DrawRectangle(x + 50, y + h + 10, w, h, HUD_OPACITY);
     DrawRectangle(x + 50, y + h + 10, lx, h, color);
@@ -217,16 +217,15 @@ static void drawLifeBar(Game* this, int x, int y, int width, int height) {
 
 static void drawBateryBar(Game* this, int x, int y, int width, int height) {
     int w = width * 0.95;
-    int h = height * 0.9;
-    int startW = width * 0.025 + height + 20;
-    int startH = height * 0.05;
+    int h = height * 0.35;
+    int startW = width * 0.025;
     float t = this->map->player->batery;
     Color color = LerpColor(RED, GREEN, t);
     int lx = w * t;
-    DrawRectangle(startW + x, y, w, startH + h, HUD_OPACITY);
-    DrawRectangle(startW + x, y, lx, startH + h, color);
-    DrawSprite(this->sprites[SPRITE_BATERY_BAR], x + height + 20, y, width, height, WHITE);
-    DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
+    DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);
+    DrawRectangle(x + startW, y + h, lx, h, color);
+    DrawSprite(this->sprites[SPRITE_BATERY_BAR], x, y, width, height, WHITE);
+    //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
 }
 
 static void drawInfoHud(Game* this, int x, int y, int size) {
@@ -416,14 +415,16 @@ static void drawHud(Game* this) {
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
     Vector2 biomeNamePos = { this->offsetHalfX, 50 };
-    DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 0, BIOME_COLOR[p->biome]);
+
+    if (map->degenerescence < 0.1)
+        DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 0, BIOME_COLOR[p->biome]);
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
     drawTimeHUD(this, this->width - 150, this->height - 150);
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
     if (p->biome == 3)
-        drawBateryBar(this, this->offsetHalfX - 170, this->height - 180, 400, 30);
+        drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
     drawInfoHud(this, this->width - 280, 550, 80);
 
     if (p->damaged) drawActionHud(this, RED);
@@ -720,7 +721,7 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/star.png");
 
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
-    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar3.png");
+    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar.png");
     sprites[SPRITE_BATERY_BAR] = LoadSprite("assets/sprites/hud/batery_hud.png");
 }
 
