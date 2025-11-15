@@ -5,7 +5,7 @@
 
 #define BIOME_ENEMY_PROBABILITY (int[4]){ 50, 50, 20, 20 }
 
-#define WALL_DENSITY 65
+#define WALL_DENSITY 75
 
 #define MUD_DENSITY 7
 

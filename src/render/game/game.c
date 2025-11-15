@@ -23,7 +23,6 @@ typedef enum {
     SPRITE_DEGENERATED_3,
 
     SPRITE_GRAVE,
-    SPRITE_SPIKE,
 
     SPRITE_ICE,
 
@@ -62,6 +61,7 @@ typedef enum {
     ANIMATION_MUD,
     ANIMATION_FIRE,
     ANIMATION_TENTACLE,
+    ANIMATION_SPIKE,
 
     ANIMATION_FONT,
 
@@ -90,6 +90,7 @@ typedef enum {
     SOUND_FRUIT,
     SOUND_SPIKE,
     SOUND_FREEZE_TIME,
+    SOUND_REGENERATE,
     SOUND_POTION,
     SOUND_BATERY,
     SOUND_MUD,
@@ -147,7 +148,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     } else if (cell->type == CELL_WIND_UP || cell->type == CELL_WIND_DOWN) {
         DrawAnimation(animations[ANIMATION_VERTICAL_WIND], x, y, size, color);
     } else if (cell->type == CELL_SPIKE) {
-        DrawSprite(sprites[SPRITE_SPIKE], x, y, size, size, color);
+        DrawAnimation(animations[ANIMATION_SPIKE], x, y, size, color);
     } else if (cell->type == CELL_MUD) {
         DrawAnimation(animations[ANIMATION_MUD], x, y, size, color);
     } else if (cell->type == CELL_FONT_HEALTH) {
@@ -260,6 +261,10 @@ static void drawEffects(Game* this, int x, int y, int size) {
 
     int delta = size + 20;
     int ey = y;
+
+    if (this->map->player->damaged){
+        drawActionHud(this, RED);
+    }
 
     if (effects.degeneration.duration > 0) {
         drawActionHud(this, RED);
@@ -406,14 +411,14 @@ static void drawTimeHUD(Game* this, int x, int y) {
 static void drawHud(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
-    //Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
-    // sprintf(buffer,
-    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\n",
-    //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
-    //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration);
+    Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
+    sprintf(buffer,
+        "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\n",
+        p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
+        p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType);
 
-    // DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
-    // DrawText(buffer, 30, this->height - 580, 30, GREEN);
+    DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
+    DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
     Vector2 biomeNamePos = { this->offsetHalfX, 50 };
@@ -480,6 +485,8 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_MUD);
     } else if (type == CELL_INVISIBILITY || type == CELL_REGENERATION) {
         audio->playSound(audio, SOUND_POTION);
+    } else if (type == CELL_FONT_HEALTH) {
+        audio->playSound(audio, SOUND_REGENERATE);
     }
 
     if (IsKeyDown(KEY_EQUAL)) {
@@ -494,6 +501,15 @@ static void playAudio(Game* this) {
     if (IsKeyDown(KEY_B)) {
         audio->setMusicVolume(audio, audio->musicVolume - DELTA_VOLUME);
     }
+}
+
+static inline void drawPlayer(Game* this){
+    Player* p = this->map->player;
+    Color color = WHITE;
+    if (p->damaged) color = RED;
+    if (p->effects.invisibility.duration > 0) color.a = 100;
+    if (p->effects.invulnerability.duration > 0 && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = PURPLE;
+    DrawAnimation(this->animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
 }
 
 static void drawMap(Game* this) {
@@ -596,11 +612,7 @@ static void drawMap(Game* this) {
         EndBlendMode();
     }
 
-    Color color = WHITE;
-    if (p->damaged && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = RED;
-    if (p->effects.invisibility.duration > 0) color.a = 100;
-    if (p->effects.invulnerability.duration > 0 && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = PURPLE;
-    DrawAnimation(animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
+    drawPlayer(this);
 
     for (int i = -1; i < 2; i++) {
         int chunkY = map->player->chunkY + i;
@@ -669,6 +681,8 @@ static void loadSprites(Game* this) {
 
     const char* batery[] = { "assets/sprites/itens/batery1.png", "assets/sprites/itens/batery2.png", "assets/sprites/itens/batery3.png", "assets/sprites/itens/batery4.png" };
 
+    const char* spike[] = { "assets/sprites/violencia/spike1.png", "assets/sprites/violencia/spike2.png", "assets/sprites/violencia/spike3.png"};
+
     animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
     animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
@@ -677,6 +691,7 @@ static void loadSprites(Game* this) {
     animations[ANIMATION_BATERY] = LoadAnimation(4, batery);
 
     animations[ANIMATION_FONT] = LoadAnimation(7, font);
+    animations[ANIMATION_SPIKE] = LoadAnimation(3, spike);
 
     sprites[SPRITE_FLOOR_LUXURIA] = LoadSprite("assets/sprites/luxuria/chao.png");
     sprites[SPRITE_WALL_LUXURIA] = LoadSprite("assets/sprites/luxuria/parede.png");
@@ -695,7 +710,6 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_DEGENERATED_3] = LoadSprite("assets/sprites/common_cells/degenerated3.png");
 
     sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");
-    sprites[SPRITE_SPIKE] = LoadSprite("assets/sprites/violencia/espinhos.png");
 
     sprites[SPRITE_ICE] = LoadSprite("assets/sprites/common_cells/ice.png");
 
@@ -715,7 +729,7 @@ static void loadSounds(Game* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
     audio->setSoundVolume(audio, 0.3);
-    audio->setMusicVolume(audio, 1.0);
+    audio->setMusicVolume(audio, 0.5);
 
     audio->loadMusic(audio, "assets/music/luxuria_trilha.mp3", MUSIC_LUXURIA);
     audio->loadMusic(audio, "assets/music/gula_trilha.mp3", MUSIC_GULA);
@@ -726,6 +740,7 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/invisibility.mp3", MUSIC_INVISIBILITY);
     audio->loadMusic(audio, "assets/music/freeze.mp3", MUSIC_FREEZE_TIME);
 
+    audio->loadSound(audio, "assets/sounds/regenerate.wav", SOUND_REGENERATE);
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
     audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
     audio->loadSound(audio, "assets/sounds/dano.wav", SOUND_DAMAGE);
