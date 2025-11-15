@@ -14,6 +14,9 @@ typedef struct Menu {
     Button* volume;
     Button* difficulty;
 
+    Button* cutscenePrev;
+    Button* cutsceneNext;
+
     Animation* animations;
     Sprite* sprites;
 
