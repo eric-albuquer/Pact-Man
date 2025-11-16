@@ -20,7 +20,7 @@ typedef struct Menu {
     Button* credits;
     Button* score;
 
-    Animation* animations;
+    //Animation* animations;
     Sprite* sprites;
 
     Audio* audio;

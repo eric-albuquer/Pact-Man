@@ -129,10 +129,10 @@ void _free(Menu* this) {
         this->cutsceneNext->free(this->cutsceneNext);
     }
 
-    for (int i = 0; i < ANIMATION_COUNT; i++) {
-        UnloadAnimation(this->animations[i]);
-    }
-    free(this->animations);
+    // for (int i = 0; i < ANIMATION_COUNT; i++) {
+    //     UnloadAnimation(this->animations[i]);
+    // }
+    // free(this->animations);
 
     for (int i = 0; i < SPRITE_COUNT; i++) {
         UnloadSprite(this->sprites[i]);
@@ -357,11 +357,12 @@ static void updateMainContent(Menu* this) {
     Audio* audio = this->audio;
     Vector2 mouse = GetMousePosition();
 
+    playSound(this);
+
     if (showTutorial) {
         if (IsKeyPressed(KEY_BACKSPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             showTutorial = false;
         }
-        playSound(this);
         return;
     }
 
@@ -378,8 +379,6 @@ static void updateMainContent(Menu* this) {
             if (b->action) b->action();
         }
     }
-
-    playSound(this);
 }
 
 
@@ -465,7 +464,7 @@ Menu* new_Menu(int width, int height) {
     int centerX = width / 2 - buttonWidth / 2;
     int startY = height / 2 - (buttonHeight * 5 + spacing * 2) / 2;
 
-    this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
+    //this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
     this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
 
     loadAudio(this);

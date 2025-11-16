@@ -199,11 +199,9 @@ static void updateAddScore(Credits* this) {
             break;
         }
     }
-    if (IsKeyPressed(KEY_BACKSPACE)) {
+    if (IsKeyPressed(KEY_BACKSPACE) && this->nameIdx > 0) {
         this->name[--this->nameIdx] = 0;
     }
-
-    printf("%s\n", this->name);
 }
 
 static void clearLines(Credits* this) {
@@ -467,7 +465,7 @@ static void loadButtons(Credits* this) {
 
 static void loadScores(Credits* this) {
     ArrayList* scores = this->scores;
-    FILE* file = fopen("scores.bin", "rb");
+    FILE* file = fopen("assets/scores.bin", "rb");
     while (1) {
         Score* score = malloc(sizeof(Score));
         if (fread(score, sizeof(Score), 1, file) == 1) {
@@ -482,7 +480,7 @@ static void loadScores(Credits* this) {
 
 static void saveScores(Credits* this) {
     ArrayList* scores = this->scores;
-    FILE* file = fopen("scores.bin", "wb");
+    FILE* file = fopen("assets/scores.bin", "wb");
     for (int i = 0; i < scores->length; i++) {
         Score* score = scores->data[i];
         fwrite(score, sizeof(Score), 1, file);

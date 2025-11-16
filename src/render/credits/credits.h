@@ -29,7 +29,7 @@ typedef struct Credits {
     LinkedList* lines;
     ArrayList* scores;
 
-    char name[100];
+    char name[1000];
     int nameIdx;
 
     Player* player;
