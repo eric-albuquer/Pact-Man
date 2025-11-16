@@ -9,7 +9,7 @@
 
 #define UPDATE_TIME 0.15f
 
-GameState state = MENU_MAIN_CONTENT;
+GameState state = CREDITS_CUTSCENE1;
 Controler* controler;
 Map* map;
 Render* render;
@@ -51,7 +51,7 @@ void updateCredits() {
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
-    ToggleFullscreen();
+    //ToggleFullscreen();
     InitAudioDevice();
     SetTargetFPS(60);
 

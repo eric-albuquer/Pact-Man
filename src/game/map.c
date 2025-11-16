@@ -224,12 +224,14 @@ static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
     updatePlayerWind(this, cell);
 }
 
-static inline void updatePlayerEndGame(Player* p, Cell* cell) {
-    p->effects = (Effects){ 0 };
+static inline void updatePlayerEndGame(Map* this, Cell* cell) {
+    this->player->effects = (Effects){ 0 };
     if (cell->type != CELL_PORTAL)
         cell->type = CELL_HEAVEN;
-    else
+    else {
         state = CREDITS_CUTSCENE1;
+        this->restart(this);
+    }
 }
 
 //===============================================================
@@ -245,7 +247,7 @@ static inline void updatePlayer(Map* this, Input input) {
     p->damaged = false;
 
     if (cm->heaven)
-        updatePlayerEndGame(p, cell);
+        updatePlayerEndGame(this, cell);
     applyPlayerEffects(p, cell);
 
     p->cellType = cell->type;
@@ -525,7 +527,7 @@ static void update(Map* this, Controler* controler) {
     this->updateCount++;
 }
 
-static void restart(Map* this){
+static void restart(Map* this) {
     this->player->restart(this->player);
     int biomeCols = this->manager->biomeCols;
     int rows = this->manager->rows;

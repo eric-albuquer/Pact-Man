@@ -45,7 +45,7 @@ typedef struct {
     float totalTime;
 } Score;
 
-static ArrayList* thisScores;
+static Credits* thisCredits;
 
 static int cmpCoins(const void* a, const void* b) {
     const Score* sa = a;
@@ -75,19 +75,23 @@ static int cmpTime(const void* a, const void* b) {
 }
 
 static void sortCoins() {
-    thisScores->sort(thisScores, cmpCoins);
+    thisCredits->scores->sort(thisCredits->scores, cmpCoins);
 }
 
 static void sortFragments() {
-    thisScores->sort(thisScores, cmpFragments);
+    thisCredits->scores->sort(thisCredits->scores, cmpFragments);
 }
 
 static void sortTime() {
-    thisScores->sort(thisScores, cmpTime);
+    thisCredits->scores->sort(thisCredits->scores, cmpTime);
 }
 
 static void next() {
-    state = min(state + 1, CREDITS_FINAL);
+    state = min(state + 1, CREDITS_ADD_SCORE);
+    if (state == CREDITS_ADD_SCORE){
+        thisCredits->name[0] = 0;
+        thisCredits->nameIdx = 0;
+    }
 }
 
 static void prev() {
@@ -102,6 +106,8 @@ static void updateCutsceneButtons(Credits* this) {
     int audioIdx = MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1);
     if (!audio->hasEndMusic(audio, audioIdx))
         audio->updateMusic(audio, audioIdx);
+    else if (state < CREDITS_CUTSCENE3)
+        next();
 
     strcpy(this->prevBtn->text, "BACK");
 
@@ -261,9 +267,9 @@ static void drawCutscenes(Credits* this) {
     }
 
     static const char* cutsceneTexts[] = {
-            "Após a árdua jornada,\n os fantasmas escapam da escuridão do Inferno e dos Pact-Men enfurecidos.",
+            "Após a árdua jornada,\nos fantasmas escapam da escuridão do Inferno e dos Pact-Men enfurecidos.",
 
-            "Ao cumprirem o pacto,\n os fantasmas finalmente alcançam a liberdade.",
+            "Ao cumprirem o pacto,\nos fantasmas finalmente alcançam a liberdade.",
 
             "Com seu feitiço quebrado,\nPac-Man retorna à forma original e celebra a restauração da paz."
     };
@@ -359,9 +365,10 @@ static void loadSprites(Credits* this) {
 static void loadAudio(Credits* this) {
     Audio* audio = this->audio;
 
-    audio->loadMusic(audio, "assets/music/cutscene1.mp3", MUSIC_CUTSCENE1);
-    audio->loadMusic(audio, "assets/music/cutscene2.mp3", MUSIC_CUTSCENE2);
+    audio->loadMusic(audio, "assets/music/end1.mp3", MUSIC_CUTSCENE1);
+    audio->loadMusic(audio, "assets/music/end2.mp3", MUSIC_CUTSCENE2);
     audio->loadMusic(audio, "assets/music/cutscene2.mp3", MUSIC_CUTSCENE3);
+
     audio->loadMusic(audio, "assets/music/credits.mp3", MUSIC_CREDITS);
     audio->loadMusic(audio, "assets/music/score.mp3", MUSIC_SCORE);
 
@@ -459,7 +466,6 @@ static void loadButtons(Credits* this) {
 
 static void loadScores(Credits* this) {
     this->scores = new_ArrayList();
-    thisScores = this->scores;
     ArrayList* scores = this->scores;
     FILE* file = fopen("scores.bin", "rb");
     while (1) {
@@ -520,6 +526,7 @@ static void _free(Credits* this) {
 
 Credits* new_Credits(int width, int height, Player* player) {
     Credits* this = malloc(sizeof(Credits));
+    thisCredits = this;
 
     this->width = width;
     this->height = height;
