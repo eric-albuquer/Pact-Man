@@ -23,6 +23,9 @@ typedef enum {
     SPRITE_END2,
     SPRITE_END3,
 
+    SPRITE_ADD_CREDITS,
+    SPRITE_CREDITS,
+
     SPRITE_COUNT
 } SpritesEnum;
 
@@ -292,27 +295,31 @@ static void drawFinalCredits(Credits* this) {
 }
 
 static void drawAddScore(Credits* this) {
-    DrawRectangle(0, 0, this->width, this->height, BLUE);
-    drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 40, WHITE);
+    DrawSprite(this->sprites[SPRITE_ADD_CREDITS], 0, 0, this->width, this->height, WHITE);
+    drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 40, BLACK);
     static char buffer[1000];
     strcpy(buffer, this->name);
     strcat(buffer, (this->updateCount & 16) ? "_" : " ");
-    drawCenteredText(buffer, this->width >> 1, this->height >> 1, 40, WHITE);
+    drawCenteredText(buffer, this->width >> 1, this->height >> 1, 40, BLACK);
 
     this->nextBtn->draw(this->nextBtn);
     this->prevBtn->draw(this->prevBtn);
 }
 
 static void drawScore(Credits* this) {
-    DrawRectangle(0, 0, this->width, this->height, RED);
+    DrawSprite(this->sprites[SPRITE_CREDITS], 0, 0, this->width, this->height, WHITE);
     ArrayList* scores = this->scores;
     static char buffer[1000];
-    int delta = 150;
+    int delta = 100;
     int y = 100;
+    int halfW = this->width >> 1;
     for (int i = 0; i < scores->length; i++) {
         Score* score = scores->data[i];
         sprintf(buffer, "Name: %s\nTotalCoins: %d\nTotalFragmens: %d\nTotalTime: %.2f", score->name, score->totalCoins, score->totalFragments, score->totalTime);
-        drawCenteredText(buffer, this->width >> 1, y += delta, 20, WHITE);
+        DrawRectangle(halfW - 100, y - 5, 200, 90, (Color){0, 0, 0, 200});
+        drawCenteredText(buffer, halfW, y, 20, WHITE);
+        y += delta;
+        
     }
 
     this->nextBtn->draw(this->nextBtn);
@@ -344,6 +351,9 @@ static void loadSprites(Credits* this) {
     sprites[SPRITE_END1] = LoadSprite("assets/sprites/credits/end1.jpg");
     sprites[SPRITE_END2] = LoadSprite("assets/sprites/credits/end2.jpg");
     sprites[SPRITE_END3] = LoadSprite("assets/sprites/credits/end3.jpg");
+
+    sprites[SPRITE_ADD_CREDITS] = LoadSprite("assets/sprites/credits/add_score.jpg");
+    sprites[SPRITE_CREDITS] = LoadSprite("assets/sprites/credits/score.jpg");
 }
 
 static void loadAudio(Credits* this) {

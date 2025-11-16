@@ -463,7 +463,7 @@ Menu* new_Menu(int width, int height) {
     int delta = buttonHeight + spacing;
 
     int centerX = width / 2 - buttonWidth / 2;
-    int startY = height / 2 - (buttonHeight * 3 + spacing * 2) / 2;
+    int startY = height / 2 - (buttonHeight * 5 + spacing * 2) / 2;
 
     this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
     this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);

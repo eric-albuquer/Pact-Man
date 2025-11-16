@@ -408,17 +408,17 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
         }
     }
 
-    for (int i = -1; i < 2; i++) {
-        int chunkY = map->player->chunkY + i;
-        if (chunkY < 0 || chunkY >= map->manager->rows) continue;
-        for (int j = -1; j < 2; j++) {
-            int chunkX = map->player->chunkX + j;
-            if (chunkX < 0 || chunkX >= map->manager->cols) continue;
-            int startChunkX = x0 + offset + (chunkX * CHUNK_SIZE - map->player->x) * cellSize + 25;
-            int startChunkY = y0 + offset + (chunkY * CHUNK_SIZE - map->player->y) * cellSize + 25;
-            DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, cellSize* CHUNK_SIZE + 3, cellSize* CHUNK_SIZE + 3 }, 3, GREEN);
-        }
-    }
+    // for (int i = -1; i < 2; i++) {
+    //     int chunkY = map->player->chunkY + i;
+    //     if (chunkY < 0 || chunkY >= map->manager->rows) continue;
+    //     for (int j = -1; j < 2; j++) {
+    //         int chunkX = map->player->chunkX + j;
+    //         if (chunkX < 0 || chunkX >= map->manager->cols) continue;
+    //         int startChunkX = x0 + offset + (chunkX * CHUNK_SIZE - map->player->x) * cellSize + 25;
+    //         int startChunkY = y0 + offset + (chunkY * CHUNK_SIZE - map->player->y) * cellSize + 25;
+    //         DrawRectangleLinesEx((Rectangle) { startChunkX, startChunkY, cellSize* CHUNK_SIZE + 3, cellSize* CHUNK_SIZE + 3 }, 3, GREEN);
+    //     }
+    // }
 
     DrawRectangle(x0 + offset + 25, y0 + offset + 25, cellSize, cellSize, WHITE);
 }
@@ -431,17 +431,16 @@ static void drawArrowToNextBiome(Game* this, int x, int y, int width, int height
 static void drawHud(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
-    Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
-    sprintf(buffer,
-        "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\n",
-        p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
-        p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType);
+    // Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
+    // sprintf(buffer,
+    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\n",
+    //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
+    //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType);
+    // DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
+    // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     if (p->damaged) drawActionHud(this, RED);
     drawEffects(this, 30, 30, 80);
-
-    DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
-    DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
 
@@ -457,7 +456,6 @@ static void drawHud(Game* this) {
 
     if (map->manager->heaven) return;
 
-    //drawTimeHUD(this, this->width - 150, this->height - 150);
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
     if (p->biome == 3)
         drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
@@ -679,7 +677,7 @@ static void drawMap(Game* this) {
 
     drawPlayer(this);
 
-    drawChunksMap(this, offsetHalfXAnimated, offsetHalfYAnimated);
+    //drawChunksMap(this, offsetHalfXAnimated, offsetHalfYAnimated);
 
     drawHud(this);
     playAudio(this);

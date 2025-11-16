@@ -51,7 +51,7 @@ void updateCredits() {
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
-    //ToggleFullscreen();
+    ToggleFullscreen();
     InitAudioDevice();
     SetTargetFPS(60);
 
@@ -63,8 +63,8 @@ int main(void) {
     UnloadImage(icon);  
 
     controler = new_Controler();
-    map = new_Map(5, 9, 350, 21);
-    render = new_Render(1920, 1080, 50, map);
+    map = new_Map(5, 9, 11, 21);
+    render = new_Render(GetScreenWidth(), GetScreenHeight(), 50, map);
 
     while (!WindowShouldClose()) {
         if (state >= GAME_MAIN_CONTENT && state <= GAME_DEATH) updateGame();
