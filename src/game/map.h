@@ -55,8 +55,6 @@ typedef struct Map {
     LinkedList* firedCells;
     LinkedList* tentacleCells;
 
-    float degenerescence;
-    float elapsedTime;
     float biomeTime;
 
     Player* player;

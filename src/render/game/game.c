@@ -40,6 +40,8 @@ typedef enum {
     SPRITE_BATERY_BAR,
     SPRITE_ARROW_NEXT_BIOME,
 
+    SPRITE_GAME_OVER,
+
     SPRITE_COUNT
 } SpritesEnum;
 
@@ -246,6 +248,42 @@ static void drawBateryBar(Game* this, int x, int y, int width, int height) {
     //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
 }
 
+static void drawTimeHUD(Game* this, int x, int y, int width) {
+    Map* map = this->map;
+
+    int remainingTime = BIOME_DEGEN_START_TIME - map->biomeTime;
+    int mm = remainingTime / 60;
+    int ss = remainingTime % 60;
+
+    sprintf(buffer, "%02d:%02d", mm, ss);
+
+    float d = map->biomeTime / BIOME_DEGEN_START_TIME;
+    int stage = min(d * 4.0f, 3);
+
+    const static char* stageText[] = {
+        "STABLE",
+        "UNSTABLE",
+        "CRACKING",
+        "COLLAPSING"
+    };
+
+    const static Color stageColors[] = {
+        { 0,   228, 48,  255 },
+        { 253, 249, 0,   255 },
+        { 255, 161, 0,   255 },
+        { 230, 41,  55,  255 }
+    };
+
+    Color stageColor = stageColors[stage];
+
+    int boxHeight = 80;
+
+    DrawRectangle(x, y, width, boxHeight, HUD_OPACITY);
+
+    drawCenteredText(buffer, x + (width >> 1), y + 10, 40, WHITE);
+    drawCenteredText(stageText[stage], x + (width >> 1), y + 50, 20, stageColor);
+}
+
 static void drawInfoHud(Game* this, int x, int y, int size) {
     DrawRectangle(x, y, size * 3, size * 2, HUD_OPACITY);
     DrawAnimation(this->animations[ANIMATION_COIN], x, y, size, WHITE);
@@ -254,6 +292,7 @@ static void drawInfoHud(Game* this, int x, int y, int size) {
     DrawAnimation(this->animations[ANIMATION_FRAGMENT], x, y + size, size, WHITE);
     sprintf(buffer, "%d/2", this->map->player->biomeFragment);
     DrawText(buffer, x + size, y + size / 3 + size, 30, WHITE);
+    drawTimeHUD(this, x, y + size * 2, size * 3);
 }
 
 static void drawActionHud(Game* this, Color color) {
@@ -384,47 +423,9 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     DrawRectangle(x0 + offset + 25, y0 + offset + 25, cellSize, cellSize, WHITE);
 }
 
-static void drawTimeHUD(Game* this, int x, int y) {
-    Map* map = this->map;
-
-    int remainingTime = BIOME_DEGEN_START_TIME - map->biomeTime;
-    int mm = remainingTime / 60;
-    int ss = remainingTime % 60;
-
-    sprintf(buffer, "%02d:%02d", mm, ss);
-
-    float d = map->degenerescence;
-    int stage = min(d * 4.0f, 3);
-
-    const static char* stageText[] = {
-        "STABLE",
-        "UNSTABLE",
-        "CRACKING",
-        "COLLAPSING"
-    };
-
-    const static Color stageColors[] = {
-        { 0,   228, 48,  255 },
-        { 253, 249, 0,   255 },
-        { 255, 161, 0,   255 },
-        { 230, 41,  55,  255 }
-    };
-
-    Color stageColor = stageColors[stage];
-
-    int boxWidth = 120;
-    int boxHeight = 80;
-
-    DrawRectangle(x, y, boxWidth, boxHeight, HUD_OPACITY);
-
-    DrawText(buffer, x + 16, y + 10, 30, WHITE);
-
-    DrawText(stageText[stage], x + 16, y + 45, 20, stageColor);
-}
-
 static void drawArrowToNextBiome(Game* this, int x, int y, int width, int height) {
     DrawSprite(this->sprites[SPRITE_ARROW_NEXT_BIOME], x, y, width, height, WHITE);
-    DrawText("BIOMA LIBERÁDO", x + width * 0.2, y + height * 0.41, 30, PURPLE);
+    drawCenteredText("BIOMA LIBERÁDO", this->offsetHalfX, y + height * 0.41, 30, PURPLE);
 }
 
 static void drawHud(Game* this) {
@@ -443,25 +444,27 @@ static void drawHud(Game* this) {
     DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
-    Vector2 biomeNamePos = { this->offsetHalfX, 50 };
 
-    if (map->degenerescence < 0.1)
+    float def = map->biomeTime / BIOME_DEGEN_START_TIME;
+
+    if (def < 0.1) {
+        Vector2 wt = MeasureTextEx(InfernoFont, BIOMES[p->biome], 90, 10);
+        Vector2 biomeNamePos = { this->offsetHalfX - wt.x * 0.5, 50 };
         DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 10, BIOME_COLOR[p->biome]);
+    }
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
     if (map->manager->heaven) return;
 
-    drawTimeHUD(this, this->width - 150, this->height - 150);
+    //drawTimeHUD(this, this->width - 150, this->height - 150);
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
     if (p->biome == 3)
         drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
     drawInfoHud(this, this->width - 280, 550, 80);
 
-
     if (p->biomeFragment >= 2 && this->updateCount & 4)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
-
 }
 
 static void playAudio(Game* this) {
@@ -480,7 +483,7 @@ static void playAudio(Game* this) {
     else if (p->effects.invisibility.duration > 0)
         audio->updateMusic(audio, MUSIC_INVISIBILITY);
     else {
-        if (this->map->degenerescence < 1.0)
+        if (this->map->biomeTime < BIOME_DEGEN_START_TIME)
             audio->updateMusic(audio, p->biome + MUSIC_LUXURIA);
         else
             audio->updateMusic(audio, MUSIC_DEGENERATION);
@@ -717,14 +720,14 @@ static void update(Game* this) {
 }
 
 static void drawDeathScreen(Game* this) {
-    DrawRectangle(0, 0, this->width, this->height, BLACK);
+    DrawSprite(this->sprites[SPRITE_GAME_OVER], 0, 0, this->width, this->height, WHITE);
     this->backMenu->draw(this->backMenu);
     this->restartGame->draw(this->restartGame);
 }
 
 static void draw(Game* this) {
     if (state == GAME_MAIN_CONTENT) drawMap(this);
-    else drawDeathScreen(this);
+    else if (state == GAME_DEATH) drawDeathScreen(this);
 }
 
 static void loadSprites(Game* this) {
@@ -824,6 +827,8 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar.png");
     sprites[SPRITE_BATERY_BAR] = LoadSprite("assets/sprites/hud/batery_hud.png");
     sprites[SPRITE_ARROW_NEXT_BIOME] = LoadSprite("assets/sprites/hud/biomeNextArrow.png");
+
+    sprites[SPRITE_GAME_OVER] = LoadSprite("assets/sprites/hud/game_over.jpg");
 }
 
 static void loadSounds(Game* this) {

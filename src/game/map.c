@@ -24,7 +24,6 @@ static inline void updatePlayerBiome(Map* this, Cell* cell) {
     p->batery = 1.0f;
 
     this->biomeTime = 0.0f;
-    this->degenerescence = 0.0f;
 }
 
 static inline void collectItens(Player* p, Cell* cell) {
@@ -468,11 +467,8 @@ static inline void updateEnemies(Map* this) {
 
 static void updateTime(Map* this) {
     if (this->manager->heaven) return;
-    this->elapsedTime += MAP_UPDATE_DT;
     this->biomeTime += MAP_UPDATE_DT;
     this->player->totalTime += MAP_UPDATE_DT;
-
-    this->degenerescence = this->biomeTime / BIOME_DEGEN_START_TIME;
 
     if (this->biomeTime < BIOME_DEGEN_START_TIME) return;
     this->manager->degenerated = this->player->biome;
@@ -533,6 +529,7 @@ static void restart(Map* this){
     this->player->restart(this->player);
     int biomeCols = this->manager->biomeCols;
     int rows = this->manager->rows;
+    this->biomeTime = 0.0f;
     this->manager->free(this->manager);
     this->manager = new_ChunkManager(biomeCols, rows, this->player);
 }
@@ -559,9 +556,7 @@ Map* new_Map(int biomeCols, int chunkRows, int spawnX, int spawnY) {
     this->firedCells = new_LinkedList();
     this->tentacleCells = new_LinkedList();
 
-    this->elapsedTime = 0.0f;
     this->biomeTime = 0.0f;
-    this->degenerescence = 0.0f;
 
     this->manager = new_ChunkManager(biomeCols, chunkRows, this->player);
 

@@ -25,7 +25,9 @@ static void restart(Player* this){
     this->life = START_LIFE;
     this->x = this->lastX = this->spawnX;
     this->y = this->lastY = this->spawnY;
-    this->biomeCoins = this->totalCoins = this->biomeFragment = this->totalFragment = 0;
+    this->damaged = false;
+    this->hitEnemy = false;
+    this->biomeCoins = this->totalCoins = this->biomeFragment = this->totalFragment = this->totalTime = 0;
     this->alive = 1;
 }
 

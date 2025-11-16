@@ -191,7 +191,7 @@ static void updateAddScore(Credits* this) {
     printf("%s\n", this->name);
 }
 
-static void clearLine(Credits* this) {
+static void clearLines(Credits* this) {
     LinkedList* lines = this->lines;
     while (lines->length > 0) {
         Line* line = lines->removeFirst(lines);
@@ -200,7 +200,7 @@ static void clearLine(Credits* this) {
 }
 
 static void resetFinalCredits(Credits* this) {
-    clearLine(this);
+    clearLines(this);
     rewind(this->file);
 }
 
@@ -438,10 +438,15 @@ static void loadScores(Credits* this) {
     this->scores = new_ArrayList();
     thisScores = this->scores;
     ArrayList* scores = this->scores;
-    Score* score = malloc(sizeof(Score));
     FILE* file = fopen("scores.bin", "rb");
-    while (fread(score, sizeof(Score), 1, file) == 1) {
-        scores->push(scores, score);
+    while (1) {
+        Score* score = malloc(sizeof(Score));
+        if (fread(score, sizeof(Score), 1, file) == 1){
+            scores->push(scores, score);
+        } else {
+            free(score);
+            break;
+        } 
     }
     fclose(file);
 }
@@ -474,7 +479,7 @@ static void _free(Credits* this) {
     this->sortByFragments->free(this->sortByFragments);
     this->sortByTime->free(this->sortByTime);
 
-    clearLine(this);
+    clearLines(this);
 
     this->lines->free(this->lines);
 
