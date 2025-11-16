@@ -17,6 +17,9 @@ typedef struct Menu {
     Button* cutscenePrev;
     Button* cutsceneNext;
 
+    Button* credits;
+    Button* score;
+
     Animation* animations;
     Sprite* sprites;
 
@@ -24,8 +27,6 @@ typedef struct Menu {
 
     int width;
     int height;
-
-    int cutsceneIdx;
 
     void (*draw)(struct Menu*);
     void (*update)(struct Menu*);

@@ -24,6 +24,7 @@ static void drawCredits(Render* this) { this->credits->draw(this->credits); }
 static void _free(Render* this) {
     this->game->free(this->game);
     this->menu->free(this->menu);
+    this->credits->free(this->credits);
     free(this);
 }
 
@@ -34,7 +35,7 @@ Render* new_Render(int width, int height, int cellSize, Map* map) {
 
     this->menu = new_Menu(width, height);
     this->game = new_Game(width, height, cellSize, map);
-    this->credits = new_Credits(width, height);
+    this->credits = new_Credits(width, height, map->player);
 
     this->drawMenu = drawMenu;
     this->drawGame = drawGame;

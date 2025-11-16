@@ -43,6 +43,8 @@ typedef struct Player {
     bool fragmentByCoins;
     unsigned short biomeCoins;
     unsigned short totalCoins;
+
+    float totalTime;
     
     unsigned biome : 2;
     unsigned damaged: 1;

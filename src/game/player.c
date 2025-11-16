@@ -25,6 +25,8 @@ static void restart(Player* this){
     this->life = START_LIFE;
     this->x = this->lastX = this->spawnX;
     this->y = this->lastY = this->spawnY;
+    this->biomeCoins = this->totalCoins = this->biomeFragment = this->totalFragment = 0;
+    this->alive = 1;
 }
 
 static void _free(Player* this) { free(this); }
@@ -47,6 +49,8 @@ Player* new_Player(int x, int y) {
     this->biomeFragment = 0;
     this->alive = 1;
     this->fragmentByCoins = false;
+
+    this->totalTime = 0;
 
     this->effects = (Effects){0};
     this->biome = 0;

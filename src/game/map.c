@@ -470,6 +470,7 @@ static void updateTime(Map* this) {
     if (this->manager->heaven) return;
     this->elapsedTime += MAP_UPDATE_DT;
     this->biomeTime += MAP_UPDATE_DT;
+    this->player->totalTime += MAP_UPDATE_DT;
 
     this->degenerescence = this->biomeTime / BIOME_DEGEN_START_TIME;
 

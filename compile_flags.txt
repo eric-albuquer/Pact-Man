@@ -9,4 +9,3 @@
 -I/opt/homebrew/include
 -I/opt/homebrew/opt/raylib/include
 -DPLATFORM_DESKTOP
-

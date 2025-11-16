@@ -81,8 +81,8 @@ void onCutsceneNext() {
     if (!currentMenu) return;
     if (state < MENU_CUTSCENE1 || state > MENU_CUTSCENE5) return;
 
-    if (currentMenu->cutsceneIdx < 4) {
-        currentMenu->cutsceneIdx++;
+    if (state < MENU_CUTSCENE5) {
+        state++;
     } else {
         state = GAME_MAIN_CONTENT;
     }
@@ -92,10 +92,18 @@ void onCutscenePrev() {
     if (!currentMenu) return;
     if (state < MENU_CUTSCENE1 || state > MENU_CUTSCENE5) return;
 
-    if (currentMenu->cutsceneIdx > 0) {
-        currentMenu->cutsceneIdx--;
+    if (state > MENU_CUTSCENE1) {
+        state--;
     } else
         state = MENU_MAIN_CONTENT;
+}
+
+void onCredits() {
+    state = CREDITS_FINAL;
+}
+
+void onScore() {
+    state = CREDITS_SCORE;
 }
 
 // ---- Metodos do menu viu galera ---- :D
@@ -185,7 +193,7 @@ static int allSlideLineCounts[] = { 2, 2, 2, 3, 1 };
 // --- 4. Sua função 'drawCutscene' ajustada ---
 static void drawCutscene(Menu* this) {
     // Esta parte fica igual
-    int idx = min(this->cutsceneIdx, 4);
+    int idx = min(state, MENU_CUTSCENE5) - MENU_CUTSCENE1;
 
     DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
     DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
@@ -223,15 +231,14 @@ static void drawCutscene(Menu* this) {
 
     // Esta parte final fica igual
     if (this->cutscenePrev) this->cutscenePrev->draw(this->cutscenePrev);
-    if (this->cutsceneIdx < 4) {
+    if (state < MENU_CUTSCENE5) {
         strcpy(this->cutsceneNext->text, "NEXT");
-        this->cutsceneNext->color = (Color) {0, 0, 0, 180};
-        this->cutsceneNext->fontColor = (Color) {255, 255, 255, 150};
-    }
-    else {
+        this->cutsceneNext->color = (Color){ 0, 0, 0, 180 };
+        this->cutsceneNext->fontColor = (Color){ 255, 255, 255, 150 };
+    } else {
         strcpy(this->cutsceneNext->text, "JOGAR");
-        this->cutsceneNext->color = (Color) {0, 255, 0, 255};
-        this->cutsceneNext->fontColor = (Color) {0, 0, 0, 255};
+        this->cutsceneNext->color = (Color){ 0, 255, 0, 255 };
+        this->cutsceneNext->fontColor = (Color){ 255, 0, 0, 255 };
     }
     if (this->cutsceneNext) this->cutsceneNext->draw(this->cutsceneNext);
 }
@@ -319,13 +326,15 @@ static void drawMainContent(Menu* this) {
     if (this->tutorial)   this->tutorial->draw(this->tutorial);
     if (this->volume)     this->volume->draw(this->volume);
     if (this->difficulty) this->difficulty->draw(this->difficulty);
+    if (this->credits)    this->credits->draw(this->credits);
+    if (this->score)      this->score->draw(this->score);
 }
 
 
 void draw(Menu* this) {
     if (state == MENU_MAIN_CONTENT)
         drawMainContent(this);
-    else
+    else if (state >= MENU_CUTSCENE1 && state <= MENU_CUTSCENE5)
         drawCutscene(this);
 }
 
@@ -334,11 +343,13 @@ static void playSound(Menu* this) {
 
     audio->updateMusic(audio, MUSIC_MENU);
 
+    int cutsceneIdx = state - MENU_CUTSCENE1;
+
     if (state >= MENU_CUTSCENE1) {
-        if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx))
-            audio->updateMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx);
+        if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + cutsceneIdx))
+            audio->updateMusic(audio, MUSIC_CUTSCENE1 + cutsceneIdx);
         else
-            this->cutsceneIdx = min(this->cutsceneIdx + 1, 4);
+            state = min(state + 1, MENU_CUTSCENE5);
     }
 }
 
@@ -354,9 +365,9 @@ static void updateMainContent(Menu* this) {
         return;
     }
 
-    Button* buttons[4] = { this->play, this->tutorial, this->volume, this->difficulty };
+    Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->credits, this->score };
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 6; i++) {
         Button* b = buttons[i];
         if (!b) continue;
 
@@ -396,18 +407,18 @@ static void updateCutscene(Menu* this) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
             audio->playSound(audio, SOUND_CLICK_BUTTON);
             if (b->action) b->action();
-            audio->restartMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx);
+            if (state <= MENU_CUTSCENE5)
+                audio->restartMusic(audio, MUSIC_CUTSCENE1 + state - MENU_CUTSCENE1);
         }
     }
 }
-
 
 void update(Menu* this) {
     if (!this) return;
 
     if (state == MENU_MAIN_CONTENT)
         updateMainContent(this);
-    else
+    else if (state >= MENU_CUTSCENE1 && state <= MENU_CUTSCENE5)
         updateCutscene(this);
 }
 
@@ -525,6 +536,38 @@ Menu* new_Menu(int width, int height) {
         onDifficulty
     );
 
+    this->credits = new_Button(
+        centerX,
+        startY += delta,
+        buttonWidth,
+        buttonHeight,
+        (Color) {
+        80, 80, 80, 150
+    },
+        (Color) {
+        255, 255, 255, 150
+    },
+        "CRÉDITOS",
+        40,
+        onCredits
+    );
+
+    this->score = new_Button(
+        centerX,
+        startY += delta,
+        buttonWidth,
+        buttonHeight,
+        (Color) {
+        80, 80, 80, 150
+    },
+        (Color) {
+        255, 255, 255, 150
+    },
+        "SCORE",
+        40,
+        onScore
+    );
+
     int btnW = 160;
     int btnH = 50;
     int margin = 40;
@@ -561,8 +604,6 @@ Menu* new_Menu(int width, int height) {
         30,
         onCutsceneNext
     );
-
-    this->cutsceneIdx = 0;
 
     this->draw = draw;
     this->update = update;
