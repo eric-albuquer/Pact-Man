@@ -9,7 +9,7 @@
 
 #define UPDATE_TIME 0.15f
 
-GameState state = MENU;
+GameState state = CREDITS;
 Controler* controler;
 Map* map;
 Render* render;

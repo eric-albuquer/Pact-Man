@@ -1,5 +1,6 @@
 #include "credits.h"
 #include <stdlib.h>
+#include <string.h>
 
 typedef enum {
     MUSIC_CUTSCENE1,
@@ -30,8 +31,15 @@ typedef enum {
     CUTSCENE1,
     CUTSCENE2,
 
+    SCORE,
+
     FINAL_CREDITS
 } CreditsState;
+
+typedef struct {
+    int y;
+    char text[200];
+} CreditsLine;
 
 CreditsState creditsState = CUTSCENE1;
 
@@ -43,7 +51,7 @@ static void prev() {
     creditsState = max(creditsState - 1, CUTSCENE1);
 }
 
-static void updateCutscenes(Credits* this) {
+static void updateButtons(Credits* this) {
     Vector2 mouse = GetMousePosition();
     Audio* audio = this->audio;
 
@@ -67,12 +75,52 @@ static void updateCutscenes(Credits* this) {
     }
 }
 
-static void updateFinalCredits(Credits* this) {
+static void updateCutscenes(Credits* this) {
+    updateButtons(this);
+}
 
+static void updateScore(Credits* this) {
+    updateButtons(this);
+}
+
+static void updateFinalCredits(Credits* this) {
+    Audio* audio = this->audio;
+    audio->updateMusic(audio, MUSIC_CREDITS);
+
+    LinkedList* creditsLines = this->creditsLines;
+
+    if (this->updateCount % 40 == 0 && !this->creditsEnd) {
+        CreditsLine* line = malloc(sizeof(CreditsLine));
+        line->y = this->height;
+        if (fgets(line->text, sizeof(line->text), this->file) == NULL) {
+            this->creditsEnd = true;
+            free(line);
+        } else {
+            creditsLines->addLast(creditsLines, line);
+        }
+    }
+
+    Node* node = creditsLines->head;
+    if (node != NULL){
+        CreditsLine* line = node->data;
+        if (line->y < 0){
+            creditsLines->removeFirst(creditsLines);
+            free(line);
+        }
+    }
+
+    while(node != NULL){
+        CreditsLine* line = node->data;
+        line->y--;
+        node = node->next;
+    }
+
+    this->updateCount++;
 }
 
 static void update(Credits* this) {
-    if (creditsState < FINAL_CREDITS) updateCutscenes(this);
+    if (creditsState < SCORE) updateCutscenes(this);
+    else if (creditsState == SCORE) updateScore(this);
     else updateFinalCredits(this);
 }
 
@@ -93,10 +141,30 @@ static void drawCutscenes(Credits* this) {
 
 static void drawFinalCredits(Credits* this) {
     DrawRectangle(0, 0, this->width, this->height, BLACK);
+
+    LinkedList* creditsLines = this->creditsLines;
+    Node* node = creditsLines->head;
+
+    const int halfX = this->width >> 1;
+
+    while(node != NULL){
+        CreditsLine* line = node->data;
+        int lineWidth = MeasureText(line->text, 40);
+        DrawText(line->text, halfX - (lineWidth >> 1), line->y, 40, WHITE);
+        node = node->next;
+    }
+}
+
+static void drawScore(Credits* this) {
+    DrawRectangle(0, 0, this->width, this->height, RED);
+
+    this->cutscenePrev->draw(this->cutscenePrev);
+    this->cutsceneNext->draw(this->cutsceneNext);
 }
 
 static void draw(Credits* this) {
-    if (creditsState < FINAL_CREDITS) drawCutscenes(this);
+    if (creditsState < SCORE) drawCutscenes(this);
+    else if (creditsState == SCORE) drawScore(this);
     else drawFinalCredits(this);
 }
 
@@ -113,6 +181,7 @@ static void loadAudio(Credits* this) {
 
     audio->loadMusic(audio, "assets/music/cutscene1.mp3", MUSIC_CUTSCENE1);
     audio->loadMusic(audio, "assets/music/cutscene2.mp3", MUSIC_CUTSCENE2);
+    audio->loadMusic(audio, "assets/music/credits.mp3", MUSIC_CREDITS);
 
     audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
 }
@@ -165,6 +234,20 @@ static void _free(Credits* this) {
         UnloadSprite(this->sprites[i]);
     free(this->sprites);
 
+    fclose(this->file);
+
+    Node* cur = this->creditsLines->head;
+    Node* temp;
+    while(cur != NULL){
+        temp = cur;
+        CreditsLine* line = cur->data;
+        free(line);
+        cur = cur->next;
+        free(temp);
+    }
+
+    this->creditsLines->free(this->creditsLines);
+
     free(this);
 }
 
@@ -182,6 +265,12 @@ Credits* new_Credits(int width, int height) {
     loadSprites(this);
     loadButtons(this);
     loadAudio(this);
+
+    this->updateCount = 0;
+    this->creditsEnd = false;
+
+    this->creditsLines = new_LinkedList();
+    this->file = fopen("assets/end_credits.txt", "r");
 
     this->update = update;
     this->draw = draw;

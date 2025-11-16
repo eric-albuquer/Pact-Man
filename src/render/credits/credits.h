@@ -4,8 +4,10 @@
 #include "audio.h"
 #include "sprites.h"
 #include "button.h"
+#include <stdio.h>
+#include "linkedlist.h"
 
-typedef struct Credits{
+typedef struct Credits {
     int width;
     int height;
 
@@ -13,8 +15,15 @@ typedef struct Credits{
     Sprite* sprites;
     Audio* audio;
 
+    FILE* file;
+
     Button* cutscenePrev;
     Button* cutsceneNext;
+
+    LinkedList* creditsLines;
+
+    unsigned int updateCount;
+    bool creditsEnd;
 
     void (*draw)(struct Credits*);
     void (*update)(struct Credits*);
