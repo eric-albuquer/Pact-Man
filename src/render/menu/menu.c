@@ -368,7 +368,7 @@ static void loadAudio(Menu* this) {
     audio->loadMusic(audio, "assets/music/cutscene4.mp3", MUSIC_CUTSCENE4);
     audio->loadMusic(audio, "assets/music/cutscene5.mp3", MUSIC_CUTSCENE5);
 
-    audio->loadSound(audio, "assets/sounds/fragmento.wav", SOUND_CLICK_BUTTON);
+    audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
 }
 
 static void loadSprites(Menu* this) {

@@ -439,6 +439,8 @@ static void drawHud(Game* this) {
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
+    if (map->manager->heaven) return;
+
     drawTimeHUD(this, this->width - 150, this->height - 150);
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
     if (p->biome == 3)
@@ -621,7 +623,7 @@ static void drawMap(Game* this) {
 
             if (p->biome == 3) {
                 BeginTextureMode(this->shadowMap);
-                DrawCircleGradient(x, y, 150, WHITE, BLANK);
+                DrawCircleGradient(x, y, 200, WHITE, BLANK);
                 EndTextureMode();
             }
 
@@ -850,7 +852,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
 
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 
-    this->drawMap = drawMap;
+    this->draw = drawMap;
     this->saveUpdate = saveUpdate;
     this->free = _free;
     return this;

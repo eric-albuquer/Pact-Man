@@ -225,6 +225,8 @@ static inline void updatePlayerEndGame(Player* p, Cell* cell) {
     p->effects = (Effects){ 0 };
     if (cell->type != CELL_PORTAL)
         cell->type = CELL_HEAVEN;
+    else
+        state = CREDITS;
 }
 
 //===============================================================
@@ -461,6 +463,7 @@ static inline void updateEnemies(Map* this) {
 //===============================================================
 
 static void updateTime(Map* this) {
+    if (this->manager->heaven) return;
     this->elapsedTime += MAP_UPDATE_DT;
     this->biomeTime += MAP_UPDATE_DT;
 

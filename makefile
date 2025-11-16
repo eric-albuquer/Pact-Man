@@ -1,9 +1,9 @@
 CC = gcc
 LDFLAGS = -lopengl32 -lgdi32 -lwinmm -lraylib
-CFLAGS  = -Wall -O2 -fopenmp -I./src/utils -I./src/tests -I./src/game -I./src/render -I./src/render/menu -I./src/render/game -I./src/game/chunks
+CFLAGS  = -Wall -O2 -fopenmp -I./src/utils -I./src/tests -I./src/game -I./src/render -I./src/render/menu -I./src/render/game -I./src/game/chunks -I./src/render/credits
 
 # Compila todos os arquivos .c da src/ e subpastas game, render e utils
-SRC_MAIN = $(wildcard src/*.c src/utils/*.c src/game/*.c src/render/menu/*.c src/render/*.c src/render/game/*.c src/game/chunks/*.c)
+SRC_MAIN = $(wildcard src/*.c src/utils/*.c src/game/*.c src/render/menu/*.c src/render/*.c src/render/game/*.c src/game/chunks/*.c src/render/credits/*.c)
 SRC_TEST = $(wildcard src/tests/*.c src/utils/*.c)
 
 EXEC_MAIN = game.exe

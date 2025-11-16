@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include "menu.h"
 #include "game.h"
+#include "credits.h"
 #include "map.h"
 #include "common.h"
 
@@ -13,11 +14,16 @@ typedef struct Render {
 
     Menu* menu;
     Game* game;
+    Credits* credits;
 
-    void (*drawGame)(struct Render*);
     void (*drawMenu)(struct Render*);
-    void (*updateGame)(struct Render*);
+    void (*drawGame)(struct Render*);
+    void (*drawCredits)(struct Render*);
+    
     void (*updateMenu)(struct Render*);
+    void (*updateGame)(struct Render*);
+    void (*updateCredits)(struct Render*);
+
     void (*free)(struct Render*);
 } Render;
 

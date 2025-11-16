@@ -12,7 +12,7 @@ typedef enum {
 
 typedef enum { RIGHT, LEFT, UP, DOWN } Direction;
 
-typedef enum { MENU, GAME } GameState;
+typedef enum { MENU, GAME, CREDITS } GameState;
 
 extern GameState state;
 

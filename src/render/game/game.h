@@ -36,7 +36,7 @@ typedef struct Game {
     Animation *animations;
     Sprite *sprites;
 
-    void (*drawMap)(struct Game*);
+    void (*draw)(struct Game*);
     void (*saveUpdate)(struct Game*);
     void (*free)(struct Game*);
 } Game;

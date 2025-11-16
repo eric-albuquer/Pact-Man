@@ -40,6 +40,14 @@ void updateMenu() {
     EndDrawing();
 }
 
+void updateCredits() {
+    render->updateCredits(render);
+
+    BeginDrawing();
+    render->drawCredits(render);
+    EndDrawing();
+}
+
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
     //ToggleFullscreen();
@@ -49,9 +57,9 @@ int main(void) {
     ChangeDirectory(GetApplicationDirectory());
 
     InfernoFont = LoadFont("assets/fonts/Nosifer-Regular.ttf");
-    Image icon = LoadImage("assets/sprites/icon.png");   // Exemplo: 32x32 px é ideal
+    Image icon = LoadImage("assets/sprites/icon.png");   
     SetWindowIcon(icon);
-    UnloadImage(icon);  // Depois de aplicar, pode liberar a memória
+    UnloadImage(icon);  
 
     controler = new_Controler();
     map = new_Map(5, 9);
@@ -59,7 +67,8 @@ int main(void) {
 
     while (!WindowShouldClose()) {
         if (state == GAME) updateGame();
-        else updateMenu();
+        else if (state == MENU) updateMenu();
+        else if (state == CREDITS) updateCredits();
     }
 
     map->free(map);
