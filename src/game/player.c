@@ -21,6 +21,12 @@ static void updateDirection(Player* this){
     else if (dy == -1) this->dir = UP;
 }
 
+static void restart(Player* this){
+    this->life = START_LIFE;
+    this->x = this->lastX = this->spawnX;
+    this->y = this->lastY = this->spawnY;
+}
+
 static void _free(Player* this) { free(this); }
 
 Player* new_Player(int x, int y) {
@@ -31,11 +37,15 @@ Player* new_Player(int x, int y) {
     this->lastX = x;
     this->lastY = y;
 
+    this->spawnX = x;
+    this->spawnY = y;
+
     this->life = START_LIFE;
     this->biomeCoins = 0;
     this->totalCoins = 0;
     this->totalFragment = 0;
     this->biomeFragment = 0;
+    this->alive = 1;
     this->fragmentByCoins = false;
 
     this->effects = (Effects){0};
@@ -48,6 +58,7 @@ Player* new_Player(int x, int y) {
 
     this->updateChunk = updateChunk;
     this->updateDirection = updateDirection;
+    this->restart = restart;
     this->free = _free;
     return this;
 }

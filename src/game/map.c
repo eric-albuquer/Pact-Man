@@ -129,7 +129,11 @@ static inline void updateDamagePlayer(Player* p, Cell* cell) {
         p->damaged = true;
     }
 
-    if (p->life < 0) p->life = 0;
+    if (p->life < 0) {
+        p->life = 0;
+        p->alive = false;
+        state = GAME_DEATH;
+    }
 }
 
 //===============================================================
@@ -226,7 +230,7 @@ static inline void updatePlayerEndGame(Player* p, Cell* cell) {
     if (cell->type != CELL_PORTAL)
         cell->type = CELL_HEAVEN;
     else
-        state = CREDITS;
+        state = CREDITS_CUTSCENE1;
 }
 
 //===============================================================
@@ -524,6 +528,14 @@ static void update(Map* this, Controler* controler) {
     this->updateCount++;
 }
 
+static void restart(Map* this){
+    this->player->restart(this->player);
+    int biomeCols = this->manager->biomeCols;
+    int rows = this->manager->rows;
+    this->manager->free(this->manager);
+    this->manager = new_ChunkManager(biomeCols, rows, this->player);
+}
+
 static void _free(Map* this) {
     this->manager->free(this->manager);
     Player* p = this->player;
@@ -535,11 +547,11 @@ static void _free(Map* this) {
     free(this);
 }
 
-Map* new_Map(int biomeCols, int chunkRows) {
+Map* new_Map(int biomeCols, int chunkRows, int spawnX, int spawnY) {
     Map* this = malloc(sizeof(Map));
 
     this->updateCount = 0;
-    this->player = new_Player(11, 51);
+    this->player = new_Player(spawnX, spawnY);
 
     this->changedChunk = new_ArrayList();
 
@@ -553,6 +565,7 @@ Map* new_Map(int biomeCols, int chunkRows) {
     this->manager = new_ChunkManager(biomeCols, chunkRows, this->player);
 
     this->update = update;
+    this->restart = restart;
     this->free = _free;
     return this;
 }

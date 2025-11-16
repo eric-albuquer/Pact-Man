@@ -8,7 +8,9 @@
 
 static void updateMenu(Render* this) { this->menu->update(this->menu); }
 
-static void updateGame(Render* this) { this->game->saveUpdate(this->game); }
+static void saveGame(Render* this) { this->game->saveUpdate(this->game); }
+
+static void updateGame(Render* this) { this->game->update(this->game); }
 
 static void updateCredits(Render* this) { this->credits->update(this->credits); }
 
@@ -39,6 +41,7 @@ Render* new_Render(int width, int height, int cellSize, Map* map) {
     this->drawCredits = drawCredits;
 
     this->updateMenu = updateMenu;
+    this->saveGame = saveGame;
     this->updateGame = updateGame;
     this->updateCredits = updateCredits;
 

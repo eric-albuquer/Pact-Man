@@ -12,6 +12,8 @@ typedef struct ChunkManager {
     int rows;
     int cols;
 
+    int biomeCols;
+
     Player* player;
     ChunkMap* chunks;
     ChunkLoader* chunkLoader;
@@ -25,6 +27,7 @@ typedef struct ChunkManager {
     Cell* (*getUpdatedCell)(struct ChunkManager*, int, int);
     void (*updateChunks)(struct ChunkManager*);
     void (*loadAdjacents)(struct ChunkManager*);
+    void (*restart)(struct ChunkManager*);
     void (*free)(struct ChunkManager*);
 } ChunkManager;
 

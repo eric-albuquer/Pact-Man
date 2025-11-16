@@ -9,7 +9,7 @@
 
 #define UPDATE_TIME 0.15f
 
-GameState state = MENU;
+GameState state = MENU_MAIN_CONTENT;
 Controler* controler;
 Map* map;
 Render* render;
@@ -24,9 +24,10 @@ void updateGame() {
         lastTime = 0;
         map->update(map, controler);
         controler->reset(controler);
-        render->updateGame(render);
+        render->saveGame(render);
     }
 
+    render->updateGame(render);
     BeginDrawing();
     render->drawGame(render);
     EndDrawing();
@@ -56,19 +57,19 @@ int main(void) {
 
     ChangeDirectory(GetApplicationDirectory());
 
-    InfernoFont = LoadFont("assets/fonts/Nosifer-Regular.ttf");
+    InfernoFont = LoadFont("assets/fonts/Berani.ttf");
     Image icon = LoadImage("assets/sprites/icon.png");   
     SetWindowIcon(icon);
     UnloadImage(icon);  
 
     controler = new_Controler();
-    map = new_Map(5, 9);
+    map = new_Map(5, 9, 11, 21);
     render = new_Render(1920, 1080, 50, map);
 
     while (!WindowShouldClose()) {
-        if (state == GAME) updateGame();
-        else if (state == MENU) updateMenu();
-        else if (state == CREDITS) updateCredits();
+        if (state >= GAME_MAIN_CONTENT && state <= GAME_DEATH) updateGame();
+        else if (state >= MENU_MAIN_CONTENT && state <= MENU_CUTSCENE5) updateMenu();
+        else if (state >= CREDITS_CUTSCENE1 && state <= CREDITS_FINAL) updateCredits();
     }
 
     map->free(map);

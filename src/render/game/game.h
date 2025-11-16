@@ -5,6 +5,7 @@
 #include "audio.h"
 #include "sprites.h"
 #include "map.h"
+#include "button.h"
 
 #define DELTA_VOLUME 0.01f
 #define FRAMES_ANIMATION 8.0f
@@ -36,7 +37,11 @@ typedef struct Game {
     Animation *animations;
     Sprite *sprites;
 
+    Button* backMenu;
+    Button* restartGame;
+
     void (*draw)(struct Game*);
+    void (*update)(struct Game*);
     void (*saveUpdate)(struct Game*);
     void (*free)(struct Game*);
 } Game;

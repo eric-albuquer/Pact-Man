@@ -27,36 +27,26 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
-typedef enum {
-    CUTSCENE1,
-    CUTSCENE2,
-
-    SCORE,
-
-    FINAL_CREDITS
-} CreditsState;
-
 typedef struct {
     int y;
     char text[200];
 } CreditsLine;
 
-CreditsState creditsState = CUTSCENE1;
-
 static void next() {
-    creditsState = min(creditsState + 1, FINAL_CREDITS);
+    state = min(state + 1, CREDITS_FINAL);
 }
 
 static void prev() {
-    creditsState = max(creditsState - 1, CUTSCENE1);
+    state = max(state - 1, CREDITS_CUTSCENE1);
 }
 
 static void updateButtons(Credits* this) {
     Vector2 mouse = GetMousePosition();
     Audio* audio = this->audio;
 
-    if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + creditsState))
-        audio->updateMusic(audio, MUSIC_CUTSCENE1 + creditsState);
+    int audioIdx = MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1);
+    if (!audio->hasEndMusic(audio, audioIdx))
+        audio->updateMusic(audio, audioIdx);
 
     Button* buttons[2] = { this->cutscenePrev, this->cutsceneNext };
 
@@ -69,8 +59,8 @@ static void updateButtons(Credits* this) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
             audio->playSound(audio, SOUND_CLICK_BUTTON);
             if (b->action) b->action();
-            if (creditsState < FINAL_CREDITS)
-                audio->restartMusic(audio, MUSIC_CUTSCENE1 + creditsState);
+            if (state < CREDITS_FINAL)
+                audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
         }
     }
 }
@@ -119,8 +109,8 @@ static void updateFinalCredits(Credits* this) {
 }
 
 static void update(Credits* this) {
-    if (creditsState < SCORE) updateCutscenes(this);
-    else if (creditsState == SCORE) updateScore(this);
+    if (state < CREDITS_SCORE) updateCutscenes(this);
+    else if (state == CREDITS_SCORE) updateScore(this);
     else updateFinalCredits(this);
 }
 
@@ -131,11 +121,12 @@ static void drawCutscenes(Credits* this) {
             "Com o feitiço quebrado, Pac-Man retorna à sua forma original,\n celebrando a liberdade de seus amigos e a restauração da paz,\n mesmo que em um paraíso que nunca imaginaram."
     };
 
-    DrawSprite(this->sprites[SPRITE_END1 + creditsState], 0, 0, this->width, this->height, WHITE);
+    int spriteIdx = SPRITE_END1 + (state - CREDITS_CUTSCENE1);
+    DrawSprite(this->sprites[spriteIdx], 0, 0, this->width, this->height, WHITE);
     DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
-    DrawText(cutsceneTexts[creditsState], 100, this->height - 200, 40, WHITE);
+    DrawText(cutsceneTexts[(state - CREDITS_CUTSCENE1)], 100, this->height - 200, 40, WHITE);
 
-    if (creditsState > CUTSCENE1) this->cutscenePrev->draw(this->cutscenePrev);
+    if (state > CREDITS_CUTSCENE1) this->cutscenePrev->draw(this->cutscenePrev);
     this->cutsceneNext->draw(this->cutsceneNext);
 }
 
@@ -163,8 +154,8 @@ static void drawScore(Credits* this) {
 }
 
 static void draw(Credits* this) {
-    if (creditsState < SCORE) drawCutscenes(this);
-    else if (creditsState == SCORE) drawScore(this);
+    if (state < CREDITS_SCORE) drawCutscenes(this);
+    else if (state == CREDITS_SCORE) drawScore(this);
     else drawFinalCredits(this);
 }
 

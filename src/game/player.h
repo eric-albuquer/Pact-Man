@@ -31,6 +31,9 @@ typedef struct Player {
     int chunkX;
     int chunkY;
 
+    int spawnX;
+    int spawnY;
+
     Direction dir;
     Effects effects;
 
@@ -44,12 +47,14 @@ typedef struct Player {
     unsigned biome : 2;
     unsigned damaged: 1;
     unsigned hitEnemy: 1;
+    unsigned alive: 1;
     float batery;
 
     CellType cellType;
 
     bool (*updateChunk)(struct Player*);
     void (*updateDirection)(struct Player*);
+    void (*restart)(struct Player*);
     void (*free)(struct Player*);
 } Player;
 

@@ -97,8 +97,9 @@ static void _free(ChunkManager* this) {
 }
 
 ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
-    biomeCols++;
     ChunkManager* this = malloc(sizeof(ChunkManager));
+    this->biomeCols = biomeCols;
+    biomeCols++;
     this->chunks = new_ChunkMap();
     this->cols = (biomeCols << 2) - 1;
     this->rows = rows;

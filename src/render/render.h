@@ -21,6 +21,7 @@ typedef struct Render {
     void (*drawCredits)(struct Render*);
     
     void (*updateMenu)(struct Render*);
+    void (*saveGame)(struct Render*);
     void (*updateGame)(struct Render*);
     void (*updateCredits)(struct Render*);
 

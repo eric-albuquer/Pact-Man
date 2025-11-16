@@ -86,6 +86,8 @@ typedef enum {
     MUSIC_DEGENERATION,
     MUSIC_HEAVEN,
 
+    MUSIC_GAME_OVER,
+
     MUSIC_COUNT
 } MusicEnum;
 
@@ -105,6 +107,9 @@ typedef enum {
     SOUND_BIOME_FREE,
     SOUND_TENTACLE,
     SOUND_FIRE,
+
+    SOUND_DEATH,
+    SOUND_CLICK_BUTTON,
 
     SOUND_COUNT
 } SoundsEnum;
@@ -441,7 +446,7 @@ static void drawHud(Game* this) {
     Vector2 biomeNamePos = { this->offsetHalfX, 50 };
 
     if (map->degenerescence < 0.1)
-        DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 0, BIOME_COLOR[p->biome]);
+        DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 10, BIOME_COLOR[p->biome]);
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
@@ -679,6 +684,49 @@ static void drawMap(Game* this) {
     this->frameCount++;
 }
 
+static bool deathSoundPlayed = false;
+static void updateDeathScreen(Game* this) {
+    Vector2 mouse = GetMousePosition();
+    Audio* audio = this->audio;
+
+    if (!deathSoundPlayed) {
+        audio->playSound(audio, SOUND_DEATH);
+        deathSoundPlayed = true;
+    }
+
+    audio->updateMusic(audio, MUSIC_GAME_OVER);
+
+    Button* buttons[2] = { this->backMenu, this->restartGame };
+
+    for (int i = 0; i < 2; i++) {
+        Button* b = buttons[i];
+        if (!b) continue;
+
+        b->hovered = b->isInside(b, mouse);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
+            audio->playSound(audio, SOUND_CLICK_BUTTON);
+            deathSoundPlayed = false;
+            if (b->action) b->action();
+        }
+    }
+}
+
+static void update(Game* this) {
+    if (state == GAME_DEATH) updateDeathScreen(this);
+}
+
+static void drawDeathScreen(Game* this) {
+    DrawRectangle(0, 0, this->width, this->height, BLACK);
+    this->backMenu->draw(this->backMenu);
+    this->restartGame->draw(this->restartGame);
+}
+
+static void draw(Game* this) {
+    if (state == GAME_MAIN_CONTENT) drawMap(this);
+    else drawDeathScreen(this);
+}
+
 static void loadSprites(Game* this) {
     Sprite* sprites = this->sprites;
     Animation* animations = this->animations;
@@ -796,6 +844,8 @@ static void loadSounds(Game* this) {
     audio->loadMusic(audio, "assets/music/earthquake.mp3", MUSIC_DEGENERATION);
     audio->loadMusic(audio, "assets/music/heaven.mp3", MUSIC_HEAVEN);
 
+    audio->loadMusic(audio, "assets/music/game_over.mp3", MUSIC_GAME_OVER);
+
     audio->loadSound(audio, "assets/sounds/regenerate.wav", SOUND_REGENERATE);
     audio->loadSound(audio, "assets/sounds/moedinha.wav", SOUND_COIN);
     audio->loadSound(audio, "assets/sounds/ventania2.wav", SOUND_WIND);
@@ -811,6 +861,58 @@ static void loadSounds(Game* this) {
     audio->loadSound(audio, "assets/sounds/biomeFree.wav", SOUND_BIOME_FREE);
     audio->loadSound(audio, "assets/sounds/tentacle.wav", SOUND_TENTACLE);
     audio->loadSound(audio, "assets/sounds/fire.wav", SOUND_FIRE);
+
+    audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
+    audio->loadSound(audio, "assets/sounds/death.wav", SOUND_DEATH);
+}
+
+static Map* thisMap;
+static void backToMenu() {
+    thisMap->restart(thisMap);
+    state = MENU_MAIN_CONTENT;
+}
+
+static void restartGame() {
+    thisMap->restart(thisMap);
+    state = GAME_MAIN_CONTENT;
+}
+
+static void loadButtons(Game* this) {
+    int btnW = 160;
+    int btnH = 50;
+    int margin = 40;
+    int y = this->height - btnH - margin;
+    this->backMenu = new_Button(
+        margin,
+        y,
+        btnW,
+        btnH,
+        (Color) {
+        0, 0, 0, 180
+    },
+        (Color) {
+        255, 255, 255, 200
+    },
+        "MENU",
+        30,
+        backToMenu
+    );
+
+    this->restartGame = new_Button(
+        this->width - btnW - margin,
+        y,
+        btnW,
+        btnH,
+        (Color) {
+        0, 0, 0, 180
+    },
+        (Color) {
+        255, 255, 255, 200
+    },
+        "RESTART",
+        30,
+        restartGame
+    );
 }
 
 static void saveUpdate(Game* this) {
@@ -855,16 +957,19 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->offsetHalfY = height >> 1;
 
     this->map = map;
+    thisMap = map;
 
     this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
     this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
 
     loadSounds(this);
     loadSprites(this);
+    loadButtons(this);
 
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 
-    this->draw = drawMap;
+    this->draw = draw;
+    this->update = update;
     this->saveUpdate = saveUpdate;
     this->free = _free;
     return this;

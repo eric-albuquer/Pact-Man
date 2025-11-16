@@ -63,9 +63,10 @@ typedef struct Map {
     unsigned int updateCount;
 
     void (*update)(struct Map*, Controler*);
+    void (*restart)(struct Map*);
     void (*free)(struct Map*);
 } Map;
 
-Map* new_Map(int chunkCols, int chunkRows);
+Map* new_Map(int chunkCols, int chunkRows, int spawnX, int spawnY);
 
 #endif

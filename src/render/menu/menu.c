@@ -41,12 +41,6 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
-typedef enum {
-    MAIN_CONTENT,
-    CUTSCENE
-} MenuState;
-
-static MenuState menuState = MAIN_CONTENT;
 static Menu* currentMenu = NULL;
 
 static FlameParticle flames[NUM_FLAMES];
@@ -58,7 +52,7 @@ static int volumeLevel = 2;
 
 // ---- Aqui sao os botoes ---- 
 void onPlay() {
-    menuState = CUTSCENE;
+    state = MENU_CUTSCENE1;
 }
 
 void onTutorial() {
@@ -85,23 +79,23 @@ void onDifficulty() {
 
 void onCutsceneNext() {
     if (!currentMenu) return;
-    if (menuState != CUTSCENE) return;
+    if (state < MENU_CUTSCENE1 || state > MENU_CUTSCENE5) return;
 
     if (currentMenu->cutsceneIdx < 4) {
         currentMenu->cutsceneIdx++;
     } else {
-        state = GAME;
+        state = GAME_MAIN_CONTENT;
     }
 }
 
 void onCutscenePrev() {
     if (!currentMenu) return;
-    if (menuState != CUTSCENE) return;
+    if (state < MENU_CUTSCENE1 || state > MENU_CUTSCENE5) return;
 
     if (currentMenu->cutsceneIdx > 0) {
         currentMenu->cutsceneIdx--;
     } else
-        menuState = MAIN_CONTENT;
+        state = MENU_MAIN_CONTENT;
 }
 
 // ---- Metodos do menu viu galera ---- :D
@@ -329,7 +323,7 @@ static void drawMainContent(Menu* this) {
 
 
 void draw(Menu* this) {
-    if (menuState == MAIN_CONTENT)
+    if (state == MENU_MAIN_CONTENT)
         drawMainContent(this);
     else
         drawCutscene(this);
@@ -340,7 +334,7 @@ static void playSound(Menu* this) {
 
     audio->updateMusic(audio, MUSIC_MENU);
 
-    if (menuState == CUTSCENE) {
+    if (state >= MENU_CUTSCENE1) {
         if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx))
             audio->updateMusic(audio, MUSIC_CUTSCENE1 + this->cutsceneIdx);
         else
@@ -411,7 +405,7 @@ static void updateCutscene(Menu* this) {
 void update(Menu* this) {
     if (!this) return;
 
-    if (menuState == MAIN_CONTENT)
+    if (state == MENU_MAIN_CONTENT)
         updateMainContent(this);
     else
         updateCutscene(this);
