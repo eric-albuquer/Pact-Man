@@ -103,7 +103,7 @@ static void updateFinalCredits(Credits* this) {
     Node* node = creditsLines->head;
     if (node != NULL){
         CreditsLine* line = node->data;
-        if (line->y < 0){
+        if (line->y < -40){
             creditsLines->removeFirst(creditsLines);
             free(line);
         }

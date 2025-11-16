@@ -15,14 +15,22 @@ APOIO TÉCNICO
 João Carlos
 Denival Cavalcanti
 
+ALGORITMOS
+Tabela Hash
+Busca em Grafos (BFS)
+Matrizes Espaciais
+Bubble Sort
+Merge Sort
+Listas Encadeadas
+Arrays Dinâmicos
+Bitwise Operations
+
 PROFESSORES
 Natasha Targino AED
 
 Tiago Barros PIF
 Pamela Bezerra PIF
-
 Erick Simões IC
-
 Fernando IH
 Eduardo Calabria POO
 Eduardo SO
@@ -45,11 +53,17 @@ Gabriel Aniceto
 Thiago Fernandes
 Willian
 Cassian Ferrari
+Gabriel Miranda
+Caio Mateus
+Andre Avelino
+Brenda
+Augusto
+Eduardo
 
 FERRAMENTAS
 Chat GPT
 Gemini
-IA de Ricardo
+ElevenLabs
 FreeSound
 Jfxr.me
 Github
@@ -72,19 +86,40 @@ Olga Albuquerque
 Igor Albuquerque
 Temaki
 Whey
-Namorada de Ricardo
+Gabi
 Irmã de Menezes
-Árabe de Jõao Carlos
-Borteleto
+Árabes de Jõao Carlos
+Magnus Carlsen
+Gabriel Borteleto
 Ayrton Senna
 Max Vestappen
 Vagner Moura
 Kleber Mendonça
 Ivete Sangalo
+Sport
+Nautico
+Santa Cruz
+Cara da cantina
 
 AGRADECIMENTOS
 Silvio Meira
-Steve Jobs
+Charles Babbage
+Edsger Dijkstra
 Ada Lovace
 Allan Turing
 Linus Torvalds
+John von Neumann
+Steve Jobs
+Bill Gates
+Grace Hopper
+Larry Page
+Denis Richie
+Blaise Pascal
+Isac Newton
+Albert Einsten
+Markov
+Grant Sanderson
+Sebastian Lague
+Derik (Veritasium)
+VSouce
+The Coding Train

@@ -103,6 +103,8 @@ typedef enum {
     SOUND_BATERY,
     SOUND_MUD,
     SOUND_BIOME_FREE,
+    SOUND_TENTACLE,
+    SOUND_FIRE,
 
     SOUND_COUNT
 } SoundsEnum;
@@ -271,41 +273,45 @@ static void drawEffects(Game* this, int x, int y, int size) {
 
     Effects effects = this->map->player->effects;
 
-    int delta = size + 20;
-    int ey = y;
+    Color hudColor;
+
+    static Sprite spritesBuffer[6];
+    int length = 0;
 
     if (effects.degeneration.duration > 0) {
-        drawActionHud(this, RED);
-        DrawSprite(sprites[SPRITE_EFFECT_DEGENERATION], x, ey, size, size, WHITE);
-        ey += delta;
-    }
-    if (effects.regeneration.duration > 0) {
-        drawActionHud(this, (Color) { 0, 255, 0, 255 });
-        DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, ey, size, size, WHITE);
-        ey += delta;
+        spritesBuffer[length++] = sprites[SPRITE_EFFECT_DEGENERATION];
+        hudColor = RED;
     }
     if (effects.slowness.duration > 0) {
-        drawActionHud(this, GRAY);
-        DrawSprite(sprites[SPRITE_EFFECT_SLOWNESS], x, ey, size, size, WHITE);
-        ey += delta;
+        spritesBuffer[length++] = sprites[SPRITE_EFFECT_SLOWNESS];
+        hudColor = GRAY;
+    }
+    if (effects.regeneration.duration > 0) {
+        spritesBuffer[length++] = sprites[SPRITE_EFFECT_REGENERATION];
+        hudColor = (Color){ 0, 255, 0, 255 };
+    }
+    if (effects.invisibility.duration > 0) {
+        spritesBuffer[length++] = sprites[SPRITE_EFFECT_INVISIBILITY];
+        hudColor = (Color){ 0, 255, 255, 255 };
+    }
+    if (effects.freezeTime.duration > 0) {
+        spritesBuffer[length++] = sprites[SPRITE_EFFECT_FREEZE_TIME];
+        hudColor = (Color){ 0, 0, 255, 255 };
     }
     if (effects.invulnerability.duration > 0) {
+        spritesBuffer[length++] = sprites[SPRITE_EFFECT_INVULNERABILITY];
         if (effects.invulnerability.duration & 1)
-            drawActionHud(this, YELLOW);
-        DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], x, ey, size, size, WHITE);
-        ey += delta;
+            hudColor = YELLOW;
+        else
+            hudColor = PURPLE;
     }
 
-    if (effects.invisibility.duration > 0) {
-        drawActionHud(this, (Color) { 0, 255, 255, 255 });
-        DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], x, ey, size, size, WHITE);
-        ey += delta;
-    }
-
-    if (effects.freezeTime.duration > 0) {
-        drawActionHud(this, (Color) { 0, 0, 255, 255 });
-        DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, ey, size, size, WHITE);
-        ey += delta;
+    int delta = size + 20;
+    int ey = y;
+    if (length > 0)
+        drawActionHud(this, hudColor);
+    for (int i = 0; i < length; i++) {
+        DrawSprite(spritesBuffer[i], x, ey += delta, size, size, WHITE);
     }
 }
 
@@ -427,7 +433,7 @@ static void drawHud(Game* this) {
 
     if (p->damaged) drawActionHud(this, RED);
     drawEffects(this, 30, 30, 80);
-    
+
     DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
     DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
@@ -450,7 +456,7 @@ static void drawHud(Game* this) {
 
     if (p->biomeFragment >= 2 && this->updateCount & 4)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
-   
+
 }
 
 static void playAudio(Game* this) {
@@ -461,7 +467,7 @@ static void playAudio(Game* this) {
         audio->updateMusic(audio, MUSIC_HEAVEN);
         return;
     }
-    
+
     if (p->effects.invulnerability.duration > 0)
         audio->updateMusic(audio, MUSIC_INVULNERABILITY);
     else if (p->effects.freezeTime.duration > 0)
@@ -518,6 +524,10 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_MUD);
     } else if (type == CELL_INVISIBILITY || type == CELL_REGENERATION) {
         audio->playSound(audio, SOUND_POTION);
+    } else if (type == CELL_TENTACLE) {
+        audio->playSound(audio, SOUND_TENTACLE);
+    } else if (type == CELL_FIRE_ON) {
+        audio->playSound(audio, SOUND_FIRE);
     }
 
     if (IsKeyDown(KEY_EQUAL)) {
@@ -799,6 +809,8 @@ static void loadSounds(Game* this) {
     audio->loadSound(audio, "assets/sounds/batery.wav", SOUND_BATERY);
     audio->loadSound(audio, "assets/sounds/mud.wav", SOUND_MUD);
     audio->loadSound(audio, "assets/sounds/biomeFree.wav", SOUND_BIOME_FREE);
+    audio->loadSound(audio, "assets/sounds/tentacle.wav", SOUND_TENTACLE);
+    audio->loadSound(audio, "assets/sounds/fire.wav", SOUND_FIRE);
 }
 
 static void saveUpdate(Game* this) {

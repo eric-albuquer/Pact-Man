@@ -72,6 +72,24 @@ static Chunk* getLoadedChunk(ChunkManager* this, int cx, int cy){
     return this->adjacents[rcy * 7 + rcx];
 }
 
+static void loadSpawnChunk(ChunkManager* this){
+    Player* p = this->player;
+    Chunk* chunk = getChunk(this, p->chunkX, p->chunkY);
+    LinkedList* enemies = chunk->enemies;
+    while (enemies->length > 0){
+        Enemy* e = enemies->removeFirst(enemies);
+        free(e);
+    }
+
+    for (int i = -1; i < 2; i++){
+        for (int j = -1; j < 2; j++){
+            Cell* cell = getUpdatedCell(this, p->x + j, p->y + i);
+            if (!cell) continue;
+            cell->type = CELL_EMPTY;
+        }
+    }
+}
+
 static void _free(ChunkManager* this) {
     this->chunks->free(this->chunks);
     this->chunkLoader->free(this->chunkLoader);
@@ -97,6 +115,8 @@ ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
     loadAdjacents(this);
 
     this->player->biome = getUpdatedCell(this, p->x, p->y)->biome;
+
+    loadSpawnChunk(this);
 
     this->getChunk = getChunk;
     this->getLoadedChunk = getLoadedChunk;

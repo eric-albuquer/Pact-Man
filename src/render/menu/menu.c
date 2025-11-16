@@ -6,6 +6,7 @@
 #include "common.h" 
 #include <raylib.h> 
 #include <math.h>
+#include <string.h>
 
 typedef enum {
     MUSIC_MENU,
@@ -66,21 +67,16 @@ void onTutorial() {
 }
 
 void onVolume() {
-    volumeLevel = (volumeLevel + 1) % 3;
+    volumeLevel = (volumeLevel + 1) % 101;
 
-    float vol = 1.0f;
-    if (volumeLevel == 0) vol = 0.0f;
-    else if (volumeLevel == 1) vol = 0.5f;
-    else vol = 1.0f;
-
-    SetMasterVolume(vol);
+    SetMasterVolume(volumeLevel / 100.0f);
 
     if (volumeButtonRef) {
         snprintf(volumeButtonRef->text, sizeof(volumeButtonRef->text),
-            "VOLUME: %d%%", (int)(vol * 100));
+            "VOLUME: %d%%", volumeLevel);
     }
 
-    printf("[MENU] Volume agora em %d%%\n", (int)(vol * 100));
+    printf("[MENU] Volume agora em %d%%\n", volumeLevel);
 }
 
 void onDifficulty() {
@@ -216,16 +212,16 @@ static void drawCutscene(Menu* this) {
 
     for (int i = 0; i < lineCount; i++) {
         const char* line = currentSlideLines[i];
-        
+
         // 1. Mede o tamanho da linha
         int lineWidth = MeasureText(line, fontSize);
-        
+
         // 2. Calcula o X centralizado
         int posX = (this->width - lineWidth) / 2;
-        
+
         // 3. Desenha a linha
         DrawText(line, posX, posY, fontSize, WHITE);
-        
+
         // 4. Move o Y para a próxima linha
         posY += fontSize + lineSpacing;
     }
@@ -233,6 +229,16 @@ static void drawCutscene(Menu* this) {
 
     // Esta parte final fica igual
     if (this->cutscenePrev) this->cutscenePrev->draw(this->cutscenePrev);
+    if (this->cutsceneIdx < 4) {
+        strcpy(this->cutsceneNext->text, "NEXT");
+        this->cutsceneNext->color = (Color) {0, 0, 0, 180};
+        this->cutsceneNext->fontColor = (Color) {255, 255, 255, 150};
+    }
+    else {
+        strcpy(this->cutsceneNext->text, "JOGAR");
+        this->cutsceneNext->color = (Color) {0, 255, 0, 255};
+        this->cutsceneNext->fontColor = (Color) {0, 0, 0, 255};
+    }
     if (this->cutsceneNext) this->cutsceneNext->draw(this->cutsceneNext);
 }
 
@@ -362,7 +368,7 @@ static void updateMainContent(Menu* this) {
 
         b->hovered = b->isInside(b, mouse);
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
+        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && b->hovered) {
             audio->playSound(audio, SOUND_CLICK_BUTTON);
             if (b->action) b->action();
         }
