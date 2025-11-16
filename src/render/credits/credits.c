@@ -48,21 +48,27 @@ static int cmpCoins(const void* a, const void* b) {
     const Score* sa = a;
     const Score* sb = b;
 
-    return sa->totalCoins > sb->totalCoins;
+    if (sa->totalCoins < sb->totalCoins) return 1;
+    if (sa->totalCoins > sb->totalCoins) return -1;
+    return 0;
 }
 
 static int cmpFragments(const void* a, const void* b) {
     const Score* sa = a;
     const Score* sb = b;
 
-    return sa->totalFragments > sb->totalFragments;
+    if (sa->totalFragments < sb->totalFragments) return 1;
+    if (sa->totalFragments > sb->totalFragments) return -1;
+    return 0;
 }
 
 static int cmpTime(const void* a, const void* b) {
     const Score* sa = a;
     const Score* sb = b;
 
-    return sa->totalTime > sb->totalTime;
+    if (sa->totalTime < sb->totalTime) return -1;
+    if (sa->totalTime > sb->totalTime) return 1;
+    return 0;
 }
 
 static void sortCoins() {
@@ -243,15 +249,14 @@ static void updateFinalCredits(Credits* this) {
     }
 }
 
-static void update(Credits* this) {
-    if (state < CREDITS_ADD_SCORE) updateCutscenes(this);
-    else if (state == CREDITS_ADD_SCORE) updateAddScore(this);
-    else if (state == CREDITS_SCORE) updateScore(this);
-    else if (state == CREDITS_FINAL) updateFinalCredits(this);
-    this->updateCount++;
-}
-
 static void drawCutscenes(Credits* this) {
+    if (IsKeyPressed(KEY_SPACE)) {
+        next();
+    }
+    if (IsKeyPressed(KEY_BACKSPACE)) {
+        prev();
+    }
+
     static const char* cutsceneTexts[] = {
             "Após a árdua jornada,\n os fantasmas escapam da escuridão do Inferno e dos Pact-Men enfurecidos.",
 
@@ -317,8 +322,16 @@ static void drawScore(Credits* this) {
     this->sortByTime->draw(this->sortByTime);
 }
 
+static void update(Credits* this) {
+    if (state <= CREDITS_CUTSCENE3 && state >= CREDITS_CUTSCENE1) updateCutscenes(this);
+    else if (state == CREDITS_ADD_SCORE) updateAddScore(this);
+    else if (state == CREDITS_SCORE) updateScore(this);
+    else if (state == CREDITS_FINAL) updateFinalCredits(this);
+    this->updateCount++;
+}
+
 static void draw(Credits* this) {
-    if (state < CREDITS_ADD_SCORE && state >= CREDITS_CUTSCENE1) drawCutscenes(this);
+    if (state <= CREDITS_CUTSCENE3 && state >= CREDITS_CUTSCENE1) drawCutscenes(this);
     else if (state == CREDITS_ADD_SCORE) drawAddScore(this);
     else if (state == CREDITS_SCORE) drawScore(this);
     else if (state == CREDITS_FINAL) drawFinalCredits(this);
@@ -404,7 +417,7 @@ static void loadButtons(Credits* this) {
     this->sortByFragments = new_Button(
         hx - btnW / 2,
         y,
-        btnW,
+        btnW + 70,
         btnH,
         (Color) {
         0, 0, 0, 180
@@ -418,7 +431,7 @@ static void loadButtons(Credits* this) {
     );
 
     this->sortByTime = new_Button(
-        hx + dx + btnW / 2,
+        hx + dx,
         y,
         btnW,
         btnH,
@@ -428,7 +441,7 @@ static void loadButtons(Credits* this) {
         (Color) {
         255, 255, 255, 200
     },
-        "MOEDAS",
+        "TEMPO",
         30,
         sortTime
     );
@@ -441,12 +454,12 @@ static void loadScores(Credits* this) {
     FILE* file = fopen("scores.bin", "rb");
     while (1) {
         Score* score = malloc(sizeof(Score));
-        if (fread(score, sizeof(Score), 1, file) == 1){
+        if (fread(score, sizeof(Score), 1, file) == 1) {
             scores->push(scores, score);
         } else {
             free(score);
             break;
-        } 
+        }
     }
     fclose(file);
 }
