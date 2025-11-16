@@ -158,25 +158,80 @@ static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
     f->color = (Color){ r, g, b, a };
 }
 
+static const char* cutsceneSlide0[] = {
+    "Após perseguir Pac-Man sem sucesso pelos vários labirintos do famoso jogo clássico,",
+    "a Gangue dos Fantasmas foi condenada a viver eternamente no Inferno de Dante."
+};
+static const char* cutsceneSlide1[] = {
+    "Para reverter essa triste e injusta punição,",
+    "Pac-Man fez um pacto com Lúcifer visando libertar os pobres fantasmas."
+};
+static const char* cutsceneSlide2[] = {
+    "Enfurecido, Lúcifer só permite que os fantasmas escapem",
+    "se conseguirem encontrar as saídas de pelo menos quatro círculos do Inferno."
+};
+static const char* cutsceneSlide3[] = {
+    "Além disso, ele transforma Pac-Man em Pact-Man,",
+    "que, junto com seus clones,",
+    "deve impedir que os fantasmas escapem."
+};
+static const char* cutsceneSlide4[] = {
+    "O feitiço só será quebrado se os fantasmas completarem a difícil jornada."
+};
+
+// --- 2. Criamos um "array de arrays" para organizar os slides ---
+static const char** allCutsceneSlides[] = {
+    cutsceneSlide0,
+    cutsceneSlide1,
+    cutsceneSlide2,
+    cutsceneSlide3,
+    cutsceneSlide4
+};
+
+// --- 3. Guardamos a contagem de linhas de cada slide ---
+static int allSlideLineCounts[] = { 2, 2, 2, 3, 1 };
+
+
+// --- 4. Sua função 'drawCutscene' ajustada ---
 static void drawCutscene(Menu* this) {
-    static const char* cutsceneTexts[] = {
-        "Após perseguir Pac-Man sem sucesso pelos vários labirintos do famoso jogo clássico,\na Gangue dos Fantasmas foi condenada a viver eternamente no Inferno de Dante.",
-
-        "Para reverter essa triste e injusta punição,\nPac-Man fez um pacto com Lúcifer visando libertar os pobres fantasmas.",
-
-        "Enfurecido, Lúcifer só permite que os fantasmas escapem\nse conseguirem encontrar as saídas de pelo menos quatro círculos do Inferno.",
-
-        "Além disso, ele transforma Pac-Man em Pact-Man,\nque, junto com seus clones,\ndeve impedir que os fantasmas escapem.",
-
-        "O feitiço só será quebrado se os fantasmas completarem a difícil jornada."
-    };
-
+    // Esta parte fica igual
     int idx = min(this->cutsceneIdx, 4);
 
     DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
     DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
-    DrawText(cutsceneTexts[idx], 100, this->height - 200, 40, WHITE);
 
+    // --- Início do Bloco de Centralização Simples ---
+
+    // Removemos esta linha:
+    // DrawText(cutsceneTexts[idx], 100, this->height - 200, 40, WHITE);
+
+    // E adicionamos este loop simples:
+
+    const char** currentSlideLines = allCutsceneSlides[idx]; // Pega o slide certo
+    int lineCount = allSlideLineCounts[idx];           // Pega o n° de linhas
+
+    int fontSize = 40;
+    int lineSpacing = 10;
+    int posY = this->height - 200; // Posição Y inicial
+
+    for (int i = 0; i < lineCount; i++) {
+        const char* line = currentSlideLines[i];
+        
+        // 1. Mede o tamanho da linha
+        int lineWidth = MeasureText(line, fontSize);
+        
+        // 2. Calcula o X centralizado
+        int posX = (this->width - lineWidth) / 2;
+        
+        // 3. Desenha a linha
+        DrawText(line, posX, posY, fontSize, WHITE);
+        
+        // 4. Move o Y para a próxima linha
+        posY += fontSize + lineSpacing;
+    }
+    // --- Fim do Bloco de Centralização ---
+
+    // Esta parte final fica igual
     if (this->cutscenePrev) this->cutscenePrev->draw(this->cutscenePrev);
     if (this->cutsceneNext) this->cutsceneNext->draw(this->cutsceneNext);
 }
