@@ -87,7 +87,7 @@ static void sortTime() {
 }
 
 static void next() {
-    state = min(state + 1, CREDITS_ADD_SCORE);
+    state = min(state + 1, CREDITS_FINAL);
     if (state == CREDITS_ADD_SCORE){
         thisCredits->name[0] = 0;
         thisCredits->nameIdx = 0;
@@ -367,7 +367,7 @@ static void loadAudio(Credits* this) {
 
     audio->loadMusic(audio, "assets/music/end1.mp3", MUSIC_CUTSCENE1);
     audio->loadMusic(audio, "assets/music/end2.mp3", MUSIC_CUTSCENE2);
-    audio->loadMusic(audio, "assets/music/cutscene2.mp3", MUSIC_CUTSCENE3);
+    audio->loadMusic(audio, "assets/music/end3.mp3", MUSIC_CUTSCENE3);
 
     audio->loadMusic(audio, "assets/music/credits.mp3", MUSIC_CREDITS);
     audio->loadMusic(audio, "assets/music/score.mp3", MUSIC_SCORE);
@@ -380,6 +380,7 @@ static void loadButtons(Credits* this) {
     int btnH = 50;
     int margin = 40;
     int y = this->height - btnH - margin;
+
     this->prevBtn = new_Button(
         margin,
         y,
@@ -465,7 +466,6 @@ static void loadButtons(Credits* this) {
 }
 
 static void loadScores(Credits* this) {
-    this->scores = new_ArrayList();
     ArrayList* scores = this->scores;
     FILE* file = fopen("scores.bin", "rb");
     while (1) {
@@ -492,9 +492,9 @@ static void saveScores(Credits* this) {
 
 static void _free(Credits* this) {
     this->audio->free(this->audio);
-    for (int i = 0; i < ANIMATION_COUNT; i++)
-        UnloadAnimation(this->animations[i]);
-    free(this->animations);
+    // for (int i = 0; i < ANIMATION_COUNT; i++)
+    //     UnloadAnimation(this->animations[i]);
+    // free(this->animations);
 
     for (int i = 0; i < SPRITE_COUNT; i++)
         UnloadSprite(this->sprites[i]);
@@ -538,13 +538,14 @@ Credits* new_Credits(int width, int height, Player* player) {
 
     this->audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
 
-    this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
+    //this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
     this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
 
     loadSprites(this);
     loadButtons(this);
     loadAudio(this);
 
+    this->scores = new_ArrayList();
     loadScores(this);
 
     this->updateCount = 0;
