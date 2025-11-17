@@ -1,6 +1,11 @@
 #include "credits.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+//===============================================================
+//  MUSICAS E SONS
+//===============================================================
 
 typedef enum {
     MUSIC_CUTSCENE1,
@@ -17,6 +22,10 @@ typedef enum {
     SOUND_CLICK_BUTTON,
     SOUND_COUNT
 } SoundEnum;
+
+//===============================================================
+//  SPRITES E ANIMAÇÕES
+//===============================================================
 
 typedef enum {
     SPRITE_END1,
@@ -38,12 +47,11 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
-typedef struct {
-    int y;
-    char text[200];
-} Line;
-
 static Credits* thisCredits;
+
+//===============================================================
+//  FUNÇÕES USADAS PARA O QUICKSORT
+//===============================================================
 
 static int cmpCoins(const void* a, const void* b) {
     const Score* sa = a;
@@ -72,6 +80,10 @@ static int cmpTime(const void* a, const void* b) {
     return 0;
 }
 
+//===============================================================
+//  AÇÕES DOS BOTÕES
+//===============================================================
+
 static void sortCoins() {
     thisCredits->scores->sort(thisCredits->scores, cmpCoins);
 }
@@ -86,16 +98,16 @@ static void sortTime() {
 
 static void next() {
     state = min(state + 1, CREDITS_FINAL);
-    if (state == CREDITS_ADD_SCORE) {
-        thisCredits->name[0] = 0;
-        thisCredits->nameIdx = 0;
-    }
 }
 
 static void prev() {
     if (state >= CREDITS_ADD_SCORE) state = MENU_MAIN_CONTENT;
     else state = max(state - 1, CREDITS_CUTSCENE1);
 }
+
+//===============================================================
+//  FUNÇÃO AUXILIAR DE ATUALIZAÇÃO DOS BOTÕES
+//===============================================================
 
 static bool updateButtons(Credits* this, Button** buttons, int length) {
     Vector2 mouse = GetMousePosition();
@@ -116,6 +128,10 @@ static bool updateButtons(Credits* this, Button** buttons, int length) {
     return false;
 }
 
+//===============================================================
+//  ATUALIZAR TELAS DE CUTSCENES
+//===============================================================
+
 static void updateCutscenes(Credits* this) {
     Audio* audio = this->audio;
     int audioIdx = MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1);
@@ -124,15 +140,28 @@ static void updateCutscenes(Credits* this) {
     else if (state < CREDITS_CUTSCENE3)
         next();
 
-    strcpy(this->prevBtn->text, "BACK");
+    Button* buttons[2];
+    buttons[0] = this->nextBtn;
+    int len = 1;
 
-    Button* buttons[2] = { this->prevBtn, this->nextBtn };
-    bool pressed = updateButtons(this, buttons, 2);
+    if (state > CREDITS_CUTSCENE1) {
+        strcpy(this->prevBtn->text, "BACK");
+        buttons[len++] = this->prevBtn;
+    }
+
+    bool pressed = updateButtons(this, buttons, len);
 
     if (pressed && state <= CREDITS_CUTSCENE3) {
         audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
+    } else if (state == CREDITS_ADD_SCORE) {
+        this->name[0] = 0;
+        this->nameIdx = 0;
     }
 }
+
+//===============================================================
+//  ATUALIZAR TELA DE ADICIONAR SCORE
+//===============================================================
 
 static void updateAddScore(Credits* this) {
     Audio* audio = this->audio;
@@ -163,7 +192,11 @@ static void updateAddScore(Credits* this) {
     }
 }
 
-static void updateScore(Credits* this) {
+//===============================================================
+//  ATUALIZAR TELA DE EXIBIR SCORE
+//===============================================================
+
+static void updateShowScore(Credits* this) {
     Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_SCORE);
     strcpy(this->prevBtn->text, "MENU");
@@ -174,22 +207,13 @@ static void updateScore(Credits* this) {
             UpdateAnimation(&this->animations[i]);
 }
 
-static void clearLines(Credits* this) {
-    LinkedList* lines = this->lines;
-    while (lines->length > 0) {
-        Line* line = lines->removeFirst(lines);
-        free(line);
-    }
-}
-
-static void resetFinalCredits(Credits* this) {
-    clearLines(this);
-    rewind(this->file);
-}
+//===============================================================
+//  ATUALIZAR TELA DE CREDITOS FINAIS
+//===============================================================
 
 static void updateFinalCredits(Credits* this) {
     if (IsKeyPressed(KEY_SPACE)) {
-        resetFinalCredits(this);
+        this->creditsMove = 0;
         state = MENU_MAIN_CONTENT;
         return;
     }
@@ -197,34 +221,12 @@ static void updateFinalCredits(Credits* this) {
     Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_CREDITS);
 
-    LinkedList* lines = this->lines;
-
-    if (this->updateCount % 40 == 0 && !this->creditsEnd) {
-        Line* line = malloc(sizeof(Line));
-        line->y = this->height;
-        if (fgets(line->text, sizeof(line->text), this->file) == NULL) {
-            this->creditsEnd = true;
-            free(line);
-        } else {
-            lines->addLast(lines, line);
-        }
-    }
-
-    Node* node = lines->head;
-    if (node != NULL) {
-        Line* line = node->data;
-        if (line->y < -40) {
-            lines->removeFirst(lines);
-            free(line);
-        }
-    }
-
-    while (node != NULL) {
-        Line* line = node->data;
-        line->y -= 1;
-        node = node->next;
-    }
+    this->creditsMove++;
 }
+
+//===============================================================
+//  DESENHAR TELA DE CUTSCENES
+//===============================================================
 
 static void drawCutscenes(Credits* this) {
     if (IsKeyPressed(KEY_SPACE)) {
@@ -251,6 +253,10 @@ static void drawCutscenes(Credits* this) {
     this->nextBtn->draw(this->nextBtn);
 }
 
+//===============================================================
+//  DESENHAR TELA DE ADICIONAR SCORE
+//===============================================================
+
 static void drawAddScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_ADD_CREDITS], 0, 0, this->width, this->height, WHITE);
     drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 70, WHITE);
@@ -262,7 +268,11 @@ static void drawAddScore(Credits* this) {
     this->nextBtn->draw(this->nextBtn);
 }
 
-static void drawScore(Credits* this) {
+//===============================================================
+//  DESENHAR TELA DE EXIBIR SCORE
+//===============================================================
+
+static void drawShowScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_CREDITS], 0, 0, this->width, this->height, WHITE);
     ArrayList* scores = this->scores;
     static char buffer[1000];
@@ -292,7 +302,6 @@ static void drawScore(Credits* this) {
         sprintf(buffer, "%02d:%02d", minuts, seconds);
         DrawText(buffer, x + size + margin * 2, y + deltaIten * 2 + margin, size, WHITE);
         y += delta;
-
     }
 
     this->nextBtn->draw(this->nextBtn);
@@ -302,37 +311,58 @@ static void drawScore(Credits* this) {
     this->sortByTime->draw(this->sortByTime);
 }
 
+//===============================================================
+//  DESENHAR TELA DE CRÉDITOS FINAIS
+//===============================================================
+
 static void drawFinalCredits(Credits* this) {
     DrawRectangle(0, 0, this->width, this->height, BLACK);
 
-    LinkedList* lines = this->lines;
-    Node* node = lines->head;
-
     const int halfX = this->width >> 1;
+    const int fontSize = 40;
+    const int margin = 10;
+    const int delta = fontSize + margin;
 
-    while (node != NULL) {
-        Line* line = node->data;
-        drawCenteredText(line->text, halfX, line->y, 40, WHITE);
-        node = node->next;
+    const int startY = this->height - this->creditsMove;
+    const int startIdx = max((-startY) / delta, 0); // Matemágica
+    const int actualY = startY + startIdx * delta; // Matemágica
+    const int endIdx = min(startIdx + 1 + (this->height - actualY) / delta, this->lines->length);
+
+    for (int i = startIdx; i < endIdx; i++) {
+        char* line = this->lines->data[i];
+        int y = this->height + (i * delta) - this->creditsMove;
+        drawCenteredText(line, halfX, y, fontSize, WHITE);
     }
 
     DrawText("Pressione barra de espaço para voltar ao menu", 50, this->height - 100, 20, GRAY);
 }
 
+//===============================================================
+//  MÉTODO DE ATUALIZAÇÃO DA CLASSE
+//===============================================================
+
 static void update(Credits* this) {
     if (state <= CREDITS_CUTSCENE3 && state >= CREDITS_CUTSCENE1) updateCutscenes(this);
     else if (state == CREDITS_ADD_SCORE) updateAddScore(this);
-    else if (state == CREDITS_SCORE) updateScore(this);
+    else if (state == CREDITS_SCORE) updateShowScore(this);
     else if (state == CREDITS_FINAL) updateFinalCredits(this);
     this->updateCount++;
 }
 
+//===============================================================
+//  MÉTODO DE DESENHAR DA CLASSE
+//===============================================================
+
 static void draw(Credits* this) {
     if (state <= CREDITS_CUTSCENE3 && state >= CREDITS_CUTSCENE1) drawCutscenes(this);
     else if (state == CREDITS_ADD_SCORE) drawAddScore(this);
-    else if (state == CREDITS_SCORE) drawScore(this);
+    else if (state == CREDITS_SCORE) drawShowScore(this);
     else if (state == CREDITS_FINAL) drawFinalCredits(this);
 }
+
+//===============================================================
+//  CARREGAMENTO DE SPRITES
+//===============================================================
 
 static void loadSprites(Credits* this) {
     Sprite* sprites = this->sprites;
@@ -356,6 +386,10 @@ static void loadSprites(Credits* this) {
     animations[ANIMATION_FRAGMENT] = LoadAnimation(8, fragment);
 }
 
+//===============================================================
+//  CARREGAMENTO DE ÁUDIO
+//===============================================================
+
 static void loadAudio(Credits* this) {
     Audio* audio = this->audio;
 
@@ -368,6 +402,10 @@ static void loadAudio(Credits* this) {
 
     audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
 }
+
+//===============================================================
+//  CARREGAMENTO DOS BOTÕES
+//===============================================================
 
 static void loadButtons(Credits* this) {
     int btnW = 180;
@@ -460,6 +498,10 @@ static void loadButtons(Credits* this) {
     );
 }
 
+//===============================================================
+//  CARREGAMENTO DOS SCORES
+//===============================================================
+
 static void loadScores(Credits* this) {
     ArrayList* scores = this->scores;
     FILE* file = fopen("data/scores.bin", "rb");
@@ -475,6 +517,10 @@ static void loadScores(Credits* this) {
     fclose(file);
 }
 
+//===============================================================
+//  FUNÇÃO PARA SALVAR OS SCORES APÓS O DESCARREGAMENTO
+//===============================================================
+
 static void saveScores(Credits* this) {
     ArrayList* scores = this->scores;
     FILE* file = fopen("data/scores.bin", "wb");
@@ -484,6 +530,29 @@ static void saveScores(Credits* this) {
     }
     fclose(file);
 }
+
+//===============================================================
+//  CARREGAMENTO DOS CRÉDITOS
+//===============================================================
+
+static void loadCredits(Credits* this) {
+    ArrayList* lines = this->lines;
+    FILE* file = fopen("assets/end_credits.txt", "r");
+    while (1) {
+        char* line = malloc(200 * sizeof(char));
+        if (fgets(line, 200, file) == NULL) {
+            free(line);
+            break;
+        } else {
+            lines->push(lines, line);
+        }
+    }
+    fclose(file);
+}
+
+//===============================================================
+//  MÉTODO DE LIBERAR MEMÓRIA DA CLASSE
+//===============================================================
 
 static void _free(Credits* this) {
     this->audio->free(this->audio);
@@ -495,29 +564,30 @@ static void _free(Credits* this) {
         UnloadSprite(this->sprites[i]);
     free(this->sprites);
 
-    fclose(this->file);
-
     this->nextBtn->free(this->nextBtn);
     this->prevBtn->free(this->prevBtn);
     this->sortByCoins->free(this->sortByCoins);
     this->sortByFragments->free(this->sortByFragments);
     this->sortByTime->free(this->sortByTime);
 
-    clearLines(this);
+    for (int i = 0; i < this->lines->length; i++)
+        free(this->lines->data[i]);
 
     this->lines->free(this->lines);
 
     saveScores(this);
 
-    for (int i = 0; i < this->scores->length; i++) {
-        Score* score = this->scores->data[i];
-        free(score);
-    }
+    for (int i = 0; i < this->scores->length; i++)
+        free(this->scores->data[i]);
 
     this->scores->free(this->scores);
 
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR DA CLASSE
+//===============================================================
 
 Credits* new_Credits(int width, int height, Score* score) {
     Credits* this = malloc(sizeof(Credits));
@@ -543,11 +613,11 @@ Credits* new_Credits(int width, int height, Score* score) {
     this->scores = new_ArrayList();
     loadScores(this);
 
-    this->updateCount = 0;
-    this->creditsEnd = false;
+    this->lines = new_ArrayList();
+    loadCredits(this);
 
-    this->lines = new_LinkedList();
-    this->file = fopen("assets/end_credits.txt", "r");
+    this->updateCount = 0;
+    this->creditsMove = 0;
 
     this->update = update;
     this->draw = draw;

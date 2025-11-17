@@ -50,9 +50,9 @@ void updateCredits() {
 }
 
 int main(void) {
+    //SetConfigFlags(FLAG_WINDOW_UNDECORATED);
     //SetConfigFlags(FLAG_FULLSCREEN_MODE);
-    InitWindow(1920, 1080, "Pact-Man");
-    //ToggleFullscreen();
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Men");
     InitAudioDevice();
     SetTargetFPS(60);
 

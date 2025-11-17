@@ -4,7 +4,6 @@
 #include "audio.h"
 #include "sprites.h"
 #include "button.h"
-#include <stdio.h>
 #include "linkedlist.h"
 #include "arraylist.h"
 #include "player.h"
@@ -17,8 +16,6 @@ typedef struct Credits {
     Sprite* sprites;
     Audio* audio;
 
-    FILE* file;
-
     Button* prevBtn;
     Button* nextBtn;
 
@@ -26,7 +23,8 @@ typedef struct Credits {
     Button* sortByFragments;
     Button* sortByTime;
 
-    LinkedList* lines;
+    //LinkedList* lines;
+    ArrayList* lines;
     ArrayList* scores;
 
     char name[1000];
@@ -34,8 +32,8 @@ typedef struct Credits {
 
     Score* score;
 
+    unsigned int creditsMove;
     unsigned int updateCount;
-    bool creditsEnd;
 
     void (*draw)(struct Credits*);
     void (*update)(struct Credits*);
