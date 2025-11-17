@@ -51,7 +51,7 @@ void updateCredits() {
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
-    ToggleFullscreen();
+    //ToggleFullscreen();
     InitAudioDevice();
     SetTargetFPS(60);
 
