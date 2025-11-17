@@ -38,13 +38,6 @@ typedef struct {
     char text[200];
 } Line;
 
-typedef struct {
-    char name[100];
-    int totalCoins;
-    int totalFragments;
-    float totalTime;
-} Score;
-
 static Credits* thisCredits;
 
 static int cmpCoins(const void* a, const void* b) {
@@ -148,9 +141,9 @@ static void updateScoreButton(Credits* this) {
             if (state == CREDITS_SCORE) {
                 Score* score = malloc(sizeof(Score));
                 strcpy(score->name, this->name);
-                score->totalCoins = this->player->totalCoins;
-                score->totalFragments = this->player->totalFragment;
-                score->totalTime = this->player->totalTime;
+                score->totalCoins = this->score->totalCoins;
+                score->totalFragments = this->score->totalFragments;
+                score->totalTime = this->score->totalTime;
                 this->scores->push(this->scores, score);
             }
         }
@@ -522,7 +515,7 @@ static void _free(Credits* this) {
     free(this);
 }
 
-Credits* new_Credits(int width, int height, Player* player) {
+Credits* new_Credits(int width, int height, Score* score) {
     Credits* this = malloc(sizeof(Credits));
     thisCredits = this;
 
@@ -532,7 +525,7 @@ Credits* new_Credits(int width, int height, Player* player) {
     this->name[0] = 0;
     this->nameIdx = 0;
 
-    this->player = player;
+    this->score = score;
 
     this->audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
 

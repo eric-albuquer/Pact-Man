@@ -384,7 +384,9 @@ static inline void generatePortal(ChunkManager* cm) {
 
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
-            chunk->cellAt(chunk, cx + j, cy + i)->type = CELL_PORTAL;
+            Cell* cell = chunk->cellAt(chunk, cx + j, cy + i);
+            cell->type = CELL_PORTAL;
+            cell->biome = VIOLENCIA;
         }
     }
     generated = true;
@@ -528,6 +530,9 @@ static void update(Map* this, Controler* controler) {
 }
 
 static void restart(Map* this) {
+    this->lastScore.totalCoins = this->player->totalCoins;
+    this->lastScore.totalFragments = this->player->totalFragment;
+    this->lastScore.totalTime = this->player->totalTime;
     this->player->restart(this->player);
     int biomeCols = this->manager->biomeCols;
     int rows = this->manager->rows;

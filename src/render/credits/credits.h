@@ -32,7 +32,7 @@ typedef struct Credits {
     char name[1000];
     int nameIdx;
 
-    Player* player;
+    Score* score;
 
     unsigned int updateCount;
     bool creditsEnd;
@@ -42,6 +42,6 @@ typedef struct Credits {
     void (*free)(struct Credits*);
 } Credits;
 
-Credits* new_Credits(int width, int height, Player* p);
+Credits* new_Credits(int width, int height, Score* score);
 
 #endif

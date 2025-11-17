@@ -10,6 +10,13 @@ typedef enum {
     VIOLENCIA,
 } Biome;
 
+typedef struct {
+    char name[100];
+    int totalCoins;
+    int totalFragments;
+    float totalTime;
+} Score;
+
 typedef enum { RIGHT, LEFT, UP, DOWN } Direction;
 
 typedef enum { MENU_MAIN_CONTENT, MENU_CUTSCENE1, MENU_CUTSCENE2, MENU_CUTSCENE3, MENU_CUTSCENE4, MENU_CUTSCENE5, GAME_MAIN_CONTENT, GAME_DEATH, CREDITS_CUTSCENE1, CREDITS_CUTSCENE2, CREDITS_CUTSCENE3, CREDITS_ADD_SCORE, CREDITS_SCORE, CREDITS_FINAL } GameState;

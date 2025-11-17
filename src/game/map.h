@@ -58,6 +58,7 @@ typedef struct Map {
     float biomeTime;
 
     Player* player;
+    Score lastScore;
     unsigned int updateCount;
 
     void (*update)(struct Map*, Controler*);

@@ -35,7 +35,7 @@ Render* new_Render(int width, int height, int cellSize, Map* map) {
 
     this->menu = new_Menu(width, height);
     this->game = new_Game(width, height, cellSize, map);
-    this->credits = new_Credits(width, height, map->player);
+    this->credits = new_Credits(width, height, &map->lastScore);
 
     this->drawMenu = drawMenu;
     this->drawGame = drawGame;
