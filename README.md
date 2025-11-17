@@ -87,65 +87,62 @@ rotar o chefão, é necessário exclusivamente consumir a estrelinha mágica.
 
 Siga estes passos para configurar o ambiente e executar o projeto:
 
-1.  *Instalar o MSYS2*
+1.  **Instalar o MSYS2**
     * Baixe e instale o MSYS2 a partir do site oficial: [https://www.msys2.org/](https://www.msys2.org/)
 
-2.  *Abrir o Terminal MSYS2*
-    * Inicie o terminal *UCRT64* (MINGW64) a partir do menu Iniciar.
+2.  **Abrir o Terminal MSYS2**
+    * Inicie o terminal **UCRT64** (MINGW64) a partir do menu Iniciar ou a instalação abre automaticamente.
 
-3.  *Instalar Ferramentas de Compilação*
+3.  **Instalar Ferramentas de Compilação**
     * Execute o comando abaixo para baixar o GCC, Make e outras ferramentas essenciais:
-    bash
+    ```bash
     pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain
-    
+    ```
 
-4.  *Adicionar o GCC ao Path do Windows*
-    * Adicione o diretório bin da sua instalação do mingw64 às variáveis de ambiente do Windows (Adicione esse path:  C:\msys64\ucrt64\bin) as variaveis do sistema.
+4.  **Adicionar o GCC ao Path do Windows**
+    * pesquise na barra de pesquisa do computador variaveis de ambiente, va até variáveis de ambiente, logo após acesse o PATH das variáveis do sistema, clique em editar, depois novo e adicione o diretório `bin` da sua instalação do mingw64 às variáveis de ambiente do Windows (por exemplo: `C:\msys64\ucrt64\bin`).
 
-5.  *Instalar a Biblioteca Raylib*
-    * Use o pacman para instalar a versão correta da Raylib para o ambiente UCRT64:
-    bash
+5.  **Instalar a Biblioteca Raylib**
+    * Dentro do mesmo terminal ucrt64 , use o comando para instalar a versão correta da Raylib para o ambiente UCRT64:
+    ```bash
     pacman -S mingw-w64-ucrt-x86_64-raylib
-    
+    ```
 
-6.  *Clonar o Repositório*
-    * Clone o repositório do projeto
-    bash
+6.  **Clonar o Repositório**
+    * Clone o repositório do projeto (substitua `...` pela URL correta do repositório):
+    ```bash
     git clone https://github.com/eric-albuquer/Pact-Man
-    
-
-7.  *Abra o cmd para executar o comando a seguir*
+    ```
     * Entre na pasta do projeto:
-    bash
+    ```bash
     cd Pact-Man
-    
+    ```
 
-8.  *Compilar e Executar o Jogo*
+7.  **Compilar e Executar o Jogo**
     * Dentro da pasta do projeto, execute o seguinte comando para limpar compilações antigas, compilar o projeto e executá-lo:
-    bash
+    ```bash
     mingw32-make clean && mingw32-make run
-    
+    ```
 
 </details>
 
 <details>
 <summary><b>Equipe</b></summary>
 
+* **Lucas Menezes Santana**
+    * Email: lms4@cesar.school
+    * LinkedIn: [www.linkedin.com/in/lucasmenezes08](https://www.linkedin.com/in/lucasmenezes08)
 
-* *Amanda Luz*
-    - Email: alc2@cesar.school
-    - LinkedIn: [https://www.linkedin.com/in/amandaaluzc](https://www.linkedin.com/in/amandaaluzc)
+* **Eric Albuquerque**
+    * Email: ega2@cesar.school
+    * LinkedIn: [https://www.linkedin.com/in/eric-albuquerque02](https://www.linkedin.com/in/eric-albuquerque02)
 
-* *Eric Albuquerque*
-    - Email: ega2@cesar.school
-    - LinkedIn: [https://www.linkedin.com/in/eric-albuquerque02](https://www.linkedin.com/in/eric-albuquerque02)
+* **Amanda Luz**
+    * Email: alc2@cesar.school
+    * LinkedIn: [https://www.linkedin.com/in/amandaaluzc](https://www.linkedin.com/in/amandaaluzc)
 
-* *Lucas Menezes Santana*
-    - Email: lms4@cesar.school
-    - LinkedIn: [www.linkedin.com/in/lucasmenezes08](https://www.linkedin.com/in/lucasmenezes08)
-
-* *Ricardo Freitas*
-    - Email: rspff@cesar.school
-    - LinkedIn: [https://www.linkedin.com/in/ricardospfreitas](https://www.linkedin.com/in/ricardospfreitas)
+* **Ricardo Sergio**
+    * Email: rspff@cesar.school
+    * LinkedIn: [https://www.linkedin.com/in/ricardospfreitas](https://www.linkedin.com/in/ricardospfreitas)
 
 </details>
