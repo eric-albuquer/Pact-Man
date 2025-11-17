@@ -48,7 +48,8 @@ Diogo SD
 Mauricio FDS
 Juliano GP
 Andre GP
-Walter Sales MC
+Walter Charles MC
+Gabriela Canali CORD
 
 COLABORAÇÕES INTELECTUAL
 Mircio Ferreira
@@ -70,6 +71,11 @@ Photoshop
 MinGW
 Raylib
 Photopea
+Paint
+Discord
+WhatsApp
+Windows 11
+Google Chrome
 
 AGRADECIMENTOS
 Silvio Meira
@@ -102,11 +108,12 @@ Andre Avelino
 Brenda Luana
 Augusto Malheiros
 Eduardo Albuquerque
+Daniel Andrade
 Pedro Ferraz
 Marcelo Luz
 Jorge Chaves
 Mariângela Luz
-FisioS e treinadoras de Amanda
+FisioS e TreinadoraS de Amanda
 Menuela Lavalle
 Lorena Lavalle
 Sandra Souto

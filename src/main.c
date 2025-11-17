@@ -63,7 +63,7 @@ int main(void) {
     UnloadImage(icon);  
 
     controler = new_Controler();
-    map = new_Map(5, 9, 350, 61);
+    map = new_Map(5, 9, 11, 61);
     render = new_Render(GetScreenWidth(), GetScreenHeight(), 50, map);
 
     while (!WindowShouldClose()) {
