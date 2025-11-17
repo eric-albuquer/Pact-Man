@@ -358,7 +358,8 @@ static void drawEffects(Game* this, int x, int y, int size) {
     if (length > 0)
         drawActionHud(this, hudColor);
     for (int i = 0; i < length; i++) {
-        DrawSprite(spritesBuffer[i], x, ey += delta, size, size, WHITE);
+        DrawSprite(spritesBuffer[i], x, ey, size, size, WHITE);
+        ey += delta;
     }
 }
 
