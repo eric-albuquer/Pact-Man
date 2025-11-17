@@ -7,7 +7,6 @@ Ricardo Sergio
 INSPIRAÇÂO
 Pac-Men
 Dante Alighieri
-Virgilio
 Minecraft
 Super Mario
 Sonic
@@ -15,12 +14,13 @@ GTA V
 Across the Bullets
 Formula C
 
-APOIO TÉCNICO
+APOIO TÉCNICO E PESQUISA
 João Carlos
-Denival Cavalcanti
+Denival Albuquerque
 
 ALGORÍTMOS
-Tabela Hash
+Tabela Hash (endereçamento aberto)
+Tabela Hash (encadeamento)
 Busca em Grafos (BFS)
 Matrizes Espaciais
 Bubble Sort
@@ -51,7 +51,7 @@ Andre GP
 Walter Charles MC
 Gabrielle Canalle CORD
 
-COLABORAÇÕES INTELECTUAL
+COLABORADORES
 Mircio Ferreira
 João Vitor Passos
 Vagner Melo
@@ -124,6 +124,8 @@ Sebastian Lague
 Derik (Veritasium)
 VSouce
 The Coding Train
+Manual do Mundo
+Pedro Loss
 
 HOMENAGEM
 Árabes de Jõao Carlos

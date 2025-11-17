@@ -97,10 +97,27 @@ static void prev() {
     else state = max(state - 1, CREDITS_CUTSCENE1);
 }
 
-static void updateCutsceneButtons(Credits* this) {
+static bool updateButtons(Credits* this, Button** buttons, int length) {
     Vector2 mouse = GetMousePosition();
     Audio* audio = this->audio;
 
+    for (int i = 0; i < length; i++) {
+        Button* b = buttons[i];
+        if (!b) continue;
+
+        b->hovered = b->isInside(b, mouse);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
+            audio->playSound(audio, SOUND_CLICK_BUTTON);
+            if (b->action) b->action();
+            return true;
+        }
+    }
+    return false;
+}
+
+static void updateCutscenes(Credits* this) {
+    Audio* audio = this->audio;
     int audioIdx = MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1);
     if (!audio->hasEndMusic(audio, audioIdx))
         audio->updateMusic(audio, audioIdx);
@@ -110,88 +127,29 @@ static void updateCutsceneButtons(Credits* this) {
     strcpy(this->prevBtn->text, "BACK");
 
     Button* buttons[2] = { this->prevBtn, this->nextBtn };
+    bool pressed = updateButtons(this, buttons, 2);
 
-    for (int i = 0; i < 2; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
-
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-            if (state <= CREDITS_CUTSCENE3)
-                audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
-        }
+    if (pressed && state <= CREDITS_CUTSCENE3) {
+        audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
     }
-}
-
-static void updateScoreButton(Credits* this) {
-    Vector2 mouse = GetMousePosition();
-    Audio* audio = this->audio;
-
-    Button* buttons[2] = { this->prevBtn, this->nextBtn };
-
-    strcpy(this->prevBtn->text, "MENU");
-
-    for (int i = 0; i < 2; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
-
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-            if (state == CREDITS_SCORE) {
-                Score* score = malloc(sizeof(Score));
-                strcpy(score->name, this->name);
-                score->totalCoins = this->score->totalCoins;
-                score->totalFragments = this->score->totalFragments;
-                score->totalTime = this->score->totalTime;
-                this->scores->push(this->scores, score);
-            }
-        }
-    }
-}
-
-static void updateSortButtons(Credits* this) {
-    Vector2 mouse = GetMousePosition();
-    Audio* audio = this->audio;
-
-    Button* buttons[3] = { this->sortByCoins, this->sortByFragments, this->sortByTime };
-
-    for (int i = 0; i < 3; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
-
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-        }
-    }
-}
-
-static void updateCutscenes(Credits* this) {
-    updateCutsceneButtons(this);
-}
-
-static void updateScore(Credits* this) {
-    Audio* audio = this->audio;
-    audio->updateMusic(audio, MUSIC_SCORE);
-    updateScoreButton(this);
-    updateSortButtons(this);
-    if (this->updateCount % 8 == 0)
-        for (int i = 0; i < ANIMATION_COUNT; i++)
-            UpdateAnimation(&this->animations[i]);
 }
 
 static void updateAddScore(Credits* this) {
     Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_SCORE);
-    updateScoreButton(this);
+    Button* buttons[] = { this->nextBtn };
+    bool pressed = updateButtons(this, buttons, 1);
+
+    // Cadastrar novo score
+    if (pressed && state == CREDITS_SCORE) {
+        Score* score = malloc(sizeof(Score));
+        strcpy(score->name, this->name);
+        score->totalCoins = this->score->totalCoins;
+        score->totalFragments = this->score->totalFragments;
+        score->totalTime = this->score->totalTime;
+        this->scores->push(this->scores, score);
+        return;
+    }
 
     for (int i = 'A'; i <= 'Z'; i++) {
         if (IsKeyPressed(i)) {
@@ -203,6 +161,17 @@ static void updateAddScore(Credits* this) {
     if (IsKeyPressed(KEY_BACKSPACE) && this->nameIdx > 0) {
         this->name[--this->nameIdx] = 0;
     }
+}
+
+static void updateScore(Credits* this) {
+    Audio* audio = this->audio;
+    audio->updateMusic(audio, MUSIC_SCORE);
+    strcpy(this->prevBtn->text, "MENU");
+    Button* buttons[] = { this->prevBtn, this->nextBtn, this->sortByCoins, this->sortByFragments, this->sortByTime };
+    updateButtons(this, buttons, 5);
+    if (this->updateCount % 8 == 0)
+        for (int i = 0; i < ANIMATION_COUNT; i++)
+            UpdateAnimation(&this->animations[i]);
 }
 
 static void clearLines(Credits* this) {
@@ -282,23 +251,6 @@ static void drawCutscenes(Credits* this) {
     this->nextBtn->draw(this->nextBtn);
 }
 
-static void drawFinalCredits(Credits* this) {
-    DrawRectangle(0, 0, this->width, this->height, BLACK);
-
-    LinkedList* lines = this->lines;
-    Node* node = lines->head;
-
-    const int halfX = this->width >> 1;
-
-    while (node != NULL) {
-        Line* line = node->data;
-        drawCenteredText(line->text, halfX, line->y, 40, WHITE);
-        node = node->next;
-    }
-
-    DrawText("Pressione barra de espaço para voltar ao menu", 50, this->height - 100, 20, GRAY);
-}
-
 static void drawAddScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_ADD_CREDITS], 0, 0, this->width, this->height, WHITE);
     drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 70, WHITE);
@@ -308,7 +260,6 @@ static void drawAddScore(Credits* this) {
     drawCenteredText(buffer, this->width >> 1, this->height >> 1, 70, WHITE);
 
     this->nextBtn->draw(this->nextBtn);
-    this->prevBtn->draw(this->prevBtn);
 }
 
 static void drawScore(Credits* this) {
@@ -330,7 +281,7 @@ static void drawScore(Credits* this) {
         int totalSeconds = score->totalTime;
         int minuts = totalSeconds / 60;
         int seconds = totalSeconds % 60;
-        DrawRectangleRounded((Rectangle){x, y, 300, h}, 0.5f, 16, (Color) { 0, 0, 0, 200 });
+        DrawRectangleRounded((Rectangle) { x, y, 300, h }, 0.5f, 16, (Color) { 0, 0, 0, 200 });
         DrawAnimation(this->animations[ANIMATION_COIN], x + margin, y + margin, size, WHITE);
         sprintf(buffer, "%s", score->name);
         DrawText(buffer, x + size + margin * 2, y + margin, size, WHITE);
@@ -349,6 +300,23 @@ static void drawScore(Credits* this) {
     this->sortByCoins->draw(this->sortByCoins);
     this->sortByFragments->draw(this->sortByFragments);
     this->sortByTime->draw(this->sortByTime);
+}
+
+static void drawFinalCredits(Credits* this) {
+    DrawRectangle(0, 0, this->width, this->height, BLACK);
+
+    LinkedList* lines = this->lines;
+    Node* node = lines->head;
+
+    const int halfX = this->width >> 1;
+
+    while (node != NULL) {
+        Line* line = node->data;
+        drawCenteredText(line->text, halfX, line->y, 40, WHITE);
+        node = node->next;
+    }
+
+    DrawText("Pressione barra de espaço para voltar ao menu", 50, this->height - 100, 20, GRAY);
 }
 
 static void update(Credits* this) {
