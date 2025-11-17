@@ -459,9 +459,10 @@ static void drawHud(Game* this) {
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
     if (p->biome == 3)
         drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
-    drawInfoHud(this, this->width - 280, 550, 80);
+    else
+        drawInfoHud(this, this->width - 280, 550, 80);
 
-    if (p->biomeFragment >= 2 && this->updateCount & 4)
+    if (p->biomeFragment >= 2 && this->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
 }
 

@@ -312,7 +312,10 @@ static void drawScore(Credits* this) {
     int halfW = this->width >> 1;
     for (int i = 0; i < scores->length; i++) {
         Score* score = scores->data[i];
-        sprintf(buffer, "Name: %s\nTotalCoins: %d\nTotalFragmens: %d\nTotalTime: %.2f", score->name, score->totalCoins, score->totalFragments, score->totalTime);
+        int totalSeconds = score->totalTime;
+        int minuts = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        sprintf(buffer, "Name: %s\nTotalCoins: %d\nTotalFragmens: %d\nTime: %02d:%02d", score->name, score->totalCoins, score->totalFragments, minuts, seconds);
         DrawRectangle(halfW - 100, y - 5, 200, 90, (Color){0, 0, 0, 200});
         drawCenteredText(buffer, halfW, y, 20, WHITE);
         y += delta;
