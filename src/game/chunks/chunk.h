@@ -20,6 +20,7 @@ typedef enum {
     CELL_EMPTY,
     CELL_FONT_HEALTH,
     CELL_TEMPLE,
+    CELL_BONUS,
     CELL_WALL,
     CELL_COIN,
     CELL_MUD,
@@ -74,11 +75,12 @@ typedef enum {
     CHUNK_TRANSITION,
     CHUNK_TEMPLE,
     CHUNK_FONT,
+    CHUNK_BONUS,
     CHUNK_FRAGMENT,
 } ChunkType;
 
 inline bool isStructure(ChunkType type) {
-    return type >= CHUNK_TEMPLE && type <= CHUNK_FONT;
+    return type >= CHUNK_TEMPLE && type <= CHUNK_BONUS;
 }
 
 typedef struct Chunk {

@@ -1,18 +1,95 @@
 DESENVOLVEDORES
-Amanda Luz
-Eric Albuquerque
-Lucas Menezes
-Ricardo Sergio
+Amanda Luz Chaves
+Eric Gonçalves Albuquerque
+Lucas Menezes Santana
+Ricardo Sergio de Paula Freitas Filho
+
+DIREÇÃO CRIATIVA / ROTEIRO
+Lucas Menezes Santana
+Amanda Luz Chaves
+Denival Albuquerque
+
+DIREÇÃO DE ARTE
+Amanda Luz Chaves
+Denival Albuquerque
+
+GAMEPLAY PROGRAMERS
+Eric Gonçalves Albuquerque
+
+ENGINE PROGRAMERS
+Eric Gonçalves Albuquerque
+Ricardo Sergio de Paula Freitas Filho
+
+UI PROGRAMERS
+Eric Gonçalves Albuquerque
+Ricardo Sergio de Paula Freitas Filho
+Amanda Luz Chaves
+
+TOOLS PROGRAMERS
+Eric Gonçalves Albuquerque
+
+AUDIO PROGRAMERS
+Eric Gonçalves Albuquerque
+Amanda Luz Chaves
+
+GAME BALANCING
+Eric Gonçalves Albuquerque
+Amanda Luz Chaves
+
+DUBLAGEM
+Ricardo Sergio de Paula Freitas Filho
+
+MUSICAS
+Hans Zimmer - F1 Main Theme
+Super Mario Bros. Music - Invincible
+
+EQUIPE DE TESTES
+Amanda Luz Chaves
+
+BIBLIOTECAS
+Raylib
+
+FERRAMENTAS DE AUDIO
+FreeSound
+Jfxr.me
+ElevenLabs
+
+FERRAMENTAS DE IMAGEM
+Chat GPT
+Gemini
+Photoshop
+Photopea
+Paint
+
+FERRAMENTAS AUXILIARES
+Github
+Vscode
+MinGW
+CMake / Make
+Discord
+WhatsApp
 
 INSPIRAÇÂO
 Pac-Men
+Toru Iwatani (Pacman)
+Namco
 Dante Alighieri
+Inferno de Dante
+Markus Persson (Notch)
 Minecraft
+Shigeru Miyamoto
 Super Mario
 Sonic
 GTA V
 Across the Bullets
 Formula C
+
+ATORES
+Pinky (fantasma rosa)
+Pac-Men
+Blinky (fantasma vermelho)
+Inky (fantasma ciano)
+Clyde (fantasma laranja)
 
 APOIO TÉCNICO E PESQUISA
 João Carlos
@@ -28,6 +105,7 @@ Quick Sort
 Listas Encadeadas
 Arrays Dinâmicos
 Bitwise Operations
+Sliding Window
 
 PROFESSORES
 Natacha Targino AED
@@ -59,34 +137,10 @@ Gabriel Aniceto
 Thiago Fernandes
 Cassian Ferrari
 
-FERRAMENTAS
-Chat GPT
-Gemini
-ElevenLabs
-FreeSound
-Jfxr.me
-Github
-Vscode
-Photoshop
-MinGW
-Raylib
-Photopea
-Paint
-Discord
-WhatsApp
-Windows 11
-Google Chrome
+JOGOS PARCEIROS
+Bomber Clean
 
-APOIO MORAL
-Willian Bezerra
-Gabriel Miranda
-Caio Mathewus
-Andre Avelino
-Brenda Luana
-Augusto Malheiros
-Eduardo Albuquerque
-Daniel Andrade
-Pedro Ferraz
+EQUIPE DE SUPORTE
 Marcelo Luz
 Jorge Chaves
 Mariângela Luz
@@ -102,7 +156,19 @@ Whey
 Laura
 Gabi
 
-AGRADECIMENTOS
+AGRADECIMENTOS ESPECIAIS
+Willian Bezerra
+Gabriel Miranda
+Caio Mathewus
+Andre Avelino
+Brenda Luana
+Augusto Malheiros
+Eduardo Albuquerque
+Daniel Andrade
+Davi
+Pedro Ferraz
+
+MENÇÃO HONRROSA
 Silvio Meira
 Charles Babbage
 Edsger Dijkstra
@@ -126,6 +192,10 @@ VSouce
 The Coding Train
 Manual do Mundo
 Pedro Loss
+Carl Sagan
+Neil deGrasse Tyson
+Michio Kaku
+Richard Feynman
 
 HOMENAGEM
 Árabes de Jõao Carlos

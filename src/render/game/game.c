@@ -75,6 +75,7 @@ typedef enum {
     ANIMATION_SPIKE,
 
     ANIMATION_FONT,
+    ANIMATION_BONUS,
 
     ANIMATION_COUNT
 } AnimationsEnum;
@@ -198,6 +199,13 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, (Color) { 0, 255, 255, 255 });
     } else if (cell->type == CELL_PORTAL) {
         DrawAnimation(animations[ANIMATION_PORTAL], x, y, size, color);
+    } else if (cell->type == CELL_BONUS) {
+        if (p->cellType == CELL_BONUS) {
+            float update = (float)(this->updateCount % BONUS_DELAY) / BONUS_DELAY;
+            int idx = animations[ANIMATION_BONUS].lenght * update;
+            DrawAnimationFrame(animations[ANIMATION_BONUS], x, y, size, color, idx);
+        } else
+            DrawAnimation(animations[ANIMATION_BONUS], x, y, size, color);
     }
 
     if (!itens) return;
@@ -744,7 +752,7 @@ static void drawMap(Game* this) {
 //  DESENHAR JOGO
 //===============================================================
 
-static void drawGame(Game* this){
+static void drawGame(Game* this) {
     drawMap(this);
     drawPlayer(this);
     //drawChunksMap(this, offsetHalfXAnimated, offsetHalfYAnimated);
@@ -863,6 +871,9 @@ static void loadSprites(Game* this) {
     const char* font[] = { "assets/sprites/common_cells/fonte.png", "assets/sprites/common_cells/fonte1.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte3.png",
                             "assets/sprites/common_cells/fonte3.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte1.png" };
 
+    const char* bonus[] = { "assets/sprites/common_cells/fonte.png", "assets/sprites/common_cells/fonte1.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte3.png",
+    "assets/sprites/common_cells/fonte3.png", "assets/sprites/common_cells/fonte2.png", "assets/sprites/common_cells/fonte1.png" };
+
     const char* batery[] = { "assets/sprites/itens/batery1.png", "assets/sprites/itens/batery2.png", "assets/sprites/itens/batery3.png", "assets/sprites/itens/batery4.png" };
 
     const char* spike[] = { "assets/sprites/violencia/spike1.png", "assets/sprites/violencia/spike2.png", "assets/sprites/violencia/spike3.png" };
@@ -877,6 +888,8 @@ static void loadSprites(Game* this) {
     animations[ANIMATION_BATERY] = LoadAnimation(4, batery);
 
     animations[ANIMATION_FONT] = LoadAnimation(7, font);
+    animations[ANIMATION_BONUS] = LoadAnimation(7, bonus);
+
     animations[ANIMATION_SPIKE] = LoadAnimation(3, spike);
 
     animations[ANIMATION_PORTAL] = LoadAnimation(3, portal);

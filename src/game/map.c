@@ -54,7 +54,17 @@ static inline void collectItens(Player* p, Cell* cell, bool isFreeze) {
     }
 }
 
-static inline void applyPlayerEffects(Player* p, Cell* cell) {
+static inline void applyRandomGoodEffects(Player* p) {
+    int idx = rand() % 4;
+    if (idx == 0) p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
+    else if (idx == 1) {
+        p->effects.regeneration.duration = POTION_REGENERATION_DURATION;
+        p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
+    } else if (idx == 2) p->effects.invisibility.duration = INVISIBILITY_DURATION;
+    else if (idx == 3) p->effects.freezeTime.duration = FREEZE_TIME_DURATION;
+}
+
+static inline void applyPlayerEffects(Player* p, Cell* cell, unsigned int updateCount) {
     static const int mudDuration = (MUD_SLOWNESS_DURATION << 1) - 1;
     static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1) - 1;
     static const int mudDurationLimit = (MUD_SLOWNESS_DURATION << 1) - 2;
@@ -69,6 +79,8 @@ static inline void applyPlayerEffects(Player* p, Cell* cell) {
     } else if (cell->type == CELL_FONT_HEALTH) {
         p->effects.regeneration.duration = FONT_REGENERATION_DURATION;
         p->effects.regeneration.strenght = max(FONT_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
+    } else if (cell->type == CELL_BONUS && updateCount % BONUS_DELAY == 0) {
+        applyRandomGoodEffects(p);
     } else if (isDegenerated(cell->type)) {
         p->effects.degeneration.duration = DEGENERATION_DURATION;
         p->effects.degeneration.strenght = (cell->type - CELL_DEGENERATED_1) + 1;
@@ -248,7 +260,7 @@ static inline void updatePlayer(Map* this, Input input) {
 
     if (cm->heaven)
         updatePlayerEndGame(this, cell);
-    applyPlayerEffects(p, cell);
+    applyPlayerEffects(p, cell, this->updateCount);
 
     p->cellType = cell->type;
 
@@ -471,7 +483,7 @@ static inline void updateEnemies(Map* this) {
 //===============================================================
 
 static void updateTime(Map* this) {
-    if (this->manager->heaven) return;
+    if (this->manager->heaven || this->player->effects.freezeTime.duration > 0) return;
     this->biomeTime += MAP_UPDATE_DT;
     this->player->totalTime += MAP_UPDATE_DT;
 

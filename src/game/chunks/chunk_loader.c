@@ -29,6 +29,19 @@ static const int FONT_MATRIX[25] = {
     1, 0, 0, 0, 1
 };
 
+static const int BONUS_MATRIX[100] = {
+    1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
+    1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 2, 2, 2, 2, 0, 0, 0,
+    1, 1, 0, 2, 2, 2, 2, 0, 1, 1,
+    1, 1, 0, 2, 2, 2, 2, 0, 1, 1,
+    0, 0, 0, 2, 2, 2, 2, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
+    1, 1, 0, 0, 1, 1, 0, 0, 1, 1
+};
+
 static inline unsigned int hash2D(int x, int y, unsigned int seed) {
     uint64_t h = (uint64_t)(x) * 0x9E3779B185EBCA87ULL;
     h ^= (uint64_t)(y) * 0xC2B2AE3D27D4EB4FULL;
@@ -69,9 +82,17 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
         return;
     }
 
+    if ((chunk->x + 2) % this->biomeWidthChunks == 0) {
+        int bonusY = (hash2D(chunk->x, 1, this->seed) % (this->height - 2)) + 1;
+        if (chunk->y == bonusY){
+            chunk->type = CHUNK_BONUS;
+            return;
+        }
+    }
+
     int biomeHalfWidth = (this->biomeWidthChunks >> 1) - 1;
     bool isXstructure = ((chunk->x - biomeHalfWidth) % this->biomeWidthChunks) == 0;
-    int templeY = ((hash2D(chunk->x, 1, this->seed) & 5) + 1);
+    int templeY = (hash2D(chunk->x, 1, this->seed) % (this->height - 2)) + 1;
 
     if (isXstructure && templeY == chunk->y) {
         chunk->type = CHUNK_TEMPLE;
@@ -154,7 +175,7 @@ static void generateBiome(ChunkLoader* this, Chunk* chunk) {
     }
 }
 
-static void generateTemple(ChunkLoader* this, Chunk* chunk) {
+static void generateTempleStructure(ChunkLoader* this, Chunk* chunk) {
     if (chunk->type != CHUNK_TEMPLE) return;
 
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
@@ -171,16 +192,32 @@ static void generateTemple(ChunkLoader* this, Chunk* chunk) {
     enemies->addLast(enemies, boss);
 }
 
-static void generateFont(ChunkLoader* this, Chunk* chunk) {
+static void generateFontStructure(ChunkLoader* this, Chunk* chunk) {
     if (chunk->type != CHUNK_FONT) return;
-    int startX = hash2D(chunk->x, chunk->y, this->seed) % 11;
-    int startY = hash2D(chunk->y, chunk->x, this->seed) % 11;
+    int startX = randChunk(this, chunk) % 11;
+    int startY = randChunk(this, chunk) % 11;
 
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             Cell* cell = chunk->cellAt(chunk, j + startX, i + startY);
             int fontCell = FONT_MATRIX[i * 5 + j];
             cell->type = fontCell == 0 ? CELL_FONT_HEALTH : CELL_WALL;
+        }
+    }
+}
+
+static void generateBonusStructure(ChunkLoader* this, Chunk* chunk) {
+    if (chunk->type != CHUNK_BONUS) return;
+    int startX = randChunk(this, chunk) % 6;
+    int startY = randChunk(this, chunk) % 6;
+
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            Cell* cell = chunk->cellAt(chunk, j + startX, i + startY);
+            int fontCell = BONUS_MATRIX[i * 10 + j];
+            if (fontCell == 0) cell->type = CELL_EMPTY;
+            else if (fontCell == 1) cell->type = CELL_WALL;
+            else if (fontCell == 2) cell->type = CELL_BONUS;
         }
     }
 }
@@ -417,25 +454,25 @@ static void generateFruit(ChunkLoader* this, Chunk* chunk) {
     generateIten(this, chunk, CELL_FRUIT);
 }
 
-static void generateInvisibility(ChunkLoader* this, Chunk* chunk){
+static void generateInvisibility(ChunkLoader* this, Chunk* chunk) {
     if (randChunk(this, chunk) % 100 >= INVISIBILITY_PROBABILITY) return;
 
     generateIten(this, chunk, CELL_INVISIBILITY);
 }
 
-static void generateRegeneration(ChunkLoader* this, Chunk* chunk){
+static void generateRegeneration(ChunkLoader* this, Chunk* chunk) {
     if (randChunk(this, chunk) % 100 >= REGENERATION_PROBABILITY) return;
 
     generateIten(this, chunk, CELL_REGENERATION);
 }
 
-static void generateBatery(ChunkLoader* this, Chunk* chunk){
+static void generateBatery(ChunkLoader* this, Chunk* chunk) {
     if (chunk->biome != VIOLENCIA || chunk->type == CHUNK_TRANSITION || randChunk(this, chunk) % 100 >= BATERY_PROBABILITY) return;
 
     generateIten(this, chunk, CELL_BATERY);
 }
 
-static void generateFreezeTime(ChunkLoader* this, Chunk* chunk){
+static void generateFreezeTime(ChunkLoader* this, Chunk* chunk) {
     if (randChunk(this, chunk) % 100 >= FREEZE_TIME_PROBABILITY) return;
 
     generateIten(this, chunk, CELL_FREEZE_TIME);
@@ -465,8 +502,9 @@ typedef void (*ChunkGeneratorFn)(ChunkLoader*, Chunk*);
 static ChunkGeneratorFn GENERATORS[] = {
     generateBiomeTransition,
     generateBiome,
-    generateTemple,
-    generateFont,
+    generateTempleStructure,
+    generateFontStructure,
+    generateBonusStructure,
     generateWalls1x1,
     generateWalls2x2,
     generateWalls3x3,

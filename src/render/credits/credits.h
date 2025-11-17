@@ -8,6 +8,8 @@
 #include "arraylist.h"
 #include "player.h"
 
+#define CREDITS_SPEED 0.7f
+
 typedef struct Credits {
     int width;
     int height;
@@ -32,7 +34,7 @@ typedef struct Credits {
 
     Score* score;
 
-    unsigned int creditsMove;
+    float creditsMove;
     unsigned int updateCount;
 
     void (*draw)(struct Credits*);

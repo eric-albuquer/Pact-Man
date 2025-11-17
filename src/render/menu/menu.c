@@ -542,22 +542,6 @@ static void loadButtons(Menu* this) {
         onDifficulty
     );
 
-    this->credits = new_Button(
-        centerX,
-        startY += delta,
-        buttonWidth,
-        buttonHeight,
-        (Color) {
-        80, 80, 80, 150
-    },
-        (Color) {
-        255, 255, 255, 150
-    },
-        "CRÉDITOS",
-        40,
-        onCredits
-    );
-
     this->score = new_Button(
         centerX,
         startY += delta,
@@ -572,6 +556,22 @@ static void loadButtons(Menu* this) {
         "SCORE",
         40,
         onScore
+    );
+
+    this->credits = new_Button(
+        centerX,
+        startY += delta,
+        buttonWidth,
+        buttonHeight,
+        (Color) {
+        80, 80, 80, 150
+    },
+        (Color) {
+        255, 255, 255, 150
+    },
+        "CRÉDITOS",
+        40,
+        onCredits
     );
 
     int btnW = 160;

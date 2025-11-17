@@ -48,6 +48,8 @@
 
 #define BATERY_DECAY 0.003f
 
+#define BONUS_DELAY 32
+
 typedef struct Map {
     ChunkManager* manager;
     ArrayList* changedChunk;

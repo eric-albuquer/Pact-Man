@@ -228,7 +228,7 @@ static void updateFinalCredits(Credits* this) {
     Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_CREDITS);
 
-    this->creditsMove++;
+    this->creditsMove += CREDITS_SPEED;
 }
 
 //===============================================================
@@ -329,7 +329,7 @@ static void drawShowScore(Credits* this) {
     const int size = 30;
     const int deltaIten = margin + size;
     const int space = 10;
-    const int h = 3 * deltaIten + margin;
+    const int h = 4 * deltaIten + margin;
     const int delta = h + space;
     const int halfW = this->width >> 1;
     const int x = halfW - 150;
@@ -341,15 +341,17 @@ static void drawShowScore(Credits* this) {
         int minuts = totalSeconds / 60;
         int seconds = totalSeconds % 60;
         DrawRectangleRounded((Rectangle) { x, y, 300, h }, 0.5f, 16, (Color) { 0, 0, 0, 200 });
-        DrawAnimation(this->animations[ANIMATION_COIN], x + margin, y + margin, size, WHITE);
         sprintf(buffer, "%s", score->name);
-        DrawText(buffer, x + size + margin * 2, y + margin, size, WHITE);
-        DrawAnimation(this->animations[ANIMATION_FRAGMENT], x + margin, y + deltaIten + margin, size, WHITE);
+        drawCenteredText(buffer, halfW, y + margin, size, RED);
+        DrawAnimation(this->animations[ANIMATION_COIN], x + margin, y + margin + deltaIten, size, WHITE);
+        sprintf(buffer, "%d", score->totalCoins);
+        DrawText(buffer, x + size + margin * 2, y + margin + deltaIten, size, WHITE);
+        DrawAnimation(this->animations[ANIMATION_FRAGMENT], x + margin, y + deltaIten * 2 + margin, size, WHITE);
         sprintf(buffer, "%d", score->totalFragments);
-        DrawText(buffer, x + size + margin * 2, y + deltaIten + margin, size, WHITE);
-        DrawSprite(this->sprites[SPRITE_TIME], x + margin, y + deltaIten * 2 + margin, size, size, WHITE);
-        sprintf(buffer, "%02d:%02d", minuts, seconds);
         DrawText(buffer, x + size + margin * 2, y + deltaIten * 2 + margin, size, WHITE);
+        DrawSprite(this->sprites[SPRITE_TIME], x + margin, y + deltaIten * 3 + margin, size, size, WHITE);
+        sprintf(buffer, "%02d:%02d", minuts, seconds);
+        DrawText(buffer, x + size + margin * 2, y + deltaIten * 3 + margin, size, WHITE);
         y += delta;
     }
 
@@ -446,7 +448,7 @@ static void loadAudio(Credits* this) {
     audio->loadMusic(audio, "assets/music/end2.mp3", MUSIC_CUTSCENE2);
     audio->loadMusic(audio, "assets/music/end3.mp3", MUSIC_CUTSCENE3);
 
-    audio->loadMusic(audio, "assets/music/credits.mp3", MUSIC_CREDITS);
+    audio->loadMusic(audio, "assets/music/creditos.mp3", MUSIC_CREDITS);
     audio->loadMusic(audio, "assets/music/score.mp3", MUSIC_SCORE);
 
     audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
