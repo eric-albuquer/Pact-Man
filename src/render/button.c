@@ -13,7 +13,8 @@ bool isInside(Button* this, Vector2 pos){
 
 void drawButton(Button* this) {
     Color color = this->hovered ? this->fontColor : this->color;
-    DrawRectangle(this->x, this->y, this->width, this->height, color);
+    //DrawRectangle(this->x, this->y, this->width, this->height, color);
+    DrawRectangleRounded((Rectangle){this->x, this->y, this->width, this->height}, 0.7f, 16, color);
 
     int textWidth = MeasureText(this->text, this->fontSize);
     int textX = this->x + (this->width - textWidth) / 2;

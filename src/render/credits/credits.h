@@ -13,7 +13,7 @@ typedef struct Credits {
     int width;
     int height;
 
-    //Animation* animations;
+    Animation* animations;
     Sprite* sprites;
     Audio* audio;
 

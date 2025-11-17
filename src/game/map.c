@@ -31,11 +31,6 @@ static inline void collectItens(Player* p, Cell* cell, bool isFreeze) {
         cell->type = CELL_EMPTY;
         p->biomeCoins++;
         p->totalCoins++;
-        if (p->fragmentByCoins == false && p->biomeCoins / COINS_TO_FRAGMENT) {
-            p->fragmentByCoins = true;
-            p->biomeFragment++;
-            p->totalFragment++;
-        }
     } else if (cell->type == CELL_FRAGMENT) {
         cell->type = CELL_EMPTY;
         p->totalFragment++;
@@ -51,6 +46,11 @@ static inline void collectItens(Player* p, Cell* cell, bool isFreeze) {
         cell->type = CELL_EMPTY;
     } else if (cell->type == CELL_FRUIT && !isFreeze) {
         cell->type = CELL_EMPTY;
+    }
+    if (p->fragmentByCoins == false && p->biomeCoins / COINS_TO_FRAGMENT) {
+        p->fragmentByCoins = true;
+        p->biomeFragment++;
+        p->totalFragment++;
     }
 }
 

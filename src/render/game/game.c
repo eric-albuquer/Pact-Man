@@ -356,7 +356,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     ChunkManager* cm = map->manager;
     Animation* animations = this->animations;
     Sprite* sprites = this->sprites;
-    int cellSize = (size - 50) / zoom;
+    float cellSize = (size - 50) / (float)zoom;
     DrawRectangle(x0, y0, size, size, HUD_OPACITY);
     DrawSprite(this->sprites[SPRITE_MINIMAP], x0, y0, size, size, WHITE);
     for (int y = 0; y < zoom; y++) {
@@ -368,7 +368,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
         }
     }
 
-    int offset = (zoom * cellSize) >> 1;
+    float offset = (zoom * cellSize) * 0.5;
 
     for (int i = 0; i < 9; i++) {
         int idx = CLOSER_IDX[i];
@@ -377,9 +377,9 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
         Node* cur = chunk->enemies->head;
         while (cur != NULL) {
             Enemy* e = cur->data;
-            int x = (e->x - map->player->x) * cellSize + 25 + x0 + offset;
-            int y = (e->y - map->player->y) * cellSize + 25 + y0 + offset;
-            int size = cellSize;
+            float x = (e->x - map->player->x) * cellSize + 25 + x0 + offset;
+            float y = (e->y - map->player->y) * cellSize + 25 + y0 + offset;
+            float size = cellSize;
 
             Color color = BIOME_COLOR[e->biome];
             if (p->effects.invulnerability.duration > 0 && this->updateCount & 1) color = getNegativeColor(color);
@@ -433,7 +433,7 @@ static void drawHud(Game* this) {
     if (p->damaged) drawActionHud(this, RED);
     if (this->map->biomeTime > BIOME_DEGEN_START_TIME && this->updateCount & 1)
         drawActionHud(this, BLACK);
-  
+
     drawEffects(this, 30, 30, 80);
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };

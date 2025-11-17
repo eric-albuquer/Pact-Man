@@ -77,29 +77,6 @@ WhatsApp
 Windows 11
 Google Chrome
 
-AGRADECIMENTOS
-Silvio Meira
-Charles Babbage
-Edsger Dijkstra
-Ada Lovace
-Allan Turing
-Linus Torvalds
-John von Neumann
-Steve Jobs
-Bill Gates
-Grace Hopper
-Larry Page
-Denis Richie
-Blaise Pascal
-Isac Newton
-Albert Einsten
-Markov
-Grant Sanderson
-Sebastian Lague
-Derik (Veritasium)
-VSouce
-The Coding Train
-
 APOIO MORAL
 Willian Bezerra
 Gabriel Miranda
@@ -124,9 +101,37 @@ Temaki
 Whey
 Laura
 Gabi
+
+AGRADECIMENTOS
+Silvio Meira
+Charles Babbage
+Edsger Dijkstra
+Ada Lovace
+Allan Turing
+Linus Torvalds
+John von Neumann
+Steve Jobs
+Bill Gates
+Grace Hopper
+Larry Page
+Denis Richie
+Blaise Pascal
+Isac Newton
+Albert Einsten
+Andrei Markov
+Grant Sanderson
+Sebastian Lague
+Derik (Veritasium)
+VSouce
+The Coding Train
+
+HOMENAGEM
 Árabes de Jõao Carlos
 Mohamed
 Magnus Carlsen
+Hikaru Nakamura
+Garry Kasparov
+Bobby Fischer
 Viniccius 13
 Gabriel Borteleto
 Ayrton Senna
@@ -139,3 +144,11 @@ Nautico
 Santa Cruz
 Cara da cantina
 Seguranças do Cesar
+
+OFERECIMENTO
+Cesar School
+Ministério da Cultúra
+Ministério da Educação
+Governo federal
+Estado de Pernambuco
+Prefeitura do Recife

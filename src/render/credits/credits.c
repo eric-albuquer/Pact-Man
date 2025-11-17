@@ -26,10 +26,15 @@ typedef enum {
     SPRITE_ADD_CREDITS,
     SPRITE_CREDITS,
 
+    SPRITE_TIME,
+
     SPRITE_COUNT
 } SpritesEnum;
 
 typedef enum {
+    ANIMATION_COIN,
+    ANIMATION_FRAGMENT,
+
     ANIMATION_COUNT
 } AnimationsEnum;
 
@@ -81,7 +86,7 @@ static void sortTime() {
 
 static void next() {
     state = min(state + 1, CREDITS_FINAL);
-    if (state == CREDITS_ADD_SCORE){
+    if (state == CREDITS_ADD_SCORE) {
         thisCredits->name[0] = 0;
         thisCredits->nameIdx = 0;
     }
@@ -178,6 +183,9 @@ static void updateScore(Credits* this) {
     audio->updateMusic(audio, MUSIC_SCORE);
     updateScoreButton(this);
     updateSortButtons(this);
+    if (this->updateCount % 8 == 0)
+        for (int i = 0; i < ANIMATION_COUNT; i++)
+            UpdateAnimation(&this->animations[i]);
 }
 
 static void updateAddScore(Credits* this) {
@@ -244,7 +252,7 @@ static void updateFinalCredits(Credits* this) {
 
     while (node != NULL) {
         Line* line = node->data;
-        line->y-=1;
+        line->y -= 1;
         node = node->next;
     }
 }
@@ -307,19 +315,33 @@ static void drawScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_CREDITS], 0, 0, this->width, this->height, WHITE);
     ArrayList* scores = this->scores;
     static char buffer[1000];
-    int delta = 100;
-    int y = 100;
-    int halfW = this->width >> 1;
+    const int margin = 15;
+    const int size = 30;
+    const int deltaIten = margin + size;
+    const int space = 10;
+    const int h = 3 * deltaIten + margin;
+    const int delta = h + space;
+    const int halfW = this->width >> 1;
+    const int x = halfW - 150;
+
+    int y = 50;
     for (int i = 0; i < scores->length; i++) {
         Score* score = scores->data[i];
         int totalSeconds = score->totalTime;
         int minuts = totalSeconds / 60;
         int seconds = totalSeconds % 60;
-        sprintf(buffer, "Name: %s\nTotalCoins: %d\nTotalFragmens: %d\nTime: %02d:%02d", score->name, score->totalCoins, score->totalFragments, minuts, seconds);
-        DrawRectangle(halfW - 100, y - 5, 200, 90, (Color){0, 0, 0, 200});
-        drawCenteredText(buffer, halfW, y, 20, WHITE);
+        DrawRectangleRounded((Rectangle){x, y, 300, h}, 0.5f, 16, (Color) { 0, 0, 0, 200 });
+        DrawAnimation(this->animations[ANIMATION_COIN], x + margin, y + margin, size, WHITE);
+        sprintf(buffer, "%s", score->name);
+        DrawText(buffer, x + size + margin * 2, y + margin, size, WHITE);
+        DrawAnimation(this->animations[ANIMATION_FRAGMENT], x + margin, y + deltaIten + margin, size, WHITE);
+        sprintf(buffer, "%d", score->totalFragments);
+        DrawText(buffer, x + size + margin * 2, y + deltaIten + margin, size, WHITE);
+        DrawSprite(this->sprites[SPRITE_TIME], x + margin, y + deltaIten * 2 + margin, size, size, WHITE);
+        sprintf(buffer, "%02d:%02d", minuts, seconds);
+        DrawText(buffer, x + size + margin * 2, y + deltaIten * 2 + margin, size, WHITE);
         y += delta;
-        
+
     }
 
     this->nextBtn->draw(this->nextBtn);
@@ -346,7 +368,7 @@ static void draw(Credits* this) {
 
 static void loadSprites(Credits* this) {
     Sprite* sprites = this->sprites;
-    //Animation* animations = this->animations;
+    Animation* animations = this->animations;
 
     sprites[SPRITE_END1] = LoadSprite("assets/sprites/credits/end1.jpg");
     sprites[SPRITE_END2] = LoadSprite("assets/sprites/credits/end2.jpg");
@@ -354,6 +376,16 @@ static void loadSprites(Credits* this) {
 
     sprites[SPRITE_ADD_CREDITS] = LoadSprite("assets/sprites/credits/add_score.jpg");
     sprites[SPRITE_CREDITS] = LoadSprite("assets/sprites/credits/score.jpg");
+
+    sprites[SPRITE_TIME] = LoadSprite("assets/sprites/credits/clock.png");
+
+    const char* coin[] = { "assets/sprites/itens/coin1.png", "assets/sprites/itens/coin2.png", "assets/sprites/itens/coin3.png", "assets/sprites/itens/coin4.png",
+    "assets/sprites/itens/coin5.png", "assets/sprites/itens/coin6.png" };
+    const char* fragment[] = { "assets/sprites/itens/newKey.png" , "assets/sprites/itens/newKey2.png", "assets/sprites/itens/newKey3.png", "assets/sprites/itens/newKey4.png",
+         "assets/sprites/itens/newKey5.png", "assets/sprites/itens/newKey4.png", "assets/sprites/itens/newKey3.png", "assets/sprites/itens/newKey2.png" };
+
+    animations[ANIMATION_COIN] = LoadAnimation(6, coin);
+    animations[ANIMATION_FRAGMENT] = LoadAnimation(8, fragment);
 }
 
 static void loadAudio(Credits* this) {
@@ -370,9 +402,9 @@ static void loadAudio(Credits* this) {
 }
 
 static void loadButtons(Credits* this) {
-    int btnW = 160;
-    int btnH = 50;
-    int margin = 40;
+    int btnW = 180;
+    int btnH = 70;
+    int margin = 60;
     int y = this->height - btnH - margin;
 
     this->prevBtn = new_Button(
@@ -407,7 +439,7 @@ static void loadButtons(Credits* this) {
         next
     );
 
-    int dx = 300;
+    int dx = 400;
     int hx = this->width >> 1;
 
     this->sortByCoins = new_Button(
@@ -416,26 +448,27 @@ static void loadButtons(Credits* this) {
         btnW,
         btnH,
         (Color) {
-        0, 0, 0, 180
+        0, 0, 255, 180
     },
         (Color) {
-        255, 255, 255, 200
+        255, 255, 0, 200
     },
         "MOEDAS",
         30,
         sortCoins
     );
 
+    int bW = btnW + 70;
     this->sortByFragments = new_Button(
-        hx - btnW / 2,
+        hx - bW / 2,
         y,
-        btnW + 70,
+        bW,
         btnH,
         (Color) {
-        0, 0, 0, 180
+        255, 0, 0, 180
     },
         (Color) {
-        255, 255, 255, 200
+        255, 255, 0, 200
     },
         "FRAGMENTOS",
         30,
@@ -443,15 +476,15 @@ static void loadButtons(Credits* this) {
     );
 
     this->sortByTime = new_Button(
-        hx + dx,
+        hx + dx - btnW / 2,
         y,
         btnW,
         btnH,
         (Color) {
-        0, 0, 0, 180
+        0, 255, 0, 180
     },
         (Color) {
-        255, 255, 255, 200
+        255, 255, 0, 200
     },
         "TEMPO",
         30,
@@ -486,9 +519,9 @@ static void saveScores(Credits* this) {
 
 static void _free(Credits* this) {
     this->audio->free(this->audio);
-    // for (int i = 0; i < ANIMATION_COUNT; i++)
-    //     UnloadAnimation(this->animations[i]);
-    // free(this->animations);
+    for (int i = 0; i < ANIMATION_COUNT; i++)
+        UnloadAnimation(this->animations[i]);
+    free(this->animations);
 
     for (int i = 0; i < SPRITE_COUNT; i++)
         UnloadSprite(this->sprites[i]);
@@ -532,7 +565,7 @@ Credits* new_Credits(int width, int height, Score* score) {
 
     this->audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
 
-    //this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
+    this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
     this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
 
     loadSprites(this);
