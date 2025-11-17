@@ -6,6 +6,8 @@ O jogo mistura o arcade clássico do Pac-Man com o novo estilo exploratório, qu
 
 O jogo foi desenvolvido como projeto da disciplina de <b>Algoritmos e Estrutura de Dados</b> (AED) do curso de Ciência da Computação, 3º período, ministrada pela professora Natasha Targino, da CESAR School.
 
+* [Vídeo Demonstrativo](https://www.youtube.com/watch?v=YwxyXMzec_8)
+
 <details>
 <summary><b>Nossa Inspiração</b></summary>
 
