@@ -23,6 +23,7 @@ static void updateDirection(Player* this){
 
 static void restart(Player* this){
     this->life = START_LIFE;
+    this->effects = (Effects){0};
     this->x = this->lastX = this->spawnX;
     this->y = this->lastY = this->spawnY;
     this->damaged = false;

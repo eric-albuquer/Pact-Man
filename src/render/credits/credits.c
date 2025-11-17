@@ -251,7 +251,7 @@ static void updateFinalCredits(Credits* this) {
 
     while (node != NULL) {
         Line* line = node->data;
-        line->y--;
+        line->y-=1;
         node = node->next;
     }
 }
@@ -300,11 +300,11 @@ static void drawFinalCredits(Credits* this) {
 
 static void drawAddScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_ADD_CREDITS], 0, 0, this->width, this->height, WHITE);
-    drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 40, BLACK);
+    drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 70, WHITE);
     static char buffer[1000];
     strcpy(buffer, this->name);
     strcat(buffer, (this->updateCount & 16) ? "_" : " ");
-    drawCenteredText(buffer, this->width >> 1, this->height >> 1, 40, BLACK);
+    drawCenteredText(buffer, this->width >> 1, this->height >> 1, 70, WHITE);
 
     this->nextBtn->draw(this->nextBtn);
     this->prevBtn->draw(this->prevBtn);
@@ -465,7 +465,7 @@ static void loadButtons(Credits* this) {
 
 static void loadScores(Credits* this) {
     ArrayList* scores = this->scores;
-    FILE* file = fopen("assets/scores.bin", "rb");
+    FILE* file = fopen("data/scores.bin", "rb");
     while (1) {
         Score* score = malloc(sizeof(Score));
         if (fread(score, sizeof(Score), 1, file) == 1) {
@@ -480,7 +480,7 @@ static void loadScores(Credits* this) {
 
 static void saveScores(Credits* this) {
     ArrayList* scores = this->scores;
-    FILE* file = fopen("assets/scores.bin", "wb");
+    FILE* file = fopen("data/scores.bin", "wb");
     for (int i = 0; i < scores->length; i++) {
         Score* score = scores->data[i];
         fwrite(score, sizeof(Score), 1, file);

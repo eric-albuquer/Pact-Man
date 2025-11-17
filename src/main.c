@@ -51,7 +51,7 @@ void updateCredits() {
 
 int main(void) {
     InitWindow(1920, 1080, "Pact-Man");
-    //ToggleFullscreen();
+    ToggleFullscreen();
     InitAudioDevice();
     SetTargetFPS(60);
 
@@ -63,7 +63,7 @@ int main(void) {
     UnloadImage(icon);  
 
     controler = new_Controler();
-    map = new_Map(5, 9, 11, 21);
+    map = new_Map(5, 9, 11, 61);
     render = new_Render(GetScreenWidth(), GetScreenHeight(), 50, map);
 
     while (!WindowShouldClose()) {

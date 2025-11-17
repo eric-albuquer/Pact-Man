@@ -118,7 +118,7 @@ typedef enum {
 
 static char buffer[1000];
 
-static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {0, 255, 0, 255}, {0, 0, 255, 255}, {0, 255, 255, 255} };
+static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, {0, 255, 0, 255}, {0, 255, 255, 255} };
 static const Color HUD_OPACITY = { 0, 0, 0, 200 };
 
 static inline Color getNegativeColor(Color color) {

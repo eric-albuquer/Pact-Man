@@ -10,6 +10,7 @@ Dante Alighieri
 Virgilio
 Minecraft
 Super Mario
+Sonic
 GTA V
 Across the Bullets
 Formula C
@@ -18,12 +19,12 @@ APOIO TÉCNICO
 João Carlos
 Denival Cavalcanti
 
-ALGORITMOS
+ALGORÍTMOS
 Tabela Hash
 Busca em Grafos (BFS)
 Matrizes Espaciais
 Bubble Sort
-Merge Sort
+Quick Sort
 Listas Encadeadas
 Arrays Dinâmicos
 Bitwise Operations
@@ -47,6 +48,7 @@ Diogo SD
 Mauricio FDS
 Juliano GP
 Andre GP
+Walter Sales MC
 
 COLABORAÇÕES INTELECTUAL
 Mircio Ferreira
@@ -54,14 +56,7 @@ João Vitor Passos
 Vagner Melo
 Gabriel Aniceto
 Thiago Fernandes
-Willian
 Cassian Ferrari
-Gabriel Miranda
-Caio Mateus
-Andre Avelino
-Brenda
-Augusto
-Eduardo
 
 FERRAMENTAS
 Chat GPT
@@ -75,35 +70,6 @@ Photoshop
 MinGW
 Raylib
 Photopea
-
-APOIO MORAL
-Marcelo Luz
-Jorge Chaves
-Mariângela Luz
-FisioS de Amanda
-Menuela Lavalle
-Lorena Lavalle
-Sandra Souto
-Ernesto Arturo
-Olga Albuquerque
-Igor Albuquerque
-Temaki
-Whey
-Gabi
-Irmã de Menezes
-Árabes de Jõao Carlos
-Magnus Carlsen
-Viniccius 13
-Gabriel Borteleto
-Ayrton Senna
-Max Vestappen
-Vagner Moura
-Kleber Mendonça
-Ivete Sangalo
-Sport
-Nautico
-Santa Cruz
-Cara da cantina
 
 AGRADECIMENTOS
 Silvio Meira
@@ -127,3 +93,42 @@ Sebastian Lague
 Derik (Veritasium)
 VSouce
 The Coding Train
+
+APOIO MORAL
+Willian Bezerra
+Gabriel Miranda
+Caio Mateus
+Andre Avelino
+Brenda Luana
+Augusto Malheiros
+Eduardo Albuquerque
+Pedro Ferraz
+Marcelo Luz
+Jorge Chaves
+Mariângela Luz
+FisioS e treinadoras de Amanda
+Menuela Lavalle
+Lorena Lavalle
+Sandra Souto
+Ernesto Arturo
+Olga Albuquerque
+Igor Albuquerque
+Temaki
+Whey
+Laura
+Gabi
+Árabes de Jõao Carlos
+Mohamed
+Magnus Carlsen
+Viniccius 13
+Gabriel Borteleto
+Ayrton Senna
+Max Vestappen
+Vagner Moura
+Kleber Mendonça
+Ivete Sangalo
+Sport
+Nautico
+Santa Cruz
+Cara da cantina
+Seguranças do Cesar

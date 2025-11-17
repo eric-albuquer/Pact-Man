@@ -525,7 +525,7 @@ Menu* new_Menu(int width, int height) {
         buttonWidth,
         buttonHeight,
         (Color) {
-        80, 80, 80, 150
+        80, 80, 80, 100
     },
         (Color) {
         255, 255, 255, 150
