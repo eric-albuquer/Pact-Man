@@ -26,7 +26,7 @@ static inline void updatePlayerBiome(Map* this, Cell* cell) {
     this->biomeTime = 0.0f;
 }
 
-static inline void collectItens(Player* p, Cell* cell) {
+static inline void collectItens(Player* p, Cell* cell, bool isFreeze) {
     if (cell->type == CELL_COIN) {
         cell->type = CELL_EMPTY;
         p->biomeCoins++;
@@ -49,7 +49,7 @@ static inline void collectItens(Player* p, Cell* cell) {
         cell->type = CELL_EMPTY;
     } else if (cell->type == CELL_REGENERATION) {
         cell->type = CELL_EMPTY;
-    } else if (cell->type == CELL_FRUIT && p->effects.freezeTime.duration == 0) {
+    } else if (cell->type == CELL_FRUIT && !isFreeze) {
         cell->type = CELL_EMPTY;
     }
 }
@@ -253,10 +253,11 @@ static inline void updatePlayer(Map* this, Input input) {
     p->cellType = cell->type;
 
     updatePlayerMovement(this, cell, input);
+    bool isFreeze = p->effects.freezeTime.duration > 0;
     updatePlayerEffects(p, cell);
 
     updateDamagePlayer(p, cell);
-    collectItens(p, cell);
+    collectItens(p, cell, isFreeze);
 }
 
 //===============================================================

@@ -236,6 +236,7 @@ static void drawLifeBar(Game* this, int x, int y, int width, int height) {
 }
 
 static void drawBateryBar(Game* this, int x, int y, int width, int height) {
+    if (this->map->player->biome != VIOLENCIA) return;
     int w = width * 0.95;
     int h = height * 0.35;
     int startW = width * 0.025;
@@ -285,13 +286,15 @@ static void drawTimeHUD(Game* this, int x, int y, int width) {
 }
 
 static void drawInfoHud(Game* this, int x, int y, int size) {
-    DrawRectangle(x, y, size * 3, size * 2, HUD_OPACITY);
-    DrawAnimation(this->animations[ANIMATION_COIN], x, y, size, WHITE);
-    sprintf(buffer, "%d/%d", this->map->player->biomeCoins, COINS_TO_FRAGMENT);
-    DrawText(buffer, x + size, y + size / 3, 30, WHITE);
-    DrawAnimation(this->animations[ANIMATION_FRAGMENT], x, y + size, size, WHITE);
-    sprintf(buffer, "%d/2", this->map->player->biomeFragment);
-    DrawText(buffer, x + size, y + size / 3 + size, 30, WHITE);
+    if (this->map->player->biome < VIOLENCIA) {
+        DrawRectangle(x, y, size * 3, size * 2, HUD_OPACITY);
+        DrawAnimation(this->animations[ANIMATION_COIN], x, y, size, WHITE);
+        sprintf(buffer, "%d/%d", this->map->player->biomeCoins, COINS_TO_FRAGMENT);
+        DrawText(buffer, x + size, y + size / 3, 30, WHITE);
+        DrawAnimation(this->animations[ANIMATION_FRAGMENT], x, y + size, size, WHITE);
+        sprintf(buffer, "%d/2", this->map->player->biomeFragment);
+        DrawText(buffer, x + size, y + size / 3 + size, 30, WHITE);
+    }
     drawTimeHUD(this, x, y + size * 2, size * 3);
 }
 
@@ -457,10 +460,8 @@ static void drawHud(Game* this) {
     if (map->manager->heaven) return;
 
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
-    if (p->biome == 3)
-        drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
-    else
-        drawInfoHud(this, this->width - 280, 550, 80);
+    drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
+    drawInfoHud(this, this->width - 280, 550, 80);
 
     if (p->biomeFragment >= 2 && this->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
