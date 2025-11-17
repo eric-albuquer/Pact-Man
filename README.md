@@ -87,42 +87,44 @@ rotar o chefão, é necessário exclusivamente consumir a estrelinha mágica.
 
 Siga estes passos para configurar o ambiente e executar o projeto:
 
-1.  **Instalar o MSYS2**
+1.  *Instalar o MSYS2*
     * Baixe e instale o MSYS2 a partir do site oficial: [https://www.msys2.org/](https://www.msys2.org/)
 
-2.  **Abrir o Terminal MSYS2**
-    * Inicie o terminal **UCRT64** (MINGW64) a partir do menu Iniciar.
+2.  *Abrir o Terminal MSYS2*
+    * Inicie o terminal *UCRT64* (MINGW64) a partir do menu Iniciar.
 
-3.  **Instalar Ferramentas de Compilação**
+3.  *Instalar Ferramentas de Compilação*
     * Execute o comando abaixo para baixar o GCC, Make e outras ferramentas essenciais:
-    ```bash
+    bash
     pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain
-    ```
+    
 
-4.  **Adicionar o GCC ao Path do Windows**
-    * Adicione o diretório `bin` da sua instalação do mingw64 às variáveis de ambiente do Windows (por exemplo: `C:\msys64\ucrt64\bin`).
+4.  *Adicionar o GCC ao Path do Windows*
+    * Adicione o diretório bin da sua instalação do mingw64 às variáveis de ambiente do Windows (Adicione esse path:  C:\msys64\ucrt64\bin) as variaveis do sistema.
 
-5.  **Instalar a Biblioteca Raylib**
+5.  *Instalar a Biblioteca Raylib*
     * Use o pacman para instalar a versão correta da Raylib para o ambiente UCRT64:
-    ```bash
+    bash
     pacman -S mingw-w64-ucrt-x86_64-raylib
-    ```
+    
 
-6.  **Clonar o Repositório**
-    * Clone o repositório do projeto (substitua `...` pela URL correta do repositório):
-    ```bash
-    git clone ...
-    ```
+6.  *Clonar o Repositório*
+    * Clone o repositório do projeto
+    bash
+    git clone https://github.com/eric-albuquer/Pact-Man
+    
+
+7.  *Abra o cmd para executar o comando a seguir*
     * Entre na pasta do projeto:
-    ```bash
-    cd nome-do-repositorio
-    ```
+    bash
+    cd Pact-Man
+    
 
-7.  **Compilar e Executar o Jogo**
+8.  *Compilar e Executar o Jogo*
     * Dentro da pasta do projeto, execute o seguinte comando para limpar compilações antigas, compilar o projeto e executá-lo:
-    ```bash
+    bash
     mingw32-make clean && mingw32-make run
-    ```
+    
 
 </details>
 
@@ -130,19 +132,19 @@ Siga estes passos para configurar o ambiente e executar o projeto:
 <summary><b>Equipe</b></summary>
 
 
-* **Amanda Luz**
+* *Amanda Luz*
     - Email: alc2@cesar.school
     - LinkedIn: [https://www.linkedin.com/in/amandaaluzc](https://www.linkedin.com/in/amandaaluzc)
 
-* **Eric Albuquerque**
+* *Eric Albuquerque*
     - Email: ega2@cesar.school
     - LinkedIn: [https://www.linkedin.com/in/eric-albuquerque02](https://www.linkedin.com/in/eric-albuquerque02)
 
-* **Lucas Menezes Santana**
+* *Lucas Menezes Santana*
     - Email: lms4@cesar.school
     - LinkedIn: [www.linkedin.com/in/lucasmenezes08](https://www.linkedin.com/in/lucasmenezes08)
 
-* **Ricardo Freitas**
+* *Ricardo Freitas*
     - Email: rspff@cesar.school
     - LinkedIn: [https://www.linkedin.com/in/ricardospfreitas](https://www.linkedin.com/in/ricardospfreitas)
 
