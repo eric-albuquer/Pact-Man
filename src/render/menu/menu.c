@@ -8,6 +8,10 @@
 #include <math.h>
 #include <string.h>
 
+//===============================================================
+//  MUSICAS E SONS
+//===============================================================
+
 typedef enum {
     MUSIC_MENU,
 
@@ -25,6 +29,10 @@ typedef enum {
     SOUND_COUNT
 } SoundEnum;
 
+//===============================================================
+//  SPRITES E ANIMAÇÕES
+//===============================================================
+
 typedef enum {
     SPRITE_BACKGROUND,
 
@@ -41,7 +49,9 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
-static Menu* currentMenu = NULL;
+//===============================================================
+//  VARIÁVEIS INTERNAS
+//===============================================================
 
 static FlameParticle flames[NUM_FLAMES];
 static bool flamesInit = false;
@@ -50,6 +60,10 @@ static bool showTutorial = false;
 static Button* volumeButtonRef = NULL;
 static int volumeLevel = 2;
 
+//===============================================================
+//  AÇÕES DOS BOTÕES
+//===============================================================
+
 // ---- Aqui sao os botoes ---- 
 void onPlay() {
     state = MENU_CUTSCENE1;
@@ -57,7 +71,6 @@ void onPlay() {
 
 void onTutorial() {
     showTutorial = true;
-    printf("[MENU] Rapaz, clicaram no botão de tutorial\n");
 }
 
 void onVolume() {
@@ -69,8 +82,6 @@ void onVolume() {
         snprintf(volumeButtonRef->text, sizeof(volumeButtonRef->text),
             "VOLUME: %d%%", volumeLevel);
     }
-
-    printf("[MENU] Volume agora em %d%%\n", volumeLevel);
 }
 
 void onDifficulty() {
@@ -78,7 +89,6 @@ void onDifficulty() {
 }
 
 void onCutsceneNext() {
-    if (!currentMenu) return;
     if (state < MENU_CUTSCENE1 || state > MENU_CUTSCENE5) return;
 
     if (state < MENU_CUTSCENE5) {
@@ -89,7 +99,6 @@ void onCutsceneNext() {
 }
 
 void onCutscenePrev() {
-    if (!currentMenu) return;
     if (state < MENU_CUTSCENE1 || state > MENU_CUTSCENE5) return;
 
     if (state > MENU_CUTSCENE1) {
@@ -106,42 +115,9 @@ void onScore() {
     state = CREDITS_SCORE;
 }
 
-// ---- Metodos do menu viu galera ---- :D
-void _free(Menu* this) {
-    if (!this) return;
-
-    if (this->play) {
-        this->play->free(this->play);
-    }
-    if (this->tutorial) {
-        this->tutorial->free(this->tutorial);
-    }
-    if (this->volume) {
-        this->volume->free(this->volume);
-    }
-    if (this->difficulty) {
-        this->difficulty->free(this->difficulty);
-    }
-    if (this->cutscenePrev) {
-        this->cutscenePrev->free(this->cutscenePrev);
-    }
-    if (this->cutsceneNext) {
-        this->cutsceneNext->free(this->cutsceneNext);
-    }
-
-    // for (int i = 0; i < ANIMATION_COUNT; i++) {
-    //     UnloadAnimation(this->animations[i]);
-    // }
-    // free(this->animations);
-
-    for (int i = 0; i < SPRITE_COUNT; i++) {
-        UnloadSprite(this->sprites[i]);
-    }
-    free(this->sprites);
-
-    free(this);
-}
-
+//===============================================================
+//  FUNÇÃO PARA REINICIAR A ANIMAÇÃO DA CHAMA
+//===============================================================
 
 static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
     f->x = (float)(rand() % screenWidth);
@@ -156,92 +132,94 @@ static void ResetFlame(FlameParticle* f, int screenWidth, int screenHeight) {
     f->color = (Color){ r, g, b, a };
 }
 
-static const char* cutsceneSlide0[] = {
-    "Após perseguir Pac-Man sem sucesso pelos vários labirintos do famoso jogo clássico,",
-    "a Gangue dos Fantasmas foi condenada a viver eternamente no Inferno de Dante."
-};
-static const char* cutsceneSlide1[] = {
-    "Para reverter essa triste e injusta punição,",
-    "Pac-Man fez um pacto com Lúcifer visando libertar os pobres fantasmas."
-};
-static const char* cutsceneSlide2[] = {
-    "Enfurecido, Lúcifer só permite que os fantasmas escapem",
-    "se conseguirem encontrar as saídas de pelo menos quatro círculos do Inferno."
-};
-static const char* cutsceneSlide3[] = {
-    "Além disso, ele transforma Pac-Man em Pact-Man,",
-    "que, junto com seus clones,",
-    "deve impedir que os fantasmas escapem."
-};
-static const char* cutsceneSlide4[] = {
-    "O feitiço só será quebrado se os fantasmas completarem a difícil jornada."
-};
+//===============================================================
+//  TOCAR SONS E MÚSICAS
+//===============================================================
 
-// --- 2. Criamos um "array de arrays" para organizar os slides ---
-static const char** allCutsceneSlides[] = {
-    cutsceneSlide0,
-    cutsceneSlide1,
-    cutsceneSlide2,
-    cutsceneSlide3,
-    cutsceneSlide4
-};
+static void playSound(Menu* this) {
+    Audio* audio = this->audio;
 
-// --- 3. Guardamos a contagem de linhas de cada slide ---
-static int allSlideLineCounts[] = { 2, 2, 2, 3, 1 };
+    audio->updateMusic(audio, MUSIC_MENU);
 
+    int cutsceneIdx = state - MENU_CUTSCENE1;
 
-// --- 4. Sua função 'drawCutscene' ajustada ---
-static void drawCutscene(Menu* this) {
-    // Esta parte fica igual
-    int idx = min(state, MENU_CUTSCENE5) - MENU_CUTSCENE1;
-
-    DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
-    DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
-
-    // --- Início do Bloco de Centralização Simples ---
-
-    // Removemos esta linha:
-    // DrawText(cutsceneTexts[idx], 100, this->height - 200, 40, WHITE);
-
-    // E adicionamos este loop simples:
-
-    const char** currentSlideLines = allCutsceneSlides[idx]; // Pega o slide certo
-    int lineCount = allSlideLineCounts[idx];           // Pega o n° de linhas
-
-    int fontSize = 40;
-    int lineSpacing = 10;
-    int posY = this->height - 200; // Posição Y inicial
-
-    for (int i = 0; i < lineCount; i++) {
-        const char* line = currentSlideLines[i];
-
-        // 1. Mede o tamanho da linha
-        int lineWidth = MeasureText(line, fontSize);
-
-        // 2. Calcula o X centralizado
-        int posX = (this->width - lineWidth) / 2;
-
-        // 3. Desenha a linha
-        DrawText(line, posX, posY, fontSize, WHITE);
-
-        // 4. Move o Y para a próxima linha
-        posY += fontSize + lineSpacing;
+    if (state >= MENU_CUTSCENE1) {
+        if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + cutsceneIdx))
+            audio->updateMusic(audio, MUSIC_CUTSCENE1 + cutsceneIdx);
+        else
+            state = min(state + 1, MENU_CUTSCENE5);
     }
-    // --- Fim do Bloco de Centralização ---
-
-    // Esta parte final fica igual
-    if (this->cutscenePrev) this->cutscenePrev->draw(this->cutscenePrev);
-    if (state < MENU_CUTSCENE5) {
-        strcpy(this->cutsceneNext->text, "NEXT");
-        this->cutsceneNext->color = (Color){ 0, 0, 0, 180 };
-        this->cutsceneNext->fontColor = (Color){ 255, 255, 255, 150 };
-    } else {
-        strcpy(this->cutsceneNext->text, "JOGAR");
-        this->cutsceneNext->color = (Color){ 0, 255, 0, 255 };
-        this->cutsceneNext->fontColor = (Color){ 255, 0, 0, 255 };
-    }
-    if (this->cutsceneNext) this->cutsceneNext->draw(this->cutsceneNext);
 }
+
+//===============================================================
+//  ATUALIZAR MENU PRINCIPAL
+//===============================================================
+
+static void updateMainContent(Menu* this) {
+    Audio* audio = this->audio;
+    Vector2 mouse = GetMousePosition();
+
+    playSound(this);
+
+    if (showTutorial) {
+        if (IsKeyPressed(KEY_BACKSPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            showTutorial = false;
+        }
+        return;
+    }
+
+    Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->credits, this->score };
+
+    for (int i = 0; i < 6; i++) {
+        Button* b = buttons[i];
+        if (!b) continue;
+
+        b->hovered = b->isInside(b, mouse);
+
+        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && b->hovered) {
+            audio->playSound(audio, SOUND_CLICK_BUTTON);
+            if (b->action) b->action();
+        }
+    }
+}
+
+//===============================================================
+//  ATUALIZAR CUTSCENES
+//===============================================================
+
+static void updateCutscene(Menu* this) {
+    playSound(this);
+
+    if (IsKeyPressed(KEY_SPACE)) {
+        onCutsceneNext();
+    }
+    if (IsKeyPressed(KEY_BACKSPACE)) {
+        onCutscenePrev();
+    }
+
+    Vector2 mouse = GetMousePosition();
+    Audio* audio = this->audio;
+
+    Button* buttons[2] = { this->cutscenePrev, this->cutsceneNext };
+
+    for (int i = 0; i < 2; i++) {
+        Button* b = buttons[i];
+        if (!b) continue;
+
+        b->hovered = b->isInside(b, mouse);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
+            audio->playSound(audio, SOUND_CLICK_BUTTON);
+            if (b->action) b->action();
+            if (state <= MENU_CUTSCENE5)
+                audio->restartMusic(audio, MUSIC_CUTSCENE1 + state - MENU_CUTSCENE1);
+        }
+    }
+}
+
+//===============================================================
+//  DESENHAR MENU PRINCIPAL
+//===============================================================
 
 static void drawMainContent(Menu* this) {
     DrawSprite(this->sprites[SPRITE_BACKGROUND], 0, 0, this->width, this->height, WHITE);
@@ -330,87 +308,104 @@ static void drawMainContent(Menu* this) {
     if (this->score)      this->score->draw(this->score);
 }
 
+//===============================================================
+//  TEXTOS DAS CUTSCENES
+//===============================================================
 
-void draw(Menu* this) {
-    if (state == MENU_MAIN_CONTENT)
-        drawMainContent(this);
-    else if (state >= MENU_CUTSCENE1 && state <= MENU_CUTSCENE5)
-        drawCutscene(this);
+static const char* cutsceneSlide0[] = {
+    "Após perseguir Pac-Man sem sucesso pelos vários labirintos do famoso jogo clássico,",
+    "a Gangue dos Fantasmas foi condenada a viver eternamente no Inferno de Dante."
+};
+static const char* cutsceneSlide1[] = {
+    "Para reverter essa triste e injusta punição,",
+    "Pac-Man fez um pacto com Lúcifer visando libertar os pobres fantasmas."
+};
+static const char* cutsceneSlide2[] = {
+    "Enfurecido, Lúcifer só permite que os fantasmas escapem",
+    "se conseguirem encontrar as saídas de pelo menos quatro círculos do Inferno."
+};
+static const char* cutsceneSlide3[] = {
+    "Além disso, ele transforma Pac-Man em Pact-Man,",
+    "que, junto com seus clones,",
+    "deve impedir que os fantasmas escapem."
+};
+static const char* cutsceneSlide4[] = {
+    "O feitiço só será quebrado se os fantasmas completarem a difícil jornada."
+};
+
+// --- 2. Criamos um "array de arrays" para organizar os slides ---
+static const char** allCutsceneSlides[] = {
+    cutsceneSlide0,
+    cutsceneSlide1,
+    cutsceneSlide2,
+    cutsceneSlide3,
+    cutsceneSlide4
+};
+
+// --- 3. Guardamos a contagem de linhas de cada slide ---
+static int allSlideLineCounts[] = { 2, 2, 2, 3, 1 };
+
+//===============================================================
+//  DESENHAR CUTSCENES
+//===============================================================
+
+// --- 4. Sua função 'drawCutscene' ajustada ---
+static void drawCutscene(Menu* this) {
+    // Esta parte fica igual
+    int idx = min(state, MENU_CUTSCENE5) - MENU_CUTSCENE1;
+
+    DrawSprite(this->sprites[idx + SPRITE_CUTSCENE1], 0, 0, this->width, this->height, WHITE);
+    DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
+
+    // --- Início do Bloco de Centralização Simples ---
+
+    // Removemos esta linha:
+    // DrawText(cutsceneTexts[idx], 100, this->height - 200, 40, WHITE);
+
+    // E adicionamos este loop simples:
+
+    const char** currentSlideLines = allCutsceneSlides[idx]; // Pega o slide certo
+    int lineCount = allSlideLineCounts[idx];           // Pega o n° de linhas
+
+    int fontSize = 40;
+    int lineSpacing = 10;
+    int posY = this->height - 200; // Posição Y inicial
+
+    for (int i = 0; i < lineCount; i++) {
+        const char* line = currentSlideLines[i];
+
+        // 1. Mede o tamanho da linha
+        int lineWidth = MeasureText(line, fontSize);
+
+        // 2. Calcula o X centralizado
+        int posX = (this->width - lineWidth) / 2;
+
+        // 3. Desenha a linha
+        DrawText(line, posX, posY, fontSize, WHITE);
+
+        // 4. Move o Y para a próxima linha
+        posY += fontSize + lineSpacing;
+    }
+    // --- Fim do Bloco de Centralização ---
+
+    // Esta parte final fica igual
+    if (this->cutscenePrev) this->cutscenePrev->draw(this->cutscenePrev);
+    if (state < MENU_CUTSCENE5) {
+        strcpy(this->cutsceneNext->text, "NEXT");
+        this->cutsceneNext->color = (Color){ 0, 0, 0, 180 };
+        this->cutsceneNext->fontColor = (Color){ 255, 255, 255, 150 };
+    } else {
+        strcpy(this->cutsceneNext->text, "JOGAR");
+        this->cutsceneNext->color = (Color){ 0, 255, 0, 255 };
+        this->cutsceneNext->fontColor = (Color){ 255, 0, 0, 255 };
+    }
+    if (this->cutsceneNext) this->cutsceneNext->draw(this->cutsceneNext);
 }
 
-static void playSound(Menu* this) {
-    Audio* audio = this->audio;
 
-    audio->updateMusic(audio, MUSIC_MENU);
-
-    int cutsceneIdx = state - MENU_CUTSCENE1;
-
-    if (state >= MENU_CUTSCENE1) {
-        if (!audio->hasEndMusic(audio, MUSIC_CUTSCENE1 + cutsceneIdx))
-            audio->updateMusic(audio, MUSIC_CUTSCENE1 + cutsceneIdx);
-        else
-            state = min(state + 1, MENU_CUTSCENE5);
-    }
-}
-
-static void updateMainContent(Menu* this) {
-    Audio* audio = this->audio;
-    Vector2 mouse = GetMousePosition();
-
-    playSound(this);
-
-    if (showTutorial) {
-        if (IsKeyPressed(KEY_BACKSPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            showTutorial = false;
-        }
-        return;
-    }
-
-    Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->credits, this->score };
-
-    for (int i = 0; i < 6; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
-
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-        }
-    }
-}
-
-
-static void updateCutscene(Menu* this) {
-    playSound(this);
-
-    if (IsKeyPressed(KEY_SPACE)) {
-        onCutsceneNext();
-    }
-    if (IsKeyPressed(KEY_BACKSPACE)) {
-        onCutscenePrev();
-    }
-
-    Vector2 mouse = GetMousePosition();
-    Audio* audio = this->audio;
-
-    Button* buttons[2] = { this->cutscenePrev, this->cutsceneNext };
-
-    for (int i = 0; i < 2; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
-
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-            if (state <= MENU_CUTSCENE5)
-                audio->restartMusic(audio, MUSIC_CUTSCENE1 + state - MENU_CUTSCENE1);
-        }
-    }
-}
+//===============================================================
+//  MÉTODO DE ATUALIZAR DA CLASSE
+//===============================================================
 
 void update(Menu* this) {
     if (!this) return;
@@ -420,6 +415,21 @@ void update(Menu* this) {
     else if (state >= MENU_CUTSCENE1 && state <= MENU_CUTSCENE5)
         updateCutscene(this);
 }
+
+//===============================================================
+//  MÉTODO DE DESENHAR
+//===============================================================
+
+void draw(Menu* this) {
+    if (state == MENU_MAIN_CONTENT)
+        drawMainContent(this);
+    else if (state >= MENU_CUTSCENE1 && state <= MENU_CUTSCENE5)
+        drawCutscene(this);
+}
+
+//===============================================================
+//  CARREGAR ÁUDIO
+//===============================================================
 
 static void loadAudio(Menu* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
@@ -436,6 +446,10 @@ static void loadAudio(Menu* this) {
     audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
 }
 
+//===============================================================
+//  CARREGAR SPRITES E ANIMAÇÕES
+//===============================================================
+
 static void loadSprites(Menu* this) {
     //Animation* animations = this->animations;
     Sprite* sprites = this->sprites;
@@ -449,26 +463,19 @@ static void loadSprites(Menu* this) {
     sprites[SPRITE_CUTSCENE5] = LoadSprite("assets/sprites/menu/cutscene5.jpg");
 }
 
-Menu* new_Menu(int width, int height) {
-    Menu* this = malloc(sizeof(Menu));
+//===============================================================
+//  CARREGAR BOTÕES
+//===============================================================
 
-    this->width = width;
-    this->height = height;
-
+static void loadButtons(Menu* this) {
     int buttonWidth = 300;
     int buttonHeight = 60;
     int spacing = 20;
 
     int delta = buttonHeight + spacing;
 
-    int centerX = width / 2 - buttonWidth / 2;
-    int startY = height / 2 - (buttonHeight * 5 + spacing * 2) / 2;
-
-    //this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
-    this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
-
-    loadAudio(this);
-    loadSprites(this);
+    int centerX = this->width / 2 - buttonWidth / 2;
+    int startY = this->height / 2 - (buttonHeight * 5 + spacing * 2) / 2;
 
     this->play = new_Button(
         centerX,
@@ -570,7 +577,7 @@ Menu* new_Menu(int width, int height) {
     int btnW = 160;
     int btnH = 50;
     int margin = 40;
-    int y = height - btnH - margin;
+    int y = this->height - btnH - margin;
 
     this->cutscenePrev = new_Button(
         margin,
@@ -589,7 +596,7 @@ Menu* new_Menu(int width, int height) {
     );
 
     this->cutsceneNext = new_Button(
-        width - btnW - margin,
+        this->width - btnW - margin,
         y,
         btnW,
         btnH,
@@ -603,12 +610,67 @@ Menu* new_Menu(int width, int height) {
         30,
         onCutsceneNext
     );
+}
+
+//===============================================================
+//  MÉTODO PARA LIBERAR MEMÓRIA
+//===============================================================
+
+void _free(Menu* this) {
+    if (!this) return;
+
+    if (this->play) {
+        this->play->free(this->play);
+    }
+    if (this->tutorial) {
+        this->tutorial->free(this->tutorial);
+    }
+    if (this->volume) {
+        this->volume->free(this->volume);
+    }
+    if (this->difficulty) {
+        this->difficulty->free(this->difficulty);
+    }
+    if (this->cutscenePrev) {
+        this->cutscenePrev->free(this->cutscenePrev);
+    }
+    if (this->cutsceneNext) {
+        this->cutsceneNext->free(this->cutsceneNext);
+    }
+
+    // for (int i = 0; i < ANIMATION_COUNT; i++) {
+    //     UnloadAnimation(this->animations[i]);
+    // }
+    // free(this->animations);
+
+    for (int i = 0; i < SPRITE_COUNT; i++) {
+        UnloadSprite(this->sprites[i]);
+    }
+    free(this->sprites);
+
+    free(this);
+}
+
+//===============================================================
+//  CONSTRUTOR DA CLASSE
+//===============================================================
+
+Menu* new_Menu(int width, int height) {
+    Menu* this = malloc(sizeof(Menu));
+
+    this->width = width;
+    this->height = height;
+
+    //this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
+    this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
+
+    loadAudio(this);
+    loadSprites(this);
+    loadButtons(this);
 
     this->draw = draw;
     this->update = update;
     this->free = _free;
-
-    currentMenu = this;
 
     return this;
 }

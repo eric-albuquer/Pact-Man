@@ -47,7 +47,12 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
-static Credits* thisCredits;
+//===============================================================
+//  VARIÁVEIS INTERNAS
+//===============================================================
+
+static char buffer[1000];
+static int (*cmp)(const void* a, const void* b);
 
 //===============================================================
 //  FUNÇÕES USADAS PARA O QUICKSORT
@@ -85,15 +90,15 @@ static int cmpTime(const void* a, const void* b) {
 //===============================================================
 
 static void sortCoins() {
-    thisCredits->scores->sort(thisCredits->scores, cmpCoins);
+    cmp = cmpCoins;
 }
 
 static void sortFragments() {
-    thisCredits->scores->sort(thisCredits->scores, cmpFragments);
+    cmp = cmpFragments;
 }
 
 static void sortTime() {
-    thisCredits->scores->sort(thisCredits->scores, cmpTime);
+    cmp = cmpTime;
 }
 
 static void next() {
@@ -197,14 +202,16 @@ static void updateAddScore(Credits* this) {
 //===============================================================
 
 static void updateShowScore(Credits* this) {
+    if (this->updateCount % 8 == 0)
+        for (int i = 0; i < ANIMATION_COUNT; i++)
+            UpdateAnimation(&this->animations[i]);
     Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_SCORE);
     strcpy(this->prevBtn->text, "MENU");
     Button* buttons[] = { this->prevBtn, this->nextBtn, this->sortByCoins, this->sortByFragments, this->sortByTime };
-    updateButtons(this, buttons, 5);
-    if (this->updateCount % 8 == 0)
-        for (int i = 0; i < ANIMATION_COUNT; i++)
-            UpdateAnimation(&this->animations[i]);
+    bool pressed = updateButtons(this, buttons, 5);
+    if (pressed && state == CREDITS_SCORE)
+        this->scores->sort(this->scores, cmp);
 }
 
 //===============================================================
@@ -225,6 +232,33 @@ static void updateFinalCredits(Credits* this) {
 }
 
 //===============================================================
+//  TEXTOS DAS CUTSCENES
+//===============================================================
+
+static const char* cutsceneSlide0[] = {
+    "Após a árdua jornada,",
+    "os fantasmas escapam da escuridão do Inferno e dos Pact-Men enfurecidos."
+};
+static const char* cutsceneSlide1[] = {
+    "Ao cumprirem o pacto,",
+    "os fantasmas finalmente alcançam a liberdade."
+};
+static const char* cutsceneSlide2[] = {
+    "Com seu feitiço quebrado,",
+    "Pac-Man retorna à forma original e celebra a restauração da paz."
+};
+
+// --- 2. Criamos um "array de arrays" para organizar os slides ---
+static const char** allCutsceneSlides[] = {
+    cutsceneSlide0,
+    cutsceneSlide1,
+    cutsceneSlide2,
+};
+
+// --- 3. Guardamos a contagem de linhas de cada slide ---
+static int allSlideLineCounts[] = { 2, 2, 2 };
+
+//===============================================================
 //  DESENHAR TELA DE CUTSCENES
 //===============================================================
 
@@ -236,18 +270,34 @@ static void drawCutscenes(Credits* this) {
         prev();
     }
 
-    static const char* cutsceneTexts[] = {
-            "Após a árdua jornada,\nos fantasmas escapam da escuridão do Inferno e dos Pact-Men enfurecidos.",
+    const int idx = (state - CREDITS_CUTSCENE1);
 
-            "Ao cumprirem o pacto,\nos fantasmas finalmente alcançam a liberdade.",
-
-            "Com seu feitiço quebrado,\nPac-Man retorna à forma original e celebra a restauração da paz."
-    };
-
-    int spriteIdx = SPRITE_END1 + (state - CREDITS_CUTSCENE1);
+    int spriteIdx = SPRITE_END1 + idx;
     DrawSprite(this->sprites[spriteIdx], 0, 0, this->width, this->height, WHITE);
     DrawRectangle(0, this->height - 210, this->width, 250, (Color) { 0, 0, 0, 150 });
-    drawCenteredText(cutsceneTexts[(state - CREDITS_CUTSCENE1)], this->width >> 1, this->height - 200, 40, WHITE);
+
+    const char** currentSlideLines = allCutsceneSlides[idx]; // Pega o slide certo
+    int lineCount = allSlideLineCounts[idx];           // Pega o n° de linhas
+
+    int fontSize = 40;
+    int lineSpacing = 10;
+    int posY = this->height - 200; // Posição Y inicial
+
+    for (int i = 0; i < lineCount; i++) {
+        const char* line = currentSlideLines[i];
+
+        // 1. Mede o tamanho da linha
+        int lineWidth = MeasureText(line, fontSize);
+
+        // 2. Calcula o X centralizado
+        int posX = (this->width - lineWidth) / 2;
+
+        // 3. Desenha a linha
+        DrawText(line, posX, posY, fontSize, WHITE);
+
+        // 4. Move o Y para a próxima linha
+        posY += fontSize + lineSpacing;
+    }
 
     if (state > CREDITS_CUTSCENE1) this->prevBtn->draw(this->prevBtn);
     this->nextBtn->draw(this->nextBtn);
@@ -260,7 +310,7 @@ static void drawCutscenes(Credits* this) {
 static void drawAddScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_ADD_CREDITS], 0, 0, this->width, this->height, WHITE);
     drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 70, WHITE);
-    static char buffer[1000];
+
     strcpy(buffer, this->name);
     strcat(buffer, (this->updateCount & 16) ? "_" : " ");
     drawCenteredText(buffer, this->width >> 1, this->height >> 1, 70, WHITE);
@@ -275,7 +325,6 @@ static void drawAddScore(Credits* this) {
 static void drawShowScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_CREDITS], 0, 0, this->width, this->height, WHITE);
     ArrayList* scores = this->scores;
-    static char buffer[1000];
     const int margin = 15;
     const int size = 30;
     const int deltaIten = margin + size;
@@ -591,7 +640,6 @@ static void _free(Credits* this) {
 
 Credits* new_Credits(int width, int height, Score* score) {
     Credits* this = malloc(sizeof(Credits));
-    thisCredits = this;
 
     this->width = width;
     this->height = height;

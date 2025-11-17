@@ -7,6 +7,10 @@
 
 #include "enemy.h"
 
+//===============================================================
+//  SPRITES E ANIMAÇÕES
+//===============================================================
+
 typedef enum {
     SPRITE_WALL_LUXURIA,
     SPRITE_WALL_GULA,
@@ -75,6 +79,10 @@ typedef enum {
     ANIMATION_COUNT
 } AnimationsEnum;
 
+//===============================================================
+//  MÚSICAS E SONS
+//===============================================================
+
 typedef enum {
     MUSIC_LUXURIA,
     MUSIC_GULA,
@@ -116,16 +124,28 @@ typedef enum {
     SOUND_COUNT
 } SoundsEnum;
 
+//===============================================================
+//  VARIÁVEIS INTERNAS
+//===============================================================
+
 static char buffer[1000];
 
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, {0, 255, 0, 255}, {0, 255, 255, 255} };
 static const Color HUD_OPACITY = { 0, 0, 0, 200 };
+
+//===============================================================
+//  ATUALIZAR ANIMAÇÕES
+//===============================================================
 
 static void updateAnimations(Game* this) {
     for (int i = 0; i < ANIMATION_COUNT; i++) {
         UpdateAnimation(&this->animations[i]);
     }
 }
+
+//===============================================================
+//  DESENHAR UMA CÉLULA
+//===============================================================
 
 static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens) {
     if (!cell) return;
@@ -182,7 +202,6 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     if (!itens) return;
 
-
     if (cell->type == CELL_COIN) {
         static const float coinSize = 0.7f;
         float w = (1 - coinSize) * size;
@@ -210,6 +229,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     //DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
+//===============================================================
+//  DESENHAR BARRA DE VIDA DO PLAYER
+//===============================================================
+
 static void drawLifeBar(Game* this, int x, int y, int width, int height) {
     int h = height * 0.26;
     int w = width * 0.88;
@@ -221,6 +244,10 @@ static void drawLifeBar(Game* this, int x, int y, int width, int height) {
     DrawRectangle(x + 50, y + h + 10, lx, h, color);
     DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
 }
+
+//===============================================================
+//  DESENHAR BATERIA DO PLAYER
+//===============================================================
 
 static void drawBateryBar(Game* this, int x, int y, int width, int height) {
     if (this->map->player->biome != VIOLENCIA) return;
@@ -235,6 +262,10 @@ static void drawBateryBar(Game* this, int x, int y, int width, int height) {
     DrawSprite(this->sprites[SPRITE_BATERY_BAR], x, y, width, height, WHITE);
     //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
 }
+
+//===============================================================
+//  DESENHAR TEMPO NA HUD
+//===============================================================
 
 static void drawTimeHUD(Game* this, int x, int y, int width) {
     Map* map = this->map;
@@ -272,6 +303,10 @@ static void drawTimeHUD(Game* this, int x, int y, int width) {
     drawCenteredText(stageText[stage], x + (width >> 1), y + 50, 20, stageColor);
 }
 
+//===============================================================
+//  DESENHAR INFORMAÇÕES DA HUD
+//===============================================================
+
 static void drawInfoHud(Game* this, int x, int y, int size) {
     if (this->map->player->biome < VIOLENCIA) {
         DrawRectangle(x, y, size * 3, size * 2, HUD_OPACITY);
@@ -284,6 +319,10 @@ static void drawInfoHud(Game* this, int x, int y, int size) {
     }
     drawTimeHUD(this, x, y + size * 2, size * 3);
 }
+
+//===============================================================
+//  DESENHAR ALERTA DE AÇÃO NA HUD
+//===============================================================
 
 static void drawActionHud(Game* this, Color color) {
     BeginTextureMode(this->shadowMap);
@@ -300,6 +339,10 @@ static void drawActionHud(Game* this, Color color) {
     }, WHITE);
     EndBlendMode();
 }
+
+//===============================================================
+//  DESENHAR EFEITOS DO PLAYER
+//===============================================================
 
 static void drawEffects(Game* this, int x, int y, int size) {
     Sprite* sprites = this->sprites;
@@ -349,6 +392,10 @@ static void drawEffects(Game* this, int x, int y, int size) {
         ey += delta;
     }
 }
+
+//===============================================================
+//  DESENHAR MINIMAPA
+//===============================================================
 
 static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     Map* map = this->map;
@@ -414,10 +461,18 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
     DrawRectangle(x0 + offset + 25, y0 + offset + 25, cellSize, cellSize, WHITE);
 }
 
+//===============================================================
+//  DESENHAR SETA PARA O PRÓXIMO BIOMA
+//===============================================================
+
 static void drawArrowToNextBiome(Game* this, int x, int y, int width, int height) {
     DrawSprite(this->sprites[SPRITE_ARROW_NEXT_BIOME], x, y, width, height, WHITE);
     drawCenteredText("BIOMA LIBERÁDO", this->offsetHalfX, y + height * 0.41, 30, PURPLE);
 }
+
+//===============================================================
+//  DESENHAR A HUD
+//===============================================================
 
 static void drawHud(Game* this) {
     Map* map = this->map;
@@ -436,6 +491,10 @@ static void drawHud(Game* this) {
 
     drawEffects(this, 30, 30, 80);
 
+    drawMinimap(this, this->width - 520, 40, 500, 80);
+
+    if (map->manager->heaven) return;
+
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
 
     float def = map->biomeTime / BIOME_DEGEN_START_TIME;
@@ -446,10 +505,6 @@ static void drawHud(Game* this) {
         DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 10, BIOME_COLOR[p->biome]);
     }
 
-    drawMinimap(this, this->width - 520, 40, 500, 80);
-
-    if (map->manager->heaven) return;
-
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
     drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
     drawInfoHud(this, this->width - 280, 550, 80);
@@ -457,6 +512,10 @@ static void drawHud(Game* this) {
     if (p->biomeFragment >= 2 && this->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
 }
+
+//===============================================================
+//  TOCAR SONS
+//===============================================================
 
 static void playAudio(Game* this) {
     Player* p = this->map->player;
@@ -543,6 +602,10 @@ static void playAudio(Game* this) {
     }
 }
 
+//===============================================================
+//  DESENHAR O PLAYER NO MAPA
+//===============================================================
+
 static inline void drawPlayer(Game* this) {
     Player* p = this->map->player;
     Color color = WHITE;
@@ -551,6 +614,10 @@ static inline void drawPlayer(Game* this) {
     if (p->effects.invulnerability.duration > 0 && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = PURPLE;
     DrawAnimation(this->animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
 }
+
+//===============================================================
+//  DESENHAR CHUNKS NO MAPA (DEBUG)
+//===============================================================
 
 static void inline drawChunksMap(Game* this, int x, int y) {
     Map* map = this->map;
@@ -567,6 +634,10 @@ static void inline drawChunksMap(Game* this, int x, int y) {
         }
     }
 }
+
+//===============================================================
+//  DESENHAR MAPA
+//===============================================================
 
 static void drawMap(Game* this) {
     Sprite* sprites = this->sprites;
@@ -667,16 +738,33 @@ static void drawMap(Game* this) {
         }, WHITE);
         EndBlendMode();
     }
+}
 
+//===============================================================
+//  DESENHAR JOGO
+//===============================================================
+
+static void drawGame(Game* this){
+    drawMap(this);
     drawPlayer(this);
-
     //drawChunksMap(this, offsetHalfXAnimated, offsetHalfYAnimated);
-
     drawHud(this);
     playAudio(this);
-
-    this->frameCount++;
 }
+
+//===============================================================
+//  DESENHAR TELA DE MORTE
+//===============================================================
+
+static void drawDeathScreen(Game* this) {
+    DrawSprite(this->sprites[SPRITE_GAME_OVER], 0, 0, this->width, this->height, WHITE);
+    this->backMenu->draw(this->backMenu);
+    this->restartGame->draw(this->restartGame);
+}
+
+//===============================================================
+//  ATUALIZAR TELA DE MORTE
+//===============================================================
 
 static bool deathSoundPlayed = false;
 static void updateDeathScreen(Game* this) {
@@ -701,25 +789,33 @@ static void updateDeathScreen(Game* this) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
             audio->playSound(audio, SOUND_CLICK_BUTTON);
             deathSoundPlayed = false;
+            this->map->restart(this->map);
             if (b->action) b->action();
         }
     }
 }
 
+//===============================================================
+//  MÉTODO DA CLASSE PARA ATUALIZAR
+//===============================================================
+
 static void update(Game* this) {
     if (state == GAME_DEATH) updateDeathScreen(this);
 }
 
-static void drawDeathScreen(Game* this) {
-    DrawSprite(this->sprites[SPRITE_GAME_OVER], 0, 0, this->width, this->height, WHITE);
-    this->backMenu->draw(this->backMenu);
-    this->restartGame->draw(this->restartGame);
-}
+//===============================================================
+//  MÉTODO DA CLASSE PARA DESENHAR
+//===============================================================
 
 static void draw(Game* this) {
-    if (state == GAME_MAIN_CONTENT) drawMap(this);
+    if (state == GAME_MAIN_CONTENT) drawGame(this);
     else if (state == GAME_DEATH) drawDeathScreen(this);
+    this->frameCount++;
 }
+
+//===============================================================
+//  CARREGAR SPRITES
+//===============================================================
 
 static void loadSprites(Game* this) {
     Sprite* sprites = this->sprites;
@@ -822,6 +918,10 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_GAME_OVER] = LoadSprite("assets/sprites/hud/game_over.jpg");
 }
 
+//===============================================================
+//  CARREGAR SONS
+//===============================================================
+
 static void loadSounds(Game* this) {
     Audio* audio = new_Audio(MUSIC_COUNT, SOUND_COUNT);
     this->audio = audio;
@@ -862,16 +962,21 @@ static void loadSounds(Game* this) {
     audio->loadSound(audio, "assets/sounds/death.wav", SOUND_DEATH);
 }
 
-static Map* thisMap;
+//===============================================================
+//  FUNÇÕES DE AÇÃO DOS BOTÕES
+//===============================================================
+
 static void backToMenu() {
-    thisMap->restart(thisMap);
     state = MENU_MAIN_CONTENT;
 }
 
 static void restartGame() {
-    thisMap->restart(thisMap);
     state = GAME_MAIN_CONTENT;
 }
+
+//===============================================================
+//  CARREGAR BOTÕES
+//===============================================================
 
 static void loadButtons(Game* this) {
     int btnW = 160;
@@ -911,11 +1016,19 @@ static void loadButtons(Game* this) {
     );
 }
 
+//===============================================================
+//  MÉTODO PARA SINCRONIZAR ATUALIZAÇÃO DO JOGO COM FRAME
+//===============================================================
+
 static void saveUpdate(Game* this) {
     updateAnimations(this);
     this->lastUpdate = this->frameCount;
     this->updateCount++;
 }
+
+//===============================================================
+//  MÉTODO PARA LIBERAR MEMÓRIA
+//===============================================================
 
 static void _free(Game* this) {
     for (int i = 0; i < ANIMATION_COUNT; i++) {
@@ -935,8 +1048,13 @@ static void _free(Game* this) {
     free(this);
 }
 
+//===============================================================
+//  CONSTRUTOR DA CLASSE
+//===============================================================
+
 Game* new_Game(int width, int height, int cellSize, Map* map) {
     Game* this = malloc(sizeof(Game));
+
     this->width = width;
     this->height = height;
     this->cellSize = cellSize;
@@ -953,7 +1071,6 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     this->offsetHalfY = height >> 1;
 
     this->map = map;
-    thisMap = map;
 
     this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
     this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
