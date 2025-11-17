@@ -121,10 +121,6 @@ static char buffer[1000];
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, {0, 255, 0, 255}, {0, 255, 255, 255} };
 static const Color HUD_OPACITY = { 0, 0, 0, 200 };
 
-static inline Color getNegativeColor(Color color) {
-    return (Color) { (color.r + 128) & 255, (color.g + 128) & 255, (color.b + 128) & 255, 255 };
-}
-
 static void updateAnimations(Game* this) {
     for (int i = 0; i < ANIMATION_COUNT; i++) {
         UpdateAnimation(&this->animations[i]);
@@ -214,15 +210,6 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     //DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
-static inline Color LerpColor(Color a, Color b, float t) {
-    Color result;
-    result.r = a.r + (b.r - a.r) * t;
-    result.g = a.g + (b.g - a.g) * t;
-    result.b = a.b + (b.b - a.b) * t;
-    result.a = a.a + (b.a - a.a) * t;
-    return result;
-}
-
 static void drawLifeBar(Game* this, int x, int y, int width, int height) {
     int h = height * 0.26;
     int w = width * 0.88;
@@ -253,8 +240,8 @@ static void drawTimeHUD(Game* this, int x, int y, int width) {
     Map* map = this->map;
 
     int remainingTime = BIOME_DEGEN_START_TIME - map->biomeTime;
-    int mm = remainingTime / 60;
-    int ss = remainingTime % 60;
+    int mm = max(remainingTime / 60, 0);
+    int ss = max(remainingTime % 60, 0);
 
     sprintf(buffer, "%02d:%02d", mm, ss);
 
@@ -444,6 +431,9 @@ static void drawHud(Game* this) {
     // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     if (p->damaged) drawActionHud(this, RED);
+    if (this->map->biomeTime > BIOME_DEGEN_START_TIME && this->updateCount & 1)
+        drawActionHud(this, BLACK);
+  
     drawEffects(this, 30, 30, 80);
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };

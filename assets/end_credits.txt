@@ -30,7 +30,7 @@ Arrays Dinâmicos
 Bitwise Operations
 
 PROFESSORES
-Natasha Targino AED
+Natacha Targino AED
 
 Tiago Barros PIF
 Pamela Bezerra PIF
@@ -49,7 +49,7 @@ Mauricio FDS
 Juliano GP
 Andre GP
 Walter Charles MC
-Gabriela Canali CORD
+Gabrielle Canalle CORD
 
 COLABORAÇÕES INTELECTUAL
 Mircio Ferreira
@@ -103,7 +103,7 @@ The Coding Train
 APOIO MORAL
 Willian Bezerra
 Gabriel Miranda
-Caio Mateus
+Caio Mathewus
 Andre Avelino
 Brenda Luana
 Augusto Malheiros

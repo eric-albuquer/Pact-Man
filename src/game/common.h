@@ -34,4 +34,17 @@ static inline void drawCenteredText(const char* text, int x, int y, int fontSize
     DrawText(text, x - hw, y, fontSize, color);
 }
 
+static inline Color getNegativeColor(Color color) {
+    return (Color) { (color.r + 128) & 255, (color.g + 128) & 255, (color.b + 128) & 255, 255 };
+}
+
+static inline Color LerpColor(Color a, Color b, float t) {
+    Color result;
+    result.r = a.r + (b.r - a.r) * t;
+    result.g = a.g + (b.g - a.g) * t;
+    result.b = a.b + (b.b - a.b) * t;
+    result.a = a.a + (b.a - a.a) * t;
+    return result;
+}
+
 #endif
