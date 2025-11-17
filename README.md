@@ -111,7 +111,7 @@ Siga estes passos para configurar o ambiente e executar o projeto:
     ```
 
 6.  **Clonar o Repositório**
-    * Clone o repositório do projeto (substitua `...` pela URL correta do repositório):
+    * Clone o repositório do projeto 
     ```bash
     git clone https://github.com/eric-albuquer/Pact-Man
     ```
