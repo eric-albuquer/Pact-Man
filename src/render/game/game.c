@@ -32,6 +32,8 @@ typedef enum {
 
     SPRITE_ICE,
 
+    SPRITE_BONUS,
+
     SPRITE_EFFECT_REGENERATION,
     SPRITE_EFFECT_SLOWNESS,
     SPRITE_EFFECT_INVULNERABILITY,
@@ -166,8 +168,6 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         sprite = sprites[SPRITE_DEGENERATED_2];
     } else if (cell->type == CELL_DEGENERATED_3) {
         sprite = sprites[SPRITE_DEGENERATED_3];
-    } else if (cell->type == CELL_TEMPLE) {
-        color = GRAY;
     } if (cell->type == CELL_HEAVEN) {
         sprite = sprites[SPRITE_HEAVEN];
     }
@@ -200,12 +200,9 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     } else if (cell->type == CELL_PORTAL) {
         DrawAnimation(animations[ANIMATION_PORTAL], x, y, size, color);
     } else if (cell->type == CELL_BONUS) {
-        if (p->cellType == CELL_BONUS) {
-            float update = (float)(this->updateCount % BONUS_DELAY) / BONUS_DELAY;
-            int idx = animations[ANIMATION_BONUS].lenght * update;
-            DrawAnimationFrame(animations[ANIMATION_BONUS], x, y, size, color, idx);
-        } else
-            DrawAnimation(animations[ANIMATION_BONUS], x, y, size, color);
+        float t = (float)(this->map->updateCount % BONUS_DELAY) / BONUS_DELAY;
+        Color c = LerpColor(BLACK, p->cellType == CELL_BONUS ? PURPLE : BLUE, t);
+        DrawSprite(sprites[SPRITE_BONUS], x, y, size, size, c);
     }
 
     if (!itens) return;
@@ -437,7 +434,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
             float size = cellSize;
 
             Color color = BIOME_COLOR[e->biome];
-            if (p->effects.invulnerability.duration > 0 && this->updateCount & 1) color = getNegativeColor(color);
+            if (p->effects.invulnerability.duration > 0 && this->map->updateCount & 1) color = getNegativeColor(color);
 
             if (e->isBoss) {
                 x -= cellSize;
@@ -494,7 +491,7 @@ static void drawHud(Game* this) {
     // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
     if (p->damaged) drawActionHud(this, RED);
-    if (this->map->biomeTime > BIOME_DEGEN_START_TIME && this->updateCount & 1)
+    if (this->map->biomeTime > BIOME_DEGEN_START_TIME && this->map->updateCount & 1)
         drawActionHud(this, BLACK);
 
     drawEffects(this, 30, 30, 80);
@@ -517,7 +514,7 @@ static void drawHud(Game* this) {
     drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
     drawInfoHud(this, this->width - 280, 550, 80);
 
-    if (p->biomeFragment >= 2 && this->updateCount & 4 && p->biome < VIOLENCIA)
+    if (p->biomeFragment >= 2 && this->map->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
 }
 
@@ -716,7 +713,7 @@ static void drawMap(Game* this) {
             }
 
             Color color = BIOME_COLOR[e->biome];
-            if (p->effects.invulnerability.duration > 0 && this->updateCount & 1) color = getNegativeColor(color);
+            if (p->effects.invulnerability.duration > 0 && this->map->updateCount & 1) color = getNegativeColor(color);
 
             int size = this->cellSize;
 
@@ -916,6 +913,8 @@ static void loadSprites(Game* this) {
 
     sprites[SPRITE_ICE] = LoadSprite("assets/sprites/common_cells/ice.png");
 
+    sprites[SPRITE_BONUS] = LoadSprite("assets/sprites/common_cells/bonus.png");
+
     sprites[SPRITE_EFFECT_REGENERATION] = LoadSprite("assets/sprites/effects/regeneration.png");
     sprites[SPRITE_EFFECT_DEGENERATION] = LoadSprite("assets/sprites/effects/degeneration.png");
     sprites[SPRITE_EFFECT_SLOWNESS] = LoadSprite("assets/sprites/effects/slowness.png");
@@ -1036,7 +1035,6 @@ static void loadButtons(Game* this) {
 static void saveUpdate(Game* this) {
     updateAnimations(this);
     this->lastUpdate = this->frameCount;
-    this->updateCount++;
 }
 
 //===============================================================

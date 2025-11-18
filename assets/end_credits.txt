@@ -1,16 +1,16 @@
 DESENVOLVEDORES
-Amanda Luz Chaves
+Amanda Luz
 Eric Albuquerque
 Lucas Menezes
 Ricardo Freitas
 
 DIREÇÃO CRIATIVA / ROTEIRO
 Lucas Menezes
-Amanda Luz Chaves
+Amanda Luz
 Denival Albuquerque
 
 DIREÇÃO DE ARTE
-Amanda Luz Chaves
+Amanda Luz
 Denival Albuquerque
 
 GAMEPLAY PROGRAMERS
@@ -23,28 +23,32 @@ Ricardo Freitas
 UI PROGRAMERS
 Eric Albuquerque
 Ricardo Freitas
-Amanda Luz Chaves
+Amanda Luz
 
 TOOLS PROGRAMERS
 Eric Albuquerque
 
 ÁUDIO PROGRAMERS
 Eric Albuquerque
-Amanda Luz Chaves
+Amanda Luz
 
 GAME BALANCING
 Eric Albuquerque
-Amanda Luz Chaves
+Amanda Luz
 
 DUBLAGEM
 Ricardo Freitas
 
+EQUIPE DE TESTES
+Amanda Luz
+
+DOCUMENTAÇÃO
+Lucas Menezes
+
 MÚSICAS
 Hans Zimmer - F1 Main Theme
 Super Mario Bros. Music - Invincible
-
-EQUIPE DE TESTES
-Amanda Luz Chaves
+Mike Oldfield - Tubular Bells
 
 BIBLIOTECAS
 Raylib
@@ -69,6 +73,11 @@ CMake / Make
 Discord
 WhatsApp
 
+APOIO TÉCNICO E PESQUISA
+Lucas Menezes
+João Carlos
+Denival Albuquerque
+
 INSPIRAÇÂO
 Pac-Man
 Toru Iwatani (Pacman)
@@ -90,10 +99,6 @@ Pac-Man
 Blinky (fantasma vermelho)
 Inky (fantasma ciano)
 Clyde (fantasma laranja)
-
-APOIO TÉCNICO E PESQUISA
-João Carlos
-Denival Albuquerque
 
 ALGORÍTMOS
 Tabela Hash (endereçamento aberto)
@@ -140,6 +145,8 @@ Cassian Ferrari
 
 JOGOS PARCEIROS
 Bomber Clean
+Smash toons
+Ecos da infância
 
 EQUIPE DE SUPORTE
 Marcelo Luz
@@ -199,6 +206,15 @@ The Coding Train
 Manual do Mundo
 Pedro Loss
 
+OFERECIMENTO
+Cesar School
+Ministério da Cultúra
+Ministério da Educação
+Governo federal
+Estado de Pernambuco
+Prefeitura do Recife
+Versado Café
+
 HOMENAGEM
 Árabes de Jõao Carlos
 Mohamed
@@ -211,6 +227,7 @@ Gabriel Borteleto
 Ayrton Senna
 Max Vestappen
 Lewis Hamilton
+Arnold Schwarzenegger
 Vagner Moura
 Walter Salles
 Fernanda Torres
@@ -221,9 +238,6 @@ Tom Hanks
 Tom Cruise
 Tom Cavalcanti
 Harrison Ford
-Arnold Schwarzenegger
-Sylvester Stallone
-Chuck Norris
 Ivete Sangalo
 Sport
 Náutico
@@ -234,11 +248,3 @@ Portaria do Cesar
 Cesar Apolo
 Cesar Brum
 Cesar Tiradentes
-
-OFERECIMENTO
-Cesar School
-Ministério da Cultúra
-Ministério da Educação
-Governo federal
-Estado de Pernambuco
-Prefeitura do Recife

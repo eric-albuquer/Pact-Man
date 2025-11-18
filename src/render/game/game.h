@@ -26,7 +26,6 @@ typedef struct Game {
 
     unsigned int lastUpdate;
     unsigned int frameCount;
-    unsigned int updateCount;
 
     Map* map;
 

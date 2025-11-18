@@ -58,7 +58,7 @@ static bool flamesInit = false;
 
 static bool showTutorial = false;
 static Button* volumeButtonRef = NULL;
-static int volumeLevel = 2;
+static int volumeLevel = 100;
 
 //===============================================================
 //  AÇÕES DOS BOTÕES
@@ -157,7 +157,6 @@ static void playSound(Menu* this) {
 
 static void updateMainContent(Menu* this) {
     Audio* audio = this->audio;
-    Vector2 mouse = GetMousePosition();
 
     playSound(this);
 
@@ -170,17 +169,8 @@ static void updateMainContent(Menu* this) {
 
     Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->credits, this->score };
 
-    for (int i = 0; i < 6; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
-
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-        }
-    }
+    bool pressed = updateButtons(buttons, 6);
+    if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 }
 
 //===============================================================
@@ -197,24 +187,15 @@ static void updateCutscene(Menu* this) {
         onCutscenePrev();
     }
 
-    Vector2 mouse = GetMousePosition();
     Audio* audio = this->audio;
 
     Button* buttons[2] = { this->cutscenePrev, this->cutsceneNext };
 
-    for (int i = 0; i < 2; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
+    bool pressed = updateButtons(buttons, 2);
+    if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-            if (state <= MENU_CUTSCENE5)
-                audio->restartMusic(audio, MUSIC_CUTSCENE1 + state - MENU_CUTSCENE1);
-        }
-    }
+    if (pressed && state <= MENU_CUTSCENE5)
+        audio->restartMusic(audio, MUSIC_CUTSCENE1 + state - MENU_CUTSCENE1);
 }
 
 //===============================================================
@@ -271,19 +252,20 @@ static void drawMainContent(Menu* this) {
         int textSize = 20;
         int textX = panelX + 40;
         int textY = panelY + 90;
+        const int deltaH = 30;
 
         DrawText("MOVIMENTACAO:", textX, textY, textSize, RAYWHITE);
-        textY += 30;
+        textY += deltaH;
         DrawText("- WASD ou Setas para mover o fantasma", textX, textY, textSize, RAYWHITE);
-        textY += 30;
+        textY += deltaH;
         DrawText("- Evite o Pact-Man e seus clones", textX, textY, textSize, RAYWHITE);
-        textY += 30;
+        textY += deltaH;
         DrawText("- Colete moedas e fragmentos para progredir", textX, textY, textSize, RAYWHITE);
         textY += 40;
         DrawText("DICAS:", textX, textY, textSize, RAYWHITE);
-        textY += 30;
+        textY += deltaH;
         DrawText("- Observe o mapa e planeje sua rota", textX, textY, textSize, RAYWHITE);
-        textY += 30;
+        textY += deltaH;
         DrawText("- Fique atento aos biomas se desintegrando com o tempo", textX, textY, textSize, RAYWHITE);
 
         const char* backMsg = "Pressione BACKSPACE (<-) ou clique para voltar";

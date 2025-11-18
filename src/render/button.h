@@ -27,4 +27,6 @@ typedef struct Button {
 
 Button* new_Button(int x, int y, int w, int h, Color color, Color fontColor, char* text, int fontSize, void (*action)());
 
+bool updateButtons(Button** buttons, int length);
+
 #endif

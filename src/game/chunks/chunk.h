@@ -19,7 +19,6 @@
 typedef enum {
     CELL_EMPTY,
     CELL_FONT_HEALTH,
-    CELL_TEMPLE,
     CELL_BONUS,
     CELL_WALL,
     CELL_COIN,
@@ -58,10 +57,6 @@ inline bool isWind(CellType type) {
 inline bool isPassable(CellType type) {
     return type != CELL_WALL && type != CELL_GRAVE && type != CELL_GRAVE_INFESTED;
 }
-
-// inline bool isSafe(CellType type) {
-//     return type != CELL_FIRE_ON && type != CELL_SPIKE;
-// }
 
 typedef struct {
     unsigned type : 5;

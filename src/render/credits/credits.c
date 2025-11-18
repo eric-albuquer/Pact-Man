@@ -113,29 +113,6 @@ static void prev() {
 }
 
 //===============================================================
-//  FUNÇÃO AUXILIAR DE ATUALIZAÇÃO DOS BOTÕES
-//===============================================================
-
-static bool updateButtons(Credits* this, Button** buttons, int length) {
-    Vector2 mouse = GetMousePosition();
-    Audio* audio = this->audio;
-
-    for (int i = 0; i < length; i++) {
-        Button* b = buttons[i];
-        if (!b) continue;
-
-        b->hovered = b->isInside(b, mouse);
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && b->hovered) {
-            audio->playSound(audio, SOUND_CLICK_BUTTON);
-            if (b->action) b->action();
-            return true;
-        }
-    }
-    return false;
-}
-
-//===============================================================
 //  ATUALIZAR TELAS DE CUTSCENES
 //===============================================================
 
@@ -157,7 +134,8 @@ static void updateCutscenes(Credits* this) {
         buttons[len++] = this->prevBtn;
     }
 
-    bool pressed = updateButtons(this, buttons, len);
+    bool pressed = updateButtons(buttons, len);
+    if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
     if (pressed && state <= CREDITS_CUTSCENE3) {
         audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
@@ -175,7 +153,8 @@ static void updateAddScore(Credits* this) {
     Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_SCORE);
     Button* buttons[] = { this->nextBtn };
-    bool pressed = updateButtons(this, buttons, 1);
+    bool pressed = updateButtons(buttons, 1);
+    if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
     // Cadastrar novo score
     if (pressed && state == CREDITS_SCORE) {
@@ -212,7 +191,9 @@ static void updateShowScore(Credits* this) {
     audio->updateMusic(audio, MUSIC_SCORE);
     strcpy(this->prevBtn->text, "MENU");
     Button* buttons[] = { this->prevBtn, this->nextBtn, this->sortByCoins, this->sortByFragments, this->sortByTime };
-    bool pressed = updateButtons(this, buttons, 5);
+    bool pressed = updateButtons(buttons, 5);
+    if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
+
     if (pressed && state == CREDITS_SCORE)
         this->scores->sort(this->scores, cmp);
 }

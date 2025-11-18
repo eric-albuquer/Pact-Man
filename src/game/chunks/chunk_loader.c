@@ -200,7 +200,7 @@ static void generateTempleStructure(ChunkLoader* this, Chunk* chunk) {
 
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
         int templeCell = TEMPLE_MATRIX[i];
-        chunk->cells[i].type = templeCell == 0 ? CELL_TEMPLE : CELL_WALL;
+        chunk->cells[i].type = templeCell == 0 ? CELL_EMPTY : CELL_WALL;
     }
 
     LinkedList* enemies = chunk->enemies;

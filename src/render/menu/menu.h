@@ -41,7 +41,7 @@ typedef struct FlameParticle {
     Color color;
 } FlameParticle;
 
-#define NUM_FLAMES 60
+#define NUM_FLAMES 100
 
 Menu* new_Menu(int width, int height);
 

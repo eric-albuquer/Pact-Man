@@ -147,6 +147,16 @@ static inline void updateDamagePlayer(Player* p, Cell* cell) {
     }
 }
 
+static inline void updatePlayerEndGame(Map* this, Cell* cell) {
+    this->player->effects = (Effects){ 0 };
+    if (cell->type != CELL_PORTAL)
+        cell->type = CELL_HEAVEN;
+    else {
+        state = CREDITS_CUTSCENE1;
+        this->restart(this);
+    }
+}
+
 //===============================================================
 //  FUNÇÕES DE MOVIMENTAÇÃO DO PLAYER
 //===============================================================
@@ -236,16 +246,6 @@ static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
     updatePlayerWind(this, cell);
 }
 
-static inline void updatePlayerEndGame(Map* this, Cell* cell) {
-    this->player->effects = (Effects){ 0 };
-    if (cell->type != CELL_PORTAL)
-        cell->type = CELL_HEAVEN;
-    else {
-        state = CREDITS_CUTSCENE1;
-        this->restart(this);
-    }
-}
-
 //===============================================================
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
@@ -315,6 +315,10 @@ static inline void findNewCell(ChunkManager* cm, Enemy* e) {
     e->y = (cIdx >> CHUNK_SHIFT) + (chunk->y << CHUNK_SHIFT);
 }
 
+//===============================================================
+//  FUNÇÕES DE MOVIMENTAÇÃO DO INIMIGO
+//===============================================================
+
 static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
@@ -331,7 +335,7 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
 
     sortNextPos(&pos);
 
-    bool normalMovement = rand() % 100 < BEST_PATH_PROBABILITY;
+    bool normalMovement = rand() % 100 < BEST_PATH_PROBABILITY_BIOME[e->biome];
 
     Vec2i nextPos = normalMovement ? getBestPos(pos) : getRandomPos(pos);
     if (isFarAwayFromSpawn(p, e))
@@ -347,6 +351,10 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->updateDirection(e);
 }
 
+//===============================================================
+//  FUNÇÕES DE ATUALIZAÇÃO DO BOSS
+//===============================================================
+
 static inline void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedCells) {
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
@@ -357,7 +365,7 @@ static inline void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedC
                         firedCells->addLast(firedCells, cell);
                     cell->type = CELL_FIRE_ON;
                 } else {
-                    cell->type = CELL_TEMPLE;
+                    cell->type = CELL_EMPTY;
                 }
             }
         }
@@ -379,31 +387,9 @@ static inline void bossMecanics(ChunkManager* cm, Enemy* e, LinkedList* firedCel
     bossTentacle(cm, e, tentacleCells);
 }
 
-static inline void generatePortal(ChunkManager* cm) {
-    static bool generated = false;
-    if (generated) return;
-    int idx = rand() & 7;
-    Chunk** adjacents = cm->adjacents;
-    Chunk* chunk;
-
-    for (int i = 0; i < 8; i++) {
-        chunk = adjacents[ADJACENT_IDX[idx]];
-        if (chunk != NULL) break;
-        idx = (idx + 1) & 7;
-    }
-
-    int cx = rand() % 7 + 5;
-    int cy = rand() % 7 + 5;
-
-    for (int i = -1; i < 2; i++) {
-        for (int j = -1; j < 2; j++) {
-            Cell* cell = chunk->cellAt(chunk, cx + j, cy + i);
-            cell->type = CELL_PORTAL;
-            cell->biome = VIOLENCIA;
-        }
-    }
-    generated = true;
-}
+//===============================================================
+//  FUNÇÕES DE COLISÃO DO INIMIGO COM O PLAYER
+//===============================================================
 
 static inline bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, LinkedList* enemies, Player* p) {
     Enemy* e = node->data;
@@ -427,7 +413,7 @@ static inline bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, Linke
                     enemies->removeNode(enemies, node);
                     return true;
                 } else {
-                    p->life -= ENEMY_DAGAME;
+                    p->life -= ENEMY_DAMAGE;
                     p->damaged = true;
                     if (!e->isBoss) e->needToTeleport = true;
                 }
@@ -437,6 +423,10 @@ static inline bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, Linke
     }
     return false;
 }
+
+//===============================================================
+//  FUNÇÃO DE ATUALIZAÇÃO DO INIMIGO
+//===============================================================
 
 static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, Player* p, ArrayList* changedChunk, LinkedList* firedCells, LinkedList* tentacleCells) {
     Enemy* e = node->data;
@@ -482,10 +472,10 @@ static inline void updateEnemies(Map* this) {
 //  FUNÇÃO DE ATUALIZAÇÃO DO MAPA
 //===============================================================
 
-static void updateTime(Map* this) {
+static void updateTime(Map* this, float deltaTime) {
     if (this->manager->heaven || this->player->effects.freezeTime.duration > 0) return;
-    this->biomeTime += MAP_UPDATE_DT;
-    this->player->totalTime += MAP_UPDATE_DT;
+    this->biomeTime += deltaTime;
+    this->player->totalTime += deltaTime;
 
     if (this->biomeTime < BIOME_DEGEN_START_TIME) return;
     this->manager->degenerated = this->player->biome;
@@ -527,7 +517,41 @@ static void inline removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, 
     }
 }
 
-static void update(Map* this, Controler* controler) {
+//===============================================================
+//  FUNÇÕES DE GERAÇÃO DO PORTAL NO FIM DO JOGO
+//===============================================================
+
+static inline void generatePortal(ChunkManager* cm) {
+    static bool generated = false;
+    if (generated) return;
+    int idx = rand() & 7;
+    Chunk** adjacents = cm->adjacents;
+    Chunk* chunk;
+
+    for (int i = 0; i < 8; i++) {
+        chunk = adjacents[ADJACENT_IDX[idx]];
+        if (chunk != NULL) break;
+        idx = (idx + 1) & 7;
+    }
+
+    int cx = rand() % 7 + 5;
+    int cy = rand() % 7 + 5;
+
+    for (int i = -1; i < 2; i++) {
+        for (int j = -1; j < 2; j++) {
+            Cell* cell = chunk->cellAt(chunk, cx + j, cy + i);
+            cell->type = CELL_PORTAL;
+            cell->biome = VIOLENCIA;
+        }
+    }
+    generated = true;
+}
+
+//===============================================================
+//  MÉTODO DA CLASSE DE ATUALIZAÇÃO
+//===============================================================
+
+static void update(Map* this, Controler* controler, float deltaTime) {
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
     updatePlayer(this, controler->input);
@@ -537,10 +561,14 @@ static void update(Map* this, Controler* controler) {
 
     if (cm->heaven) generatePortal(cm);
 
-    updateTime(this);
+    updateTime(this, deltaTime);
 
     this->updateCount++;
 }
+
+//===============================================================
+//  MÉTODO DA CLASSE DE REINÍCIO
+//===============================================================
 
 static void restart(Map* this) {
     this->lastScore.totalCoins = this->player->totalCoins;
@@ -554,6 +582,11 @@ static void restart(Map* this) {
     this->manager = new_ChunkManager(biomeCols, rows, this->player);
 }
 
+
+//===============================================================
+//  MÉTODO DA CLASSE DE LIBERAÇÃO DE MEMÓRIA
+//===============================================================
+
 static void _free(Map* this) {
     this->manager->free(this->manager);
     Player* p = this->player;
@@ -564,6 +597,10 @@ static void _free(Map* this) {
 
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR DA CLASSE
+//===============================================================
 
 Map* new_Map(int biomeCols, int chunkRows, int spawnX, int spawnY) {
     Map* this = malloc(sizeof(Map));

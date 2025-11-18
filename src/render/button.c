@@ -3,18 +3,18 @@
 #include <string.h>
 #include "common.h"
 
-void freeButton(Button* this){
+void freeButton(Button* this) {
     free(this);
 }
 
-bool isInside(Button* this, Vector2 pos){
+bool isInside(Button* this, Vector2 pos) {
     return pos.x > this->x && pos.x < this->x + this->width && pos.y > this->y && pos.y < this->y + this->height;
 }
 
 void drawButton(Button* this) {
     Color color = this->hovered ? this->fontColor : this->color;
     //DrawRectangle(this->x, this->y, this->width, this->height, color);
-    DrawRectangleRounded((Rectangle){this->x, this->y, this->width, this->height}, 0.7f, 16, color);
+    DrawRectangleRounded((Rectangle) { this->x, this->y, this->width, this->height }, 0.7f, 16, color);
 
     int textWidth = MeasureText(this->text, this->fontSize);
     int textX = this->x + (this->width - textWidth) / 2;
@@ -27,7 +27,7 @@ void drawButton(Button* this) {
 }
 
 
-Button* new_Button(int x, int y, int w, int h, Color color, Color fontColor, char* text, int fontSize, void (*action)()){
+Button* new_Button(int x, int y, int w, int h, Color color, Color fontColor, char* text, int fontSize, void (*action)()) {
     Button* this = malloc(sizeof(Button));
     this->x = x;
     this->y = y;
@@ -45,4 +45,19 @@ Button* new_Button(int x, int y, int w, int h, Color color, Color fontColor, cha
     this->draw = drawButton;
     this->free = freeButton;
     return this;
+}
+
+bool updateButtons(Button** buttons, int length) {
+    Vector2 mouse = GetMousePosition();
+    for (int i = 0; i < length; i++) {
+        Button* btn = buttons[i];
+
+        btn->hovered = btn->isInside(btn, mouse);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && btn->hovered) {
+            if (btn->action) btn->action();
+            return true;
+        }
+    }
+    return false;
 }

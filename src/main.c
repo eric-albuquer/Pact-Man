@@ -22,7 +22,7 @@ void updateGame() {
 
     if (lastTime >= UPDATE_TIME) {
         lastTime = 0;
-        map->update(map, controler);
+        map->update(map, controler, UPDATE_TIME);
         controler->reset(controler);
         render->saveGame(render);
     }
