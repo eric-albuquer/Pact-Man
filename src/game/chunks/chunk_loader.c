@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+//===============================================================
+//  ESTRUTURAS
+//===============================================================
+
 static const int TEMPLE_MATRIX[CELLS_PER_CHUNK] = {
     1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -42,6 +46,10 @@ static const int BONUS_MATRIX[100] = {
     1, 1, 0, 0, 1, 1, 0, 0, 1, 1
 };
 
+//===============================================================
+//  FUNÇÃO DE RUIDO 2D
+//===============================================================
+
 static inline unsigned int hash2D(int x, int y, unsigned int seed) {
     uint64_t h = (uint64_t)(x) * 0x9E3779B185EBCA87ULL;
     h ^= (uint64_t)(y) * 0xC2B2AE3D27D4EB4FULL;
@@ -54,6 +62,10 @@ static inline unsigned int hash2D(int x, int y, unsigned int seed) {
     return (unsigned int)h;
 }
 
+//===============================================================
+//  FUNÇÃO ALEATÓRIA
+//===============================================================
+
 static inline unsigned int randChunk(ChunkLoader* this, Chunk* chunk) {
     static const uint64_t A = 0x9E3779B97F4A7C15ULL;
     uint64_t s = ((uint64_t)chunk->x << 32) ^ chunk->y ^ this->seed ^ chunk->randCounter++;
@@ -63,6 +75,10 @@ static inline unsigned int randChunk(ChunkLoader* this, Chunk* chunk) {
     s ^= s >> 31;
     return (unsigned int)s;
 }
+
+//===============================================================
+//  PRE CARREGAMENTO DE CHUNKS
+//===============================================================
 
 static void preLoad(ChunkLoader* this, Chunk* chunk) {
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
@@ -113,6 +129,10 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
         return;
     }
 }
+
+//===============================================================
+//  FUNÇÕES DE GERAÇÃO DE CHUNKS
+//===============================================================
 
 static void generateBorder(ChunkLoader* this, Chunk* chunk) {
     if (!chunk->isBorder) return;
@@ -478,6 +498,10 @@ static void generateFreezeTime(ChunkLoader* this, Chunk* chunk) {
     generateIten(this, chunk, CELL_FREEZE_TIME);
 }
 
+//===============================================================
+//  FUNÇÃO DE GERAÇÃO DE INIMIGO
+//===============================================================
+
 static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
     if (isStructure(chunk->type) || chunk->isBorder) return;
     if (randChunk(this, chunk) % 100 >= BIOME_ENEMY_PROBABILITY[chunk->biome]) return;
@@ -496,6 +520,10 @@ static void generateEnemies(ChunkLoader* this, Chunk* chunk) {
     Enemy* e = new_Enemy(ex, ey, cell->biome);
     enemies->addLast(enemies, e);
 }
+
+//===============================================================
+//  PIPELINE DE GERAÇÃO PROCEDURAL
+//===============================================================
 
 typedef void (*ChunkGeneratorFn)(ChunkLoader*, Chunk*);
 
@@ -532,9 +560,17 @@ void generate(ChunkLoader* this, Chunk* chunk) {
     }
 }
 
+//===============================================================
+//  MÉTODO DE LIBERAÇÃO DE MEMÓRIA
+//===============================================================
+
 static void _free(ChunkLoader* this) {
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR DA CLASSE
+//===============================================================
 
 ChunkLoader* new_ChunkLoader(const int biomeWidth, const int height, const int seed) {
     ChunkLoader* this = malloc(sizeof(ChunkLoader));

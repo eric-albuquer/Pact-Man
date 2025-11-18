@@ -1,11 +1,11 @@
 DESENVOLVEDORES
 Amanda Luz Chaves
-Eric Gonçalves Albuquerque
-Lucas Menezes Santana
-Ricardo Sergio de Paula Freitas Filho
+Eric Albuquerque
+Lucas Menezes
+Ricardo Freitas
 
 DIREÇÃO CRIATIVA / ROTEIRO
-Lucas Menezes Santana
+Lucas Menezes
 Amanda Luz Chaves
 Denival Albuquerque
 
@@ -14,32 +14,32 @@ Amanda Luz Chaves
 Denival Albuquerque
 
 GAMEPLAY PROGRAMERS
-Eric Gonçalves Albuquerque
+Eric Albuquerque
 
 ENGINE PROGRAMERS
-Eric Gonçalves Albuquerque
-Ricardo Sergio de Paula Freitas Filho
+Eric Albuquerque
+Ricardo Freitas
 
 UI PROGRAMERS
-Eric Gonçalves Albuquerque
-Ricardo Sergio de Paula Freitas Filho
+Eric Albuquerque
+Ricardo Freitas
 Amanda Luz Chaves
 
 TOOLS PROGRAMERS
-Eric Gonçalves Albuquerque
+Eric Albuquerque
 
-AUDIO PROGRAMERS
-Eric Gonçalves Albuquerque
+ÁUDIO PROGRAMERS
+Eric Albuquerque
 Amanda Luz Chaves
 
 GAME BALANCING
-Eric Gonçalves Albuquerque
+Eric Albuquerque
 Amanda Luz Chaves
 
 DUBLAGEM
-Ricardo Sergio de Paula Freitas Filho
+Ricardo Freitas
 
-MUSICAS
+MÚSICAS
 Hans Zimmer - F1 Main Theme
 Super Mario Bros. Music - Invincible
 
@@ -49,7 +49,7 @@ Amanda Luz Chaves
 BIBLIOTECAS
 Raylib
 
-FERRAMENTAS DE AUDIO
+FERRAMENTAS DE ÁUDIO
 FreeSound
 Jfxr.me
 ElevenLabs
@@ -70,7 +70,7 @@ Discord
 WhatsApp
 
 INSPIRAÇÂO
-Pac-Men
+Pac-Man
 Toru Iwatani (Pacman)
 Namco
 Dante Alighieri
@@ -86,7 +86,7 @@ Formula C
 
 ATORES
 Pinky (fantasma rosa)
-Pac-Men
+Pac-Man
 Blinky (fantasma vermelho)
 Inky (fantasma ciano)
 Clyde (fantasma laranja)
@@ -113,19 +113,20 @@ Natacha Targino AED
 Tiago Barros PIF
 Pamela Bezerra PIF
 Erick Simões IC
-Fernando IH
+Fernando Ferreira IH
 Eduardo Calabria POO
-Eduardo SO
-Pietra IHC
-Dioclessiano P1
-Ricardo LOG
-Carol FP
-Bella FP/SD
-Mineiro SD
+Eduardo Nascimento SO
+Pietra Ranucci IHC
+Diocleciano Dantas P1
+Ricardo Cesar LOG
+Ana Carolina Melo FP
+Geysa Pimentel GP
+Izabella Nunes FP/SD
+Mineiro (Henrrique Braga) SD
 Diogo SD
-Mauricio FDS
-Juliano GP
-Andre GP
+Mauricio Braga FDS
+Juliano Machado GP
+Andre Gomes GP
 Walter Charles MC
 Gabrielle Canalle CORD
 
@@ -157,6 +158,7 @@ Laura
 Gabi
 
 AGRADECIMENTOS ESPECIAIS
+David Magalhães
 Willian Bezerra
 Gabriel Miranda
 Caio Mathewus
@@ -165,7 +167,7 @@ Brenda Luana
 Augusto Malheiros
 Eduardo Albuquerque
 Daniel Andrade
-Davi
+Nathália Melo
 Pedro Ferraz
 
 MENÇÃO HONRROSA
@@ -185,6 +187,10 @@ Blaise Pascal
 Isac Newton
 Albert Einsten
 Andrei Markov
+Carl Sagan
+Neil deGrasse Tyson
+Michio Kaku
+Richard Feynman
 Grant Sanderson
 Sebastian Lague
 Derik (Veritasium)
@@ -192,10 +198,6 @@ VSouce
 The Coding Train
 Manual do Mundo
 Pedro Loss
-Carl Sagan
-Neil deGrasse Tyson
-Michio Kaku
-Richard Feynman
 
 HOMENAGEM
 Árabes de Jõao Carlos
@@ -210,13 +212,28 @@ Ayrton Senna
 Max Vestappen
 Lewis Hamilton
 Vagner Moura
+Walter Salles
+Fernanda Torres
+Fernanda Montenegro
+Selton Mello
 Kleber Mendonça
+Tom Hanks
+Tom Cruise
+Tom Cavalcanti
+Harrison Ford
+Arnold Schwarzenegger
+Sylvester Stallone
+Chuck Norris
 Ivete Sangalo
 Sport
-Nautico
+Náutico
 Santa Cruz
 Cara da cantina
 Seguranças do Cesar
+Portaria do Cesar
+Cesar Apolo
+Cesar Brum
+Cesar Tiradentes
 
 OFERECIMENTO
 Cesar School

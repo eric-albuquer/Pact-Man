@@ -12,6 +12,8 @@ typedef enum {
     MUSIC_CUTSCENE2,
     MUSIC_CUTSCENE3,
 
+    MUSIC_CUTSCENE_BACKGROUND,
+
     MUSIC_SCORE,
     MUSIC_CREDITS,
 
@@ -139,6 +141,7 @@ static bool updateButtons(Credits* this, Button** buttons, int length) {
 
 static void updateCutscenes(Credits* this) {
     Audio* audio = this->audio;
+    audio->updateMusic(audio, MUSIC_CUTSCENE_BACKGROUND);
     int audioIdx = MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1);
     if (!audio->hasEndMusic(audio, audioIdx))
         audio->updateMusic(audio, audioIdx);
@@ -447,6 +450,8 @@ static void loadAudio(Credits* this) {
     audio->loadMusic(audio, "assets/music/end1.mp3", MUSIC_CUTSCENE1);
     audio->loadMusic(audio, "assets/music/end2.mp3", MUSIC_CUTSCENE2);
     audio->loadMusic(audio, "assets/music/end3.mp3", MUSIC_CUTSCENE3);
+
+    audio->loadMusic(audio, "assets/music/end_background.mp3", MUSIC_CUTSCENE_BACKGROUND);
 
     audio->loadMusic(audio, "assets/music/creditos.mp3", MUSIC_CREDITS);
     audio->loadMusic(audio, "assets/music/score.mp3", MUSIC_SCORE);
