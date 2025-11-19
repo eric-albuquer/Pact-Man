@@ -80,13 +80,9 @@ Denival Albuquerque
 
 INSPIRAÇÂO
 Pac-Man
-Toru Iwatani (Pacman)
 Namco
-Dante Alighieri
 Inferno de Dante
-Markus Persson (Notch)
 Minecraft
-Shigeru Miyamoto
 Super Mario
 Sonic
 GTA V
@@ -153,7 +149,7 @@ Marcelo Luz
 Jorge Chaves
 Mariângela Luz
 FisioS e TreinadoraS de Amanda
-Menuela Lavalle
+Manuela Lavalle
 Lorena Lavalle
 Sandra Souto
 Ernesto Arturo
@@ -178,6 +174,10 @@ Nathália Melo
 Pedro Ferraz
 
 MENÇÃO HONRROSA
+Toru Iwatani (Pacman)
+Markus Persson (Minecraft)
+Dante Alighieri
+Shigeru Miyamoto (Super Mario)
 Silvio Meira
 Charles Babbage
 Edsger Dijkstra
@@ -243,8 +243,8 @@ Sport
 Náutico
 Santa Cruz
 Cara da cantina
+Moça da portaria
 Seguranças do Cesar
-Portaria do Cesar
 Cesar Apolo
 Cesar Brum
 Cesar Tiradentes

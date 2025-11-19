@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+//===============================================================
+//  FUNÇÕES DE CHAVE E HASH
+//===============================================================
+
 static size_t chunkKey(int cx, int cy) {
     return ((size_t)(cy) << 32) | cx;
 }
@@ -10,6 +14,10 @@ static int hashCode(size_t key) {
     size_t h = key * 0x9E3779B97F4A7C15ULL;
     return (int)(h ^ (h >> 32));
 }
+
+//===============================================================
+//  REHASH PARA TABELA QUASE CHEIA
+//===============================================================
 
 static void rehash(ChunkMap* map) {
     int oldCapacity = map->capacity;
@@ -39,6 +47,10 @@ static void rehash(ChunkMap* map) {
     map->used = newUsed;
 }
 
+//===============================================================
+//  ADICIONAR CHUNK
+//===============================================================
+
 static void add(ChunkMap* map, Chunk* chunk) {
     if (map->size >= map->maxFill) rehash(map);
     size_t key = chunkKey(chunk->x, chunk->y);
@@ -56,6 +68,10 @@ static void add(ChunkMap* map, Chunk* chunk) {
     map->size++;
 }
 
+//===============================================================
+//  PEGAR CHUNK
+//===============================================================
+
 static Chunk* get(ChunkMap* map, int cx, int cy) {
     size_t key = chunkKey(cx, cy);
     int idx = hashCode(key) & map->mask;
@@ -66,6 +82,10 @@ static Chunk* get(ChunkMap* map, int cx, int cy) {
     }
     return NULL;
 }
+
+//===============================================================
+//  APAGAR CHUNK // ARMAZENAR NO SSD (NÃO IMPLEMENTADO)
+//===============================================================
 
 static bool delete(ChunkMap* map, Chunk* chunk) {
     size_t key = chunkKey(chunk->x, chunk->y);
@@ -81,12 +101,20 @@ static bool delete(ChunkMap* map, Chunk* chunk) {
     return false;
 }
 
+//===============================================================
+//  MÉTODO PARA LIBERAR MEMÓRIA
+//===============================================================
+
 static void _free(ChunkMap* this){
     free(this->chunks);
     free(this->keys);
     free(this->used);
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR DA CLASSE
+//===============================================================
 
 ChunkMap* new_ChunkMap() {
     ChunkMap* this = malloc(sizeof(ChunkMap));

@@ -7,12 +7,6 @@
 #include "chunk.h"
 #include "linkedlist.h"
 
-static inline bool farAway(Player* p, Enemy* e) {
-    float distToSpawn = hypotf(p->x - e->spawnX, p->y - e->spawnY);
-
-    return distToSpawn > MAX_PERSUIT_RADIUS;
-}
-
 void mapDistancePlayer(Map* map) {
     if (!map) return;
 
@@ -76,7 +70,7 @@ NextPos getNextPos(ChunkManager* cm, int x, int y, int biome) {
 
         Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
 
-        if (next && isPassable(next->type) && next->biome == biome && next->distance >= 0)
+        if (next && isPassable(next->type) && next->biome == biome)
             nextPos.pos[nextPos.moves++] = (QNode){ neighborX, neighborY, next->distance };
     }
 
@@ -117,7 +111,7 @@ Vec2i getCloserToSpawn(NextPos nextPos, int x, int y){
     float dist = 10000000.0f;
     for (int i = 0; i < nextPos.moves; i++){
         QNode pos = nextPos.pos[i];
-        int posDist = hypotf(pos.x - x, pos.y - y);
+        float posDist = hypotf(pos.x - x, pos.y - y);
         if (posDist < dist){
             dist = posDist;
             closer.x = pos.x;

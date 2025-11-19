@@ -170,7 +170,7 @@ static void updateAddScore(Credits* this) {
     for (int i = 'A'; i <= 'Z'; i++) {
         if (IsKeyPressed(i)) {
             this->name[this->nameIdx++] = i;
-            this->name[this->nameIdx] = 0;
+            this->name[this->nameIdx] = '\0';
             break;
         }
     }
