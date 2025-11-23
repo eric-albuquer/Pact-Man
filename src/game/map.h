@@ -37,7 +37,7 @@
 #define INVISIBILITY_DURATION 100
 #define FONT_REGENERATION_DURATION 2
 #define POTION_REGENERATION_DURATION 50
-#define BONUS_DELAY 32
+#define BONUS_DELAY 48
 
 //===============================================================
 //  ✨ Constantes de Regeneração e Saúde
@@ -50,7 +50,7 @@
 //  🤖 Constantes de Inteligência Artificial (IA)
 //===============================================================
 
-#define MAX_PERSUIT_RADIUS 40
+#define MAX_PERSUIT_RADIUS_BIOME (const int[4]) {40, 45, 50, 55}
 #define BEST_PATH_PROBABILITY_BIOME (const int[4]) {40, 50, 60, 70}
 
 //===============================================================
@@ -59,6 +59,8 @@
 
 #define BOSS_FIRE_QUANTITY 60
 #define BOSS_TENTACLE_QUANTITY 15
+#define FINAL_BOSS_GRAVE_PROBABILITY 1
+#define FINAL_BOSS_SPIKE_PROBABILITY 20
 
 //===============================================================
 //  🗺️ Constantes de Mapa e Ambiente

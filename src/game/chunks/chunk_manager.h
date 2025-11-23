@@ -20,6 +20,7 @@ typedef struct ChunkManager {
     Chunk* adjacents[49];
     int degenerated;
     bool heaven;
+    bool portal;
 
     Chunk* (*getLoadedChunk)(struct ChunkManager*, int, int);
     Chunk* (*getChunk)(struct ChunkManager*, int, int);

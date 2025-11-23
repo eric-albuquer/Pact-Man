@@ -30,6 +30,7 @@ static void restart(Player* this){
     this->hitEnemy = false;
     this->biomeCoins = this->totalCoins = this->biomeFragment = this->totalFragment = this->totalTime = 0;
     this->alive = 1;
+    this->batery = 1.0f;
 }
 
 static void _free(Player* this) { free(this); }

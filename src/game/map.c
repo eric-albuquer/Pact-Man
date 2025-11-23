@@ -289,7 +289,7 @@ static inline void updateEnemyChunk(ChunkManager* cm, Node* node, LinkedList* li
 static inline bool isFarAwayFromSpawn(Player* p, Enemy* e) {
     float distToSpawn = hypotf(p->x - e->spawnX, p->y - e->spawnY);
 
-    return distToSpawn > MAX_PERSUIT_RADIUS;
+    return distToSpawn > MAX_PERSUIT_RADIUS_BIOME[e->biome];
 }
 
 static inline void findNewCell(ChunkManager* cm, Enemy* e) {
@@ -356,6 +356,22 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
 //===============================================================
 
 static inline void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedCells) {
+    if (e->biome == VIOLENCIA){
+        for (int i = -5; i < 6; i++){
+            for (int j = -5; j < 6; j++){
+                Cell* cell = cm->getUpdatedCell(cm, e->x + j, e->y + i);
+                if (cell == NULL) continue;
+                if (cell->type == CELL_EMPTY){
+                    int num = rand() % 1000;
+                    if (num < FINAL_BOSS_GRAVE_PROBABILITY)
+                        cell->type = CELL_GRAVE_INFESTED;
+                    else if (num < FINAL_BOSS_SPIKE_PROBABILITY)
+                        cell->type = CELL_SPIKE;
+                }
+            }
+        }
+    }
+
     for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
             Cell* cell = cm->getUpdatedCell(cm, e->x + j, e->y + i);
@@ -484,7 +500,11 @@ static void updateTime(Map* this, float deltaTime) {
 static void inline removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, LinkedList* tentacleCells) {
     while (firedCells->length > BOSS_FIRE_QUANTITY) {
         Cell* cell = firedCells->removeFirst(firedCells);
-        cell->type = CELL_EMPTY;
+        if (cell->biome >= HERESIA && rand() & 1) {
+            cell->type = CELL_DEGENERATED_1;
+        } else {
+            cell->type = CELL_EMPTY;
+        }
     }
 
     while (tentacleCells->length > BOSS_TENTACLE_QUANTITY) {
@@ -522,8 +542,7 @@ static void inline removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, 
 //===============================================================
 
 static inline void generatePortal(ChunkManager* cm) {
-    static bool generated = false;
-    if (generated) return;
+    if (cm->portal) return;
     int idx = rand() & 7;
     Chunk** adjacents = cm->adjacents;
     Chunk* chunk;
@@ -544,7 +563,7 @@ static inline void generatePortal(ChunkManager* cm) {
             cell->biome = VIOLENCIA;
         }
     }
-    generated = true;
+    cm->portal = true;
 }
 
 //===============================================================

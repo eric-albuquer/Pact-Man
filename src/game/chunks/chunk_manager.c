@@ -110,6 +110,7 @@ ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
     this->degenerated = -1;
 
     this->heaven = false;
+    this->portal = false;
 
     this->player->updateChunk(this->player);
 

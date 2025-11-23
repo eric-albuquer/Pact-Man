@@ -362,7 +362,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
 
     if (effects.degeneration.duration > 0) {
         spritesBuffer[length++] = sprites[SPRITE_EFFECT_DEGENERATION];
-        hudColor = RED;
+        hudColor = BLACK;
     }
     if (effects.slowness.duration > 0) {
         spritesBuffer[length++] = sprites[SPRITE_EFFECT_SLOWNESS];
