@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "controler.h"
+#include "controller.h"
 #include "map.h"
 #include "raylib.h"
 #include "render.h"
@@ -10,7 +10,7 @@
 #define UPDATE_TIME 0.15f
 
 GameState state = MENU_MAIN_CONTENT;
-Controler* controler;
+Controller* controller;
 Map* map;
 Render* render;
 Font InfernoFont;
@@ -18,12 +18,12 @@ Font InfernoFont;
 void updateGame() {
     static float lastTime = 0;
     lastTime += GetFrameTime();
-    controler->getInputs(controler);
+    controller->getInputs(controller);
 
     if (lastTime >= UPDATE_TIME) {
         lastTime = 0;
-        map->update(map, controler, UPDATE_TIME);
-        controler->reset(controler);
+        map->update(map, controller, UPDATE_TIME);
+        controller->reset(controller);
         render->saveGame(render);
     }
 
@@ -49,7 +49,7 @@ void updateCredits() {
     EndDrawing();
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
     //SetConfigFlags(FLAG_WINDOW_UNDECORATED);
     //SetConfigFlags(FLAG_FULLSCREEN_MODE);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Men");
@@ -63,8 +63,8 @@ int main(void) {
     SetWindowIcon(icon);
     UnloadImage(icon);  
 
-    controler = new_Controler();
-    map = new_Map(5, 9, 350, 61);
+    controller = new_Controller();
+    map = new_Map(5, 9, 11, 61);
     render = new_Render(GetScreenWidth(), GetScreenHeight(), 50, map);
 
     while (!WindowShouldClose()) {
@@ -75,7 +75,7 @@ int main(void) {
 
     map->free(map);
     render->free(render);
-    controler->free(controler);
+    controller->free(controller);
 
     UnloadFont(InfernoFont);
     CloseAudioDevice();

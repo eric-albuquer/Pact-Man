@@ -570,10 +570,10 @@ static inline void generatePortal(ChunkManager* cm) {
 //  MÉTODO DA CLASSE DE ATUALIZAÇÃO
 //===============================================================
 
-static void update(Map* this, Controler* controler, float deltaTime) {
+static void update(Map* this, Controller* controller, float deltaTime) {
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
-    updatePlayer(this, controler->input);
+    updatePlayer(this, controller->input);
     updateEnemies(this);
 
     removeBossMecanics(cm, this->firedCells, this->tentacleCells);

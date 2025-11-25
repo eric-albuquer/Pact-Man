@@ -2,7 +2,7 @@
 #define MAP_H
 
 #include "arraylist.h"
-#include "controler.h"
+#include "controller.h"
 #include "hashtable.h"
 #include "linkedlist.h"
 #include "player.h"
@@ -82,7 +82,7 @@ typedef struct Map {
     Score lastScore;
     unsigned int updateCount;
 
-    void (*update)(struct Map*, Controler*, float);
+    void (*update)(struct Map*, Controller*, float);
     void (*restart)(struct Map*);
     void (*free)(struct Map*);
 } Map;
