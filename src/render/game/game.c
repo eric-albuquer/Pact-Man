@@ -743,6 +743,8 @@ static void drawMap(Game* this) {
         }, WHITE);
         EndBlendMode();
     }
+
+    // drawChunksMap(this, offsetHalfXAnimated, offsetHalfYAnimated);
 }
 
 //===============================================================

@@ -100,7 +100,7 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
 
     if ((chunk->x + 2) % this->biomeWidthChunks == 0) {
         int bonusY = (hash2D(chunk->x, 1, this->seed) % (this->height - 2)) + 1;
-        if (chunk->y == bonusY){
+        if (chunk->y == bonusY) {
             chunk->type = CHUNK_BONUS;
             return;
         }
@@ -347,20 +347,24 @@ static void generateWind(ChunkLoader* this, Chunk* chunk) {
     int windIdx = randChunk(this, chunk) & CHUNK_MASK;
     int windDelta = randChunk(this, chunk) & 1;
     int windDir = windDelta;
-    if (horizontal)
+    if (horizontal) {
         windDir += CELL_WIND_RIGHT;
-    else
+        windDelta = windDelta == 0 ? CHUNK_MASK : 0;
+    }
+    else {
         windDir += CELL_WIND_UP;
+        windDelta *= CHUNK_MASK;
+    }
 
     if (horizontal) {
         for (int i = 0; i < CHUNK_SIZE; i++) {
             Cell* cell = chunk->cellAt(chunk, i, windIdx);
             cell->type = windDir;
         }
-        for (int i = -2; i < 3; i++){
+        for (int i = -2; i < 3; i++) {
             int y = windIdx + i;
-            if (y >= 0 && y < CHUNK_SIZE){
-                chunk->cellAt(chunk, windDelta * CHUNK_MASK, y)->type = CELL_EMPTY;
+            if (y >= 0 && y < CHUNK_SIZE) {
+                chunk->cellAt(chunk, windDelta, y)->type = CELL_EMPTY;
             }
         }
     } else {
@@ -368,10 +372,10 @@ static void generateWind(ChunkLoader* this, Chunk* chunk) {
             Cell* cell = chunk->cellAt(chunk, windIdx, i);
             cell->type = windDir;
         }
-        for (int i = -2; i < 3; i++){
+        for (int i = -2; i < 3; i++) {
             int x = windIdx + i;
-            if (x >= 0 && x < CHUNK_SIZE){
-                chunk->cellAt(chunk, x, windDelta * CHUNK_MASK)->type = CELL_EMPTY;
+            if (x >= 0 && x < CHUNK_SIZE) {
+                chunk->cellAt(chunk, x, windDelta)->type = CELL_EMPTY;
             }
         }
     }
