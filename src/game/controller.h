@@ -1,13 +1,9 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#define SDL_MAIN_HANDLED
-
-#include "SDL2/SDL.h"
-
 #include "raylib.h"
 
-#define MIN_SENSITIVITY 8000
+#define MIN_SENSITIVITY 0.5f
 
 typedef struct Input {
     unsigned right: 1;
@@ -18,7 +14,6 @@ typedef struct Input {
 
 typedef struct Controller {
     Input input;
-    SDL_Joystick* joystick;
 
     void (*getInputs)(struct Controller*);
     void (*reset)(struct Controller*);

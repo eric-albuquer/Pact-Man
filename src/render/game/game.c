@@ -472,7 +472,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
 
 static void drawArrowToNextBiome(Game* this, int x, int y, int width, int height) {
     DrawSprite(this->sprites[SPRITE_ARROW_NEXT_BIOME], x, y, width, height, WHITE);
-    drawCenteredText("BIOMA LIBERÁDO", this->offsetHalfX, y + height * 0.41, 30, PURPLE);
+    drawCenteredText("CÍRCULO LIBERADO", this->offsetHalfX, y + height * 0.41, 30, PURPLE);
 }
 
 //===============================================================

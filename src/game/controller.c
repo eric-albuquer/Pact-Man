@@ -20,31 +20,10 @@ static void getKeyboardInputs(Controller* this) {
 }
 
 static void getControllerInputs(Controller* this) {
-    if (!this->joystick) return;
+    if (!IsGamepadAvailable(0)) return;
 
-    SDL_JoystickUpdate();
-
-    // int numButtons = SDL_JoystickNumButtons(this->joystick);
-    // int numAxes = SDL_JoystickNumAxes(this->joystick);
-
-    // Debug de botões
-    // for (int i = 0; i < numButtons; i++) {
-    //     if (SDL_JoystickGetButton(this->joystick, i)) {
-    //         printf("BOTAO PRESSIONADO: ID = %d\n", i);
-    //     }
-    // }
-
-    // Debug de eixos (analógicos)
-    // for (int i = 0; i < numAxes; i++) {
-    //     int value = SDL_JoystickGetAxis(this->joystick, i);
-
-    //     if (value > 8000 || value < -8000) {
-    //         printf("EIXO %d = %d\n", i, value);
-    //     }
-    // }
-
-    int horizontal = SDL_JoystickGetAxis(this->joystick, 0);
-    int vertical = SDL_JoystickGetAxis(this->joystick, 1);
+    float horizontal = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
+    float vertical = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y);
 
     if (horizontal > MIN_SENSITIVITY)
         this->input.right = 1;
@@ -57,29 +36,18 @@ static void getControllerInputs(Controller* this) {
         this->input.up = 1;
 }
 
-
 static void getInputs(Controller* this) {
     getKeyboardInputs(this);
     getControllerInputs(this);
 }
 
 static void _free(Controller* this) {
-    if (this->joystick) {
-        SDL_JoystickClose(this->joystick);
-        this->joystick = NULL;
-    }
-
-    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
-    
     free(this);
 }
 
 Controller* new_Controller() {
     Controller* this = malloc(sizeof(Controller));
     reset(this);
-
-    SDL_Init(SDL_INIT_JOYSTICK);
-    this->joystick = SDL_JoystickOpen(0);
 
     this->getInputs = getInputs;
     this->reset = reset;

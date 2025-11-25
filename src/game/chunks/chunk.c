@@ -69,6 +69,7 @@ static void updateGraveInfested(Chunk* this, int x, int y) {
         enemies->addLast(enemies, e);
         return;
     }
+    if (cell->biome == VIOLENCIA) return;  
     Node* node = hasEnemyInCell(this, x, y);
     if (node == NULL) return;
     Enemy* e = node->data;

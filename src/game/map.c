@@ -489,7 +489,11 @@ static inline void updateEnemies(Map* this) {
 //===============================================================
 
 static void updateTime(Map* this, float deltaTime) {
-    if (this->manager->heaven || this->player->effects.freezeTime.duration > 0) return;
+    if (this->manager->heaven){
+        this->biomeTime = 0;
+        return;
+    }
+    if (this->player->effects.freezeTime.duration > 0) return;
     this->biomeTime += deltaTime;
     this->player->totalTime += deltaTime;
 

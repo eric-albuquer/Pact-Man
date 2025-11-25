@@ -1,14 +1,11 @@
 CC = gcc
 
-SDL_CFLAGS = $(shell pkg-config --cflags sdl2)
-SDL_LIBS   = $(shell pkg-config --libs sdl2)
-
-CFLAGS  = -Wall -O2 -fopenmp $(SDL_CFLAGS) \
+CFLAGS  = -Wall -O2 -fopenmp \
 -I./src/utils -I./src/game -I./src/render \
 -I./src/render/menu -I./src/render/game -I./src/game/chunks \
 -I./src/render/credits
 
-LDFLAGS = -mconsole -lopengl32 -lgdi32 -lwinmm -lraylib $(SDL_LIBS)
+LDFLAGS = -mconsole -lopengl32 -lgdi32 -lwinmm -lraylib
 
 SRC_MAIN = $(wildcard src/*.c src/utils/*.c src/game/*.c src/render/menu/*.c \
 src/render/*.c src/render/game/*.c src/game/chunks/*.c src/render/credits/*.c)
