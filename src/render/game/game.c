@@ -211,12 +211,12 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     if (!itens) return;
 
-    if (!tutorialVisibleBuffer[type]){
+    if (!tutorialVisibleBuffer[type]) {
         this->tutorialDuration[type] -= GetFrameTime();
         tutorialVisibleBuffer[type] = 1;
     }
 
-    if (this->tutorialDuration[type] > 0){
+    if (this->tutorialDuration[type] > 0) {
         Color color = this->frameCount & 32 ? YELLOW : RED;
         drawCenteredText(this->tutorialText[type], x, y - size, 30, color);
     }
@@ -498,9 +498,9 @@ static void drawHud(Game* this) {
     Player* p = map->player;
     // Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
     // sprintf(buffer,
-    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\n",
+    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\nUpdate%d\n",
     //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
-    //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType);
+    //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType, this->map->updateCount);
     // DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
     // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
@@ -757,8 +757,6 @@ static void drawMap(Game* this) {
         }, WHITE);
         EndBlendMode();
     }
-
-    // drawChunksMap(this, offsetHalfXAnimated, offsetHalfYAnimated);
 }
 
 //===============================================================
@@ -820,10 +818,10 @@ static void updateDeathScreen(Game* this) {
 //  REINICAR CONTADOR DE TUTORIAL
 //===============================================================
 
-static void resetTutorialBuffer(Game* this){
-    for (int i = 0; i < CELL_COUNT; i++){
+static void resetTutorialBuffer(Game* this) {
+    for (int i = 0; i < CELL_COUNT; i++) {
         tutorialVisibleBuffer[i] = false;
-    } 
+    }
 }
 
 
@@ -1060,18 +1058,32 @@ static void loadButtons(Game* this) {
 //  CARREGAR TUTORIAL
 //===============================================================
 
-static void loadTutorial(Game* this){
-    float *tutorialDuration = this->tutorialDuration;
+static void loadTutorial(Game* this) {
+    float* tutorialDuration = this->tutorialDuration;
 
-    for (int i = 0; i < CELL_COUNT; i++){
+    for (int i = 0; i < CELL_COUNT; i++) {
         tutorialDuration[i] = TUTORIAL_DURATION;
         strcpy(this->tutorialText[i], "\0");
     }
 
-    strcpy(this->tutorialText[CELL_INVISIBILITY], "A invisibilidade permitirá atravessar paredes e ser ignorado!");
-    strcpy(this->tutorialText[CELL_FRUIT], "A invulnerabilidade permitirá que você mate os inimigos!");
-    strcpy(this->tutorialText[CELL_REGENERATION], "Você recupera sua vida!");
+    strcpy(this->tutorialText[CELL_INVISIBILITY], "Use a invisibilidade para atravessar paredes e evitar inimigos.");
+    strcpy(this->tutorialText[CELL_FRUIT], "A invulnerabilidade permite derrotar inimigos!");
+    strcpy(this->tutorialText[CELL_REGENERATION], "Regenera parte da sua vida.");
     strcpy(this->tutorialText[CELL_FREEZE_TIME], "O tempo congela aqui!");
+    strcpy(this->tutorialText[CELL_BATERY], "Aumenta seu campo de visão.");
+    strcpy(this->tutorialText[CELL_GRAVE_INFESTED], "Um Pac-Man pode surgir daqui!");
+    strcpy(this->tutorialText[CELL_FRAGMENT], "Fragmento essencial para avançar.");
+    strcpy(this->tutorialText[CELL_TENTACLE], "Tentáculos... o boss está próximo!");
+}
+
+//===============================================================
+//  REINICIAR GAME
+//===============================================================
+
+static void restart(Game* this) {
+    for (int i = 0; i < CELL_COUNT; i++) {
+        this->tutorialDuration[i] = TUTORIAL_DURATION;
+    }
 }
 
 //===============================================================
@@ -1079,6 +1091,7 @@ static void loadTutorial(Game* this){
 //===============================================================
 
 static void saveUpdate(Game* this) {
+    if (this->map->updateCount == 1) restart(this);
     updateAnimations(this);
     this->lastUpdate = this->frameCount;
 }
