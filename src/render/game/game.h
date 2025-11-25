@@ -11,6 +11,8 @@
 #define FRAMES_ANIMATION 8.0f
 #define HALF_FRAMES_ANIMATION 4.0f
 
+#define TUTORIAL_DURATION 15.0f
+
 typedef struct Game {
     int width;
     int height;
@@ -38,6 +40,9 @@ typedef struct Game {
 
     Button* backMenu;
     Button* restartGame;
+
+    char tutorialText[CELL_COUNT][200];
+    float tutorialDuration[CELL_COUNT];
 
     void (*draw)(struct Game*);
     void (*update)(struct Game*);

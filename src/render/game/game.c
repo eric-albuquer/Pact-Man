@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "enemy.h"
 
@@ -132,6 +133,7 @@ typedef enum {
 //===============================================================
 
 static char buffer[1000];
+static bool tutorialVisibleBuffer[CELL_COUNT];
 
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, {0, 255, 0, 255}, {0, 255, 255, 255} };
 static const Color HUD_OPACITY = { 0, 0, 0, 200 };
@@ -153,6 +155,8 @@ static void updateAnimations(Game* this) {
 static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens) {
     if (!cell) return;
 
+    CellType type = cell->type;
+
     Sprite* sprites = this->sprites;
     Animation* animations = this->animations;
     Player* p = this->map->player;
@@ -160,15 +164,15 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     Sprite sprite = sprites[SPRITE_FLOOR_LUXURIA + cell->biome];
     Color color = WHITE;
 
-    if (cell->type == CELL_WALL) {
+    if (type == CELL_WALL) {
         sprite = sprites[SPRITE_WALL_LUXURIA + cell->biome];
-    } else if (cell->type == CELL_DEGENERATED_1) {
+    } else if (type == CELL_DEGENERATED_1) {
         sprite = sprites[SPRITE_DEGENERATED_1];
-    } else if (cell->type == CELL_DEGENERATED_2) {
+    } else if (type == CELL_DEGENERATED_2) {
         sprite = sprites[SPRITE_DEGENERATED_2];
-    } else if (cell->type == CELL_DEGENERATED_3) {
+    } else if (type == CELL_DEGENERATED_3) {
         sprite = sprites[SPRITE_DEGENERATED_3];
-    } if (cell->type == CELL_HEAVEN) {
+    } if (type == CELL_HEAVEN) {
         sprite = sprites[SPRITE_HEAVEN];
     }
 
@@ -176,30 +180,30 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     color = WHITE;
 
-    if (cell->type == CELL_FIRE_ON) {
+    if (type == CELL_FIRE_ON) {
         DrawAnimation(animations[ANIMATION_FIRE], x, y, size, color);
-    } else if (cell->type == CELL_FIRE_OFF) {
+    } else if (type == CELL_FIRE_OFF) {
         DrawAnimation(animations[ANIMATION_FIRE], x, y, size, DARKGRAY);
-    } else if (cell->type == CELL_WIND_RIGHT || cell->type == CELL_WIND_LEFT) {
+    } else if (type == CELL_WIND_RIGHT || type == CELL_WIND_LEFT) {
         DrawAnimation(animations[ANIMATION_HORIZONTAL_WIND], x, y, size, color);
-    } else if (cell->type == CELL_WIND_UP || cell->type == CELL_WIND_DOWN) {
+    } else if (type == CELL_WIND_UP || type == CELL_WIND_DOWN) {
         DrawAnimation(animations[ANIMATION_VERTICAL_WIND], x, y, size, color);
-    } else if (cell->type == CELL_SPIKE) {
+    } else if (type == CELL_SPIKE) {
         DrawAnimation(animations[ANIMATION_SPIKE], x, y, size, color);
-    } else if (cell->type == CELL_MUD) {
+    } else if (type == CELL_MUD) {
         DrawAnimation(animations[ANIMATION_MUD], x, y, size, color);
-    } else if (cell->type == CELL_FONT_HEALTH) {
+    } else if (type == CELL_FONT_HEALTH) {
         if (p->cellType == CELL_FONT_HEALTH)
             DrawAnimationFrame(animations[ANIMATION_FONT], x, y, size, color, 3);
         else
             DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
-    } else if (cell->type == CELL_GRAVE) {
+    } else if (type == CELL_GRAVE) {
         DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, color);
-    } else if (cell->type == CELL_GRAVE_INFESTED) {
+    } else if (type == CELL_GRAVE_INFESTED) {
         DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, (Color) { 0, 255, 255, 255 });
-    } else if (cell->type == CELL_PORTAL) {
+    } else if (type == CELL_PORTAL) {
         DrawAnimation(animations[ANIMATION_PORTAL], x, y, size, color);
-    } else if (cell->type == CELL_BONUS) {
+    } else if (type == CELL_BONUS) {
         float t = (float)(this->map->updateCount % BONUS_DELAY) / BONUS_DELAY;
         Color c = LerpColor(BLACK, p->cellType == CELL_BONUS ? PURPLE : BLUE, t);
         DrawSprite(sprites[SPRITE_BONUS], x, y, size, size, c);
@@ -207,26 +211,36 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     if (!itens) return;
 
-    if (cell->type == CELL_COIN) {
+    if (!tutorialVisibleBuffer[type]){
+        this->tutorialDuration[type] -= GetFrameTime();
+        tutorialVisibleBuffer[type] = 1;
+    }
+
+    if (this->tutorialDuration[type] > 0){
+        Color color = this->frameCount & 32 ? YELLOW : RED;
+        drawCenteredText(this->tutorialText[type], x, y - size, 30, color);
+    }
+
+    if (type == CELL_COIN) {
         static const float coinSize = 0.7f;
         float w = (1 - coinSize) * size;
         float hw = w * 0.5;
         DrawAnimation(animations[ANIMATION_COIN], x + hw, y + hw, size * coinSize, color);
-    } else if (cell->type == CELL_FRAGMENT) {
+    } else if (type == CELL_FRAGMENT) {
         DrawAnimation(animations[ANIMATION_FRAGMENT], x, y, size, color);
-    } else if (cell->type == CELL_FRUIT) {
+    } else if (type == CELL_FRUIT) {
         DrawSprite(sprites[SPRITE_EFFECT_INVULNERABILITY], x, y, size, size, color);
         if (p->effects.freezeTime.duration > 0)
             DrawSprite(sprites[SPRITE_ICE], x, y, size, size, (Color) { 255, 255, 255, 150 });
-    } else if (cell->type == CELL_INVISIBILITY) {
+    } else if (type == CELL_INVISIBILITY) {
         DrawSprite(sprites[SPRITE_EFFECT_INVISIBILITY], x, y, size, size, color);
-    } else if (cell->type == CELL_REGENERATION) {
+    } else if (type == CELL_REGENERATION) {
         DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, y, size, size, color);
-    } else if (cell->type == CELL_TENTACLE) {
+    } else if (type == CELL_TENTACLE) {
         DrawAnimation(animations[ANIMATION_TENTACLE], x, y, size, color);
-    } else if (cell->type == CELL_BATERY) {
+    } else if (type == CELL_BATERY) {
         DrawAnimation(animations[ANIMATION_BATERY], x, y, size, color);
-    } else if (cell->type == CELL_FREEZE_TIME) {
+    } else if (type == CELL_FREEZE_TIME) {
         DrawSprite(sprites[SPRITE_EFFECT_FREEZE_TIME], x, y, size, size, color);
     }
 
@@ -803,11 +817,23 @@ static void updateDeathScreen(Game* this) {
 }
 
 //===============================================================
+//  REINICAR CONTADOR DE TUTORIAL
+//===============================================================
+
+static void resetTutorialBuffer(Game* this){
+    for (int i = 0; i < CELL_COUNT; i++){
+        tutorialVisibleBuffer[i] = false;
+    } 
+}
+
+
+//===============================================================
 //  MÉTODO DA CLASSE PARA ATUALIZAR
 //===============================================================
 
 static void update(Game* this) {
     if (state == GAME_DEATH) updateDeathScreen(this);
+    else if (state == GAME_MAIN_CONTENT) resetTutorialBuffer(this);
 }
 
 //===============================================================
@@ -1031,6 +1057,24 @@ static void loadButtons(Game* this) {
 }
 
 //===============================================================
+//  CARREGAR TUTORIAL
+//===============================================================
+
+static void loadTutorial(Game* this){
+    float *tutorialDuration = this->tutorialDuration;
+
+    for (int i = 0; i < CELL_COUNT; i++){
+        tutorialDuration[i] = TUTORIAL_DURATION;
+        strcpy(this->tutorialText[i], "\0");
+    }
+
+    strcpy(this->tutorialText[CELL_INVISIBILITY], "A invisibilidade permitirá atravessar paredes e ser ignorado!");
+    strcpy(this->tutorialText[CELL_FRUIT], "A invulnerabilidade permitirá que você mate os inimigos!");
+    strcpy(this->tutorialText[CELL_REGENERATION], "Você recupera sua vida!");
+    strcpy(this->tutorialText[CELL_FREEZE_TIME], "O tempo congela aqui!");
+}
+
+//===============================================================
 //  MÉTODO PARA SINCRONIZAR ATUALIZAÇÃO DO JOGO COM FRAME
 //===============================================================
 
@@ -1091,6 +1135,7 @@ Game* new_Game(int width, int height, int cellSize, Map* map) {
     loadSounds(this);
     loadSprites(this);
     loadButtons(this);
+    loadTutorial(this);
 
     this->shadowMap = LoadRenderTexture(this->width, this->height);
 

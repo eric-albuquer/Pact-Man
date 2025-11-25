@@ -601,6 +601,7 @@ static void restart(Map* this) {
     int biomeCols = this->manager->biomeCols;
     int rows = this->manager->rows;
     this->biomeTime = 0.0f;
+    this->updateCount = 0;
     this->manager->free(this->manager);
     this->manager = new_ChunkManager(biomeCols, rows, this->player);
 }

@@ -44,6 +44,8 @@ typedef enum {
     CELL_DEGENERATED_3,
     CELL_HEAVEN,
     CELL_PORTAL,
+
+    CELL_COUNT,
 } CellType;
 
 inline bool isDegenerated(CellType type){
