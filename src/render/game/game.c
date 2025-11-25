@@ -70,8 +70,11 @@ typedef enum {
 
     ANIMATION_PORTAL,
 
-    ANIMATION_HORIZONTAL_WIND,
-    ANIMATION_VERTICAL_WIND,
+    ANIMATION_RIGHT_WIND,
+    ANIMATION_LEFT_WIND,
+    ANIMATION_UP_WIND,
+    ANIMATION_DOWN_WIND,
+
     ANIMATION_MUD,
     ANIMATION_FIRE,
     ANIMATION_TENTACLE,
@@ -136,7 +139,6 @@ static char buffer[1000];
 static bool tutorialVisibleBuffer[CELL_COUNT];
 
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, {0, 255, 0, 255}, {0, 255, 255, 255} };
-static const Color HUD_OPACITY = { 0, 0, 0, 200 };
 
 //===============================================================
 //  ATUALIZAR ANIMAÇÕES
@@ -184,10 +186,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_FIRE], x, y, size, color);
     } else if (type == CELL_FIRE_OFF) {
         DrawAnimation(animations[ANIMATION_FIRE], x, y, size, DARKGRAY);
-    } else if (type == CELL_WIND_RIGHT || type == CELL_WIND_LEFT) {
-        DrawAnimation(animations[ANIMATION_HORIZONTAL_WIND], x, y, size, color);
-    } else if (type == CELL_WIND_UP || type == CELL_WIND_DOWN) {
-        DrawAnimation(animations[ANIMATION_VERTICAL_WIND], x, y, size, color);
+    } else if (isWind(type)) {
+        DrawAnimation(animations[ANIMATION_RIGHT_WIND + type - CELL_WIND_RIGHT], x, y, size, color);
     } else if (type == CELL_SPIKE) {
         DrawAnimation(animations[ANIMATION_SPIKE], x, y, size, color);
     } else if (type == CELL_MUD) {
@@ -882,8 +882,6 @@ static void loadSprites(Game* this) {
     animations[ANIMATION_COIN] = LoadAnimation(6, coin);
     animations[ANIMATION_FRAGMENT] = LoadAnimation(8, fragment);
 
-    const char* verticalWind[] = { "assets/sprites/luxuria/ventania1.png", "assets/sprites/luxuria/ventania2.png" };
-    const char* horizontalWind[] = { "assets/sprites/luxuria/ventania3.png", "assets/sprites/luxuria/ventania4.png" };
     const char* mud[] = { "assets/sprites/gula/lama1.png", "assets/sprites/gula/lama2.png", "assets/sprites/gula/lama3.png" };
     const char* fire[] = { "assets/sprites/heresia/fogo.png", "assets/sprites/heresia/fogo2.png", "assets/sprites/heresia/fogo3.png",
                              "assets/sprites/heresia/fogo4.png" };
@@ -903,8 +901,15 @@ static void loadSprites(Game* this) {
 
     const char* portal[] = { "assets/sprites/common_cells/portal1.png", "assets/sprites/common_cells/portal2.png", "assets/sprites/common_cells/portal3.png" };
 
-    animations[ANIMATION_HORIZONTAL_WIND] = LoadAnimation(2, horizontalWind);
-    animations[ANIMATION_VERTICAL_WIND] = LoadAnimation(2, verticalWind);
+    const char* rightWind[] = { "assets/sprites/luxuria/RightArrow1.png", "assets/sprites/luxuria/RightArrow2.png" };
+    const char* leftWind[] = { "assets/sprites/luxuria/LeftArrow1.png", "assets/sprites/luxuria/LeftArrow2.png" };
+    const char* upWind[] = { "assets/sprites/luxuria/UpArrow1.png", "assets/sprites/luxuria/UpArrow2.png" };
+    const char* downWind[] = { "assets/sprites/luxuria/DownArrow1.png", "assets/sprites/luxuria/DownArrow2.png" };
+
+    animations[ANIMATION_RIGHT_WIND] = LoadAnimation(2, rightWind);
+    animations[ANIMATION_LEFT_WIND] = LoadAnimation(2, leftWind);
+    animations[ANIMATION_UP_WIND] = LoadAnimation(2, upWind);
+    animations[ANIMATION_DOWN_WIND] = LoadAnimation(2, downWind);
     animations[ANIMATION_MUD] = LoadAnimation(3, mud);
     animations[ANIMATION_FIRE] = LoadAnimation(4, fire);
     animations[ANIMATION_TENTACLE] = LoadAnimation(4, tentacle);

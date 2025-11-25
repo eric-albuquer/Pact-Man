@@ -10,6 +10,8 @@
 
 #define CREDITS_SPEED 0.7f
 
+#define ERROR_MSG_DURATION 5.0f
+
 typedef struct Credits {
     int width;
     int height;

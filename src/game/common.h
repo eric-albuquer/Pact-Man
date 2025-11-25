@@ -3,6 +3,8 @@
 
 #include <raylib.h>
 
+#define HUD_OPACITY (Color){ 0, 0, 0, 200 }
+
 typedef enum {
     LUXURIA,
     GULA,

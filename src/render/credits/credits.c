@@ -55,6 +55,7 @@ typedef enum {
 
 static char buffer[1000];
 static int (*cmp)(const void* a, const void* b);
+static float errorMsgDuration = 0.0f;
 
 //===============================================================
 //  FUNÇÕES USADAS PARA O QUICKSORT
@@ -150,6 +151,8 @@ static void updateCutscenes(Credits* this) {
 //===============================================================
 
 static void updateAddScore(Credits* this) {
+    if (errorMsgDuration > 0) errorMsgDuration -= GetFrameTime();
+
     Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_SCORE);
     Button* buttons[] = { this->nextBtn };
@@ -158,6 +161,11 @@ static void updateAddScore(Credits* this) {
 
     // Cadastrar novo score
     if (pressed && state == CREDITS_SCORE) {
+        if (this->nameIdx == 0){
+            state = CREDITS_ADD_SCORE;
+            errorMsgDuration = ERROR_MSG_DURATION;
+            return;
+        }
         Score* score = malloc(sizeof(Score));
         strcpy(score->name, this->name);
         score->totalCoins = this->score->totalCoins;
@@ -167,15 +175,16 @@ static void updateAddScore(Credits* this) {
         return;
     }
 
-    for (int i = 'A'; i <= 'Z'; i++) {
+    for (int i = KEY_SPACE; i <= KEY_GRAVE; i++) {
         if (IsKeyPressed(i)) {
             this->name[this->nameIdx++] = i;
             this->name[this->nameIdx] = '\0';
             break;
         }
     }
+
     if (IsKeyPressed(KEY_BACKSPACE) && this->nameIdx > 0) {
-        this->name[--this->nameIdx] = 0;
+        this->name[--this->nameIdx] = '\0';
     }
 }
 
@@ -292,12 +301,20 @@ static void drawCutscenes(Credits* this) {
 //===============================================================
 
 static void drawAddScore(Credits* this) {
+    const int halfW = this->width >> 1;
+
     DrawSprite(this->sprites[SPRITE_ADD_CREDITS], 0, 0, this->width, this->height, WHITE);
-    drawCenteredText("Digite seu nome:", this->width >> 1, (this->height >> 1) - 100, 70, WHITE);
+
+    if (errorMsgDuration > 0 && this->updateCount & 32){
+        DrawRectangle(halfW - 300, 200, 600, 140, HUD_OPACITY);
+        drawCenteredText("Digite um nome!", halfW, 235, 70, YELLOW);
+    }
+
+    drawCenteredText("Digite seu nome:", halfW, (this->height >> 1) - 100, 70, WHITE);
 
     strcpy(buffer, this->name);
     strcat(buffer, (this->updateCount & 16) ? "_" : " ");
-    drawCenteredText(buffer, this->width >> 1, this->height >> 1, 70, WHITE);
+    drawCenteredText(buffer, halfW, this->height >> 1, 70, WHITE);
 
     this->nextBtn->draw(this->nextBtn);
 }
