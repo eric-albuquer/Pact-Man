@@ -345,20 +345,34 @@ static void generateWind(ChunkLoader* this, Chunk* chunk) {
 
     bool horizontal = randChunk(this, chunk) & 1;
     int windIdx = randChunk(this, chunk) & CHUNK_MASK;
-    int windDir;
+    int windDelta = randChunk(this, chunk) & 1;
+    int windDir = windDelta;
     if (horizontal)
-        windDir = (randChunk(this, chunk) & 1) + CELL_WIND_RIGHT;
+        windDir += CELL_WIND_RIGHT;
     else
-        windDir = (randChunk(this, chunk) & 1) + CELL_WIND_UP;
+        windDir += CELL_WIND_UP;
+
     if (horizontal) {
         for (int i = 0; i < CHUNK_SIZE; i++) {
             Cell* cell = chunk->cellAt(chunk, i, windIdx);
             cell->type = windDir;
         }
+        for (int i = -2; i < 3; i++){
+            int y = windIdx + i;
+            if (y >= 0 && y < CHUNK_SIZE){
+                chunk->cellAt(chunk, windDelta * CHUNK_MASK, y)->type = CELL_EMPTY;
+            }
+        }
     } else {
         for (int i = 0; i < CHUNK_SIZE; i++) {
             Cell* cell = chunk->cellAt(chunk, windIdx, i);
             cell->type = windDir;
+        }
+        for (int i = -2; i < 3; i++){
+            int x = windIdx + i;
+            if (x >= 0 && x < CHUNK_SIZE){
+                chunk->cellAt(chunk, x, windDelta * CHUNK_MASK)->type = CELL_EMPTY;
+            }
         }
     }
 }

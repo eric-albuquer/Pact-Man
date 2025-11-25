@@ -23,3 +23,5 @@ run: $(EXEC_MAIN)
 
 clean:
 	del /Q $(EXEC_MAIN) 2>nul || true
+
+# mingw32-make clean && mingw32-make run
