@@ -6,28 +6,47 @@
 const int CLOSER_IDX[9] = {16, 17, 18, 23, 24, 25, 30, 31, 32};
 const int ADJACENT_IDX[8] = {16, 17, 18, 23, 25, 30, 31, 32};
 
-static void loadAdjacents(ChunkManager* this){
+#include <omp.h>
+
+static void loadAdjacents(ChunkManager* this) {
     int cx = this->player->chunkX;
     int cy = this->player->chunkY;
     ChunkMap* chunks = this->chunks;
-    ChunkLoader *cl = this->chunkLoader;
-    int idx = 0;
-    for (int i = -3; i < 4; i++){
-        int chunkY = cy + i;
-        for (int j = -3; j < 4; j++){
+    ChunkLoader* cl = this->chunkLoader;
+
+    #pragma omp parallel for collapse(2)
+    for (int i = -3; i < 4; i++) {
+        for (int j = -3; j < 4; j++) {
+
+            int chunkY = cy + i;
             int chunkX = cx + j;
-            Chunk* chunk = chunks->get(chunks, chunkX, chunkY);
-            if (chunkX >= 0 && chunkX < this->cols && chunkY >= 0 && chunkY < this->rows && !chunk && abs(i) < 2 && abs(j) < 2){
-                chunk = new_Chunk(chunkX, chunkY);
-                cl->generate(cl, chunk);
-                chunks->add(chunks, chunk);
+
+            Chunk* chunk = NULL;
+
+            chunk = chunks->get(chunks, chunkX, chunkY);
+
+            if (chunkX >= 0 && chunkX < this->cols &&
+                chunkY >= 0 && chunkY < this->rows &&
+                !chunk && abs(i) < 2 && abs(j) < 2) {
+
+                Chunk* newChunk = new_Chunk(chunkX, chunkY);
+                cl->generate(cl, newChunk);
+
+                #pragma omp critical
+                {
+                    chunks->add(chunks, newChunk);
+                }
+
+                chunk = newChunk;
             }
-            this->adjacents[idx++] = chunk;
+
+            this->adjacents[(i + 3) * 7 + (j + 3)] = chunk;
         }
     }
 }
 
 static void updateChunks(ChunkManager* this){
+    #pragma omp parallel for
     for (int i = 0; i < 9; i++){
         int idx = CLOSER_IDX[i];
         Chunk* chunk = this->adjacents[idx];

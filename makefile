@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS  = -Wall -O2 -fopenmp \
+CFLAGS  = -Wall -O1 -fopenmp \
 -I./src/utils -I./src/game -I./src/render \
 -I./src/render/menu -I./src/render/game -I./src/game/chunks \
 -I./src/render/credits

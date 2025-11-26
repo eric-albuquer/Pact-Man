@@ -103,7 +103,7 @@ Busca em Grafos (BFS)
 Matrizes Espaciais
 Bubble Sort
 Quick Sort
-Listas Encadeadas
+Listas Encadeadas (Pilha / Fila)
 Arrays Dinâmicos
 Bitwise Operations
 Sliding Window
