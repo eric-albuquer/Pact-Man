@@ -25,6 +25,8 @@ typedef struct Menu {
 
     Audio* audio;
 
+    unsigned int frameCount;
+
     int width;
     int height;
 

@@ -126,6 +126,13 @@ static void updateCutscenes(Credits* this) {
     else if (state < CREDITS_CUTSCENE3)
         next();
 
+    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+        next();
+    }
+    if ((IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) && state > CREDITS_CUTSCENE1) {
+        prev();
+    }
+
     Button* buttons[2];
     buttons[0] = this->nextBtn;
     int len = 1;
@@ -158,6 +165,11 @@ static void updateAddScore(Credits* this) {
     Button* buttons[] = { this->nextBtn };
     bool pressed = updateButtons(buttons, 1);
     if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
+
+    if (IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
+        pressed = true;
+        next();
+    }
 
     // Cadastrar novo score
     if (pressed && state == CREDITS_SCORE) {
@@ -193,6 +205,13 @@ static void updateAddScore(Credits* this) {
 //===============================================================
 
 static void updateShowScore(Credits* this) {
+    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
+        next();
+    }
+    if ((IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2)) && state > CREDITS_CUTSCENE1) {
+        prev();
+    }
+
     if (this->updateCount % 8 == 0)
         for (int i = 0; i < ANIMATION_COUNT; i++)
             UpdateAnimation(&this->animations[i]);
@@ -212,7 +231,7 @@ static void updateShowScore(Credits* this) {
 //===============================================================
 
 static void updateFinalCredits(Credits* this) {
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
         this->creditsMove = 0;
         state = MENU_MAIN_CONTENT;
         return;
@@ -256,13 +275,6 @@ static int allSlideLineCounts[] = { 2, 2, 2 };
 //===============================================================
 
 static void drawCutscenes(Credits* this) {
-    if (IsKeyPressed(KEY_SPACE)) {
-        next();
-    }
-    if (IsKeyPressed(KEY_BACKSPACE)) {
-        prev();
-    }
-
     const int idx = (state - CREDITS_CUTSCENE1);
 
     int spriteIdx = SPRITE_END1 + idx;

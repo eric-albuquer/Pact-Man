@@ -155,22 +155,40 @@ static void playSound(Menu* this) {
 //  ATUALIZAR MENU PRINCIPAL
 //===============================================================
 
+static int selected = 0;
+
 static void updateMainContent(Menu* this) {
     Audio* audio = this->audio;
+    Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->score, this->credits  };
 
     playSound(this);
 
     if (showTutorial) {
-        if (IsKeyPressed(KEY_BACKSPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (IsKeyPressed(KEY_BACKSPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
             showTutorial = false;
         }
         return;
     }
 
-    Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->credits, this->score };
-
     bool pressed = updateButtons(buttons, 6);
+
+    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)){
+        pressed = true;
+        buttons[selected]->action();
+    }
+
     if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
+
+    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) > 0.5f && this->frameCount % 8 == 0)){
+        buttons[selected]->hovered = false;
+        selected = (selected + 1) % 6;
+    } else if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) < -0.5f && this->frameCount % 8 == 0)){
+        buttons[selected]->hovered = false;
+        selected = selected - 1;
+        if (selected == -1) selected = 5;
+    }
+
+    buttons[selected]->hovered = true;
 }
 
 //===============================================================
@@ -180,10 +198,10 @@ static void updateMainContent(Menu* this) {
 static void updateCutscene(Menu* this) {
     playSound(this);
 
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
         onCutsceneNext();
     }
-    if (IsKeyPressed(KEY_BACKSPACE)) {
+    if (IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
         onCutscenePrev();
     }
 
@@ -396,6 +414,8 @@ void update(Menu* this) {
         updateMainContent(this);
     else if (state >= MENU_CUTSCENE1 && state <= MENU_CUTSCENE5)
         updateCutscene(this);
+
+    this->frameCount++;
 }
 
 //===============================================================
@@ -645,6 +665,8 @@ Menu* new_Menu(int width, int height) {
 
     //this->animations = malloc(sizeof(Animation) * ANIMATION_COUNT);
     this->sprites = malloc(sizeof(Sprite) * SPRITE_COUNT);
+
+    this->frameCount = 0;
 
     loadAudio(this);
     loadSprites(this);
