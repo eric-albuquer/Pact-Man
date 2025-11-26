@@ -218,7 +218,9 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
 
     if (this->tutorialDuration[type] > 0) {
         Color color = this->frameCount & 32 ? YELLOW : RED;
-        drawCenteredText(this->tutorialText[type], x, y - size, 30, color);
+        int fhw = MeasureText(this->tutorialText[type], 25) >> 1;
+        DrawRectangle(x - fhw, y - 25, fhw << 1, 25, HUD_OPACITY);
+        drawCenteredText(this->tutorialText[type], x, y - 25, 25, color);
     }
 
     if (type == CELL_COIN) {
@@ -1070,6 +1072,9 @@ static void loadTutorial(Game* this) {
         tutorialDuration[i] = TUTORIAL_DURATION;
         strcpy(this->tutorialText[i], "\0");
     }
+
+    tutorialDuration[CELL_EMPTY] = 0;
+    tutorialDuration[CELL_WALL] = 0;
 
     strcpy(this->tutorialText[CELL_INVISIBILITY], "Use a invisibilidade para atravessar paredes e evitar inimigos.");
     strcpy(this->tutorialText[CELL_FRUIT], "A invulnerabilidade permite derrotar inimigos!");

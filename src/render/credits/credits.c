@@ -161,7 +161,7 @@ static void updateAddScore(Credits* this) {
 
     // Cadastrar novo score
     if (pressed && state == CREDITS_SCORE) {
-        if (this->nameIdx == 0){
+        if (this->nameIdx == 0) {
             state = CREDITS_ADD_SCORE;
             errorMsgDuration = ERROR_MSG_DURATION;
             return;
@@ -305,7 +305,7 @@ static void drawAddScore(Credits* this) {
 
     DrawSprite(this->sprites[SPRITE_ADD_CREDITS], 0, 0, this->width, this->height, WHITE);
 
-    if (errorMsgDuration > 0 && this->updateCount & 32){
+    if (errorMsgDuration > 0 && this->updateCount & 32) {
         DrawRectangle(halfW - 300, 200, 600, 140, HUD_OPACITY);
         drawCenteredText("Digite um nome!", halfW, 235, 70, YELLOW);
     }
@@ -323,37 +323,66 @@ static void drawAddScore(Credits* this) {
 //  DESENHAR TELA DE EXIBIR SCORE
 //===============================================================
 
+static void drawTableRow(Credits* this, Score* score, const int x, const int y, const int width, const int height, const int margin, int idx) {
+    static const float nameW = 0.4f;
+    static const float othersW = 0.2f;
+
+    const int fontSize = height - (margin << 1);
+
+    int ax = x;
+    int deltaW = width * nameW;
+
+    DrawRectangle(ax, y, deltaW, height, HUD_OPACITY);
+    DrawRectangleLines(ax, y, deltaW, height, GRAY);
+    sprintf(buffer, "%d", idx);
+    drawCenteredText(buffer, ax + margin + (fontSize >> 1), y + margin, fontSize, GREEN);
+    DrawText(score->name, ax + margin * 3 + fontSize, y + margin, fontSize, RED);
+    ax += deltaW;
+    deltaW = width * othersW;
+
+    DrawRectangle(ax, y, deltaW, height, HUD_OPACITY);
+    DrawRectangleLines(ax, y, deltaW, height, GRAY);
+    DrawSprite(this->sprites[SPRITE_TIME], ax + margin, y + margin, fontSize, fontSize, WHITE);
+    int totalSeconds = score->totalTime;
+    int minuts = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+    sprintf(buffer, "%02d:%02d", minuts, seconds);
+    DrawText(buffer, ax + margin * 2 + fontSize, y + margin, fontSize, WHITE);
+    ax += deltaW;
+
+    DrawRectangle(ax, y, deltaW, height, HUD_OPACITY);
+    DrawRectangleLines(ax, y, deltaW, height, GRAY);
+    DrawAnimation(this->animations[ANIMATION_FRAGMENT], ax + margin, y + margin, fontSize, WHITE);
+    sprintf(buffer, "%d", score->totalFragments);
+    DrawText(buffer, ax + margin * 2 + fontSize, y + margin, fontSize, WHITE);
+    ax += deltaW;
+
+    DrawRectangle(ax, y, deltaW, height, HUD_OPACITY);
+    DrawRectangleLines(ax, y, deltaW, height, GRAY);
+    DrawAnimation(this->animations[ANIMATION_COIN], ax + margin, y + margin, fontSize, WHITE);
+    sprintf(buffer, "%d", score->totalCoins);
+    DrawText(buffer, ax + margin * 2 + fontSize, y + margin, fontSize, WHITE);
+}
+
 static void drawShowScore(Credits* this) {
     DrawSprite(this->sprites[SPRITE_CREDITS], 0, 0, this->width, this->height, WHITE);
     ArrayList* scores = this->scores;
-    const int margin = 15;
-    const int size = 30;
-    const int deltaIten = margin + size;
-    const int space = 10;
-    const int h = 4 * deltaIten + margin;
-    const int delta = h + space;
-    const int halfW = this->width >> 1;
-    const int x = halfW - 150;
+    static const int margin = 10;
+    static const int heightRow = 60;
+    const int widthRow = this->width * 0.7;
+    
+    const int startX = (this->width - widthRow) >> 1;
 
-    int y = 50;
-    for (int i = 0; i < scores->length; i++) {
+    int y = 200;
+    int rows = min(10, scores->length);
+
+    DrawRectangleRounded((Rectangle){(this->width >> 1) - 200, 70, 400, 85}, 0.5f, 16, HUD_OPACITY);
+    drawCenteredText("SCORES", this->width >> 1, 80, 70, WHITE);
+
+    for (int i = 0; i < rows; i++) {
         Score* score = scores->data[i];
-        int totalSeconds = score->totalTime;
-        int minuts = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-        DrawRectangleRounded((Rectangle) { x, y, 300, h }, 0.5f, 16, (Color) { 0, 0, 0, 200 });
-        sprintf(buffer, "%s", score->name);
-        drawCenteredText(buffer, halfW, y + margin, size, RED);
-        DrawAnimation(this->animations[ANIMATION_COIN], x + margin, y + margin + deltaIten, size, WHITE);
-        sprintf(buffer, "%d", score->totalCoins);
-        DrawText(buffer, x + size + margin * 2, y + margin + deltaIten, size, WHITE);
-        DrawAnimation(this->animations[ANIMATION_FRAGMENT], x + margin, y + deltaIten * 2 + margin, size, WHITE);
-        sprintf(buffer, "%d", score->totalFragments);
-        DrawText(buffer, x + size + margin * 2, y + deltaIten * 2 + margin, size, WHITE);
-        DrawSprite(this->sprites[SPRITE_TIME], x + margin, y + deltaIten * 3 + margin, size, size, WHITE);
-        sprintf(buffer, "%02d:%02d", minuts, seconds);
-        DrawText(buffer, x + size + margin * 2, y + deltaIten * 3 + margin, size, WHITE);
-        y += delta;
+        drawTableRow(this, score, startX, y, widthRow, heightRow, margin, i + 1);
+        y += heightRow + margin;
     }
 
     this->nextBtn->draw(this->nextBtn);
@@ -503,7 +532,7 @@ static void loadButtons(Credits* this) {
     int hx = this->width >> 1;
 
     this->sortByCoins = new_Button(
-        hx - dx - btnW / 2,
+        hx + dx - btnW / 2,
         y,
         btnW,
         btnH,
@@ -536,7 +565,7 @@ static void loadButtons(Credits* this) {
     );
 
     this->sortByTime = new_Button(
-        hx + dx - btnW / 2,
+        hx - dx - btnW / 2,
         y,
         btnW,
         btnH,

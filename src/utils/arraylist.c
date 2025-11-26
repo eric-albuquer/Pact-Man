@@ -30,6 +30,15 @@ static void swap(void** a, void** b){
     *b = temp;
 }
 
+static void* removeIdx(ArrayList* this, unsigned int idx){
+    if (idx >= this->length) return NULL;
+    for (unsigned int i = idx; i < this->length - 1; i++){
+        swap(&this->data[i], &this->data[i + 1]);
+    }
+    this->length--;
+    return this->data[this->length];
+}
+
 static void quickSort(ArrayList* this, int start, int end, int (*cmp)(const void*, const void*)){
     if (start >= end) return;
     swap(&this->data[(start + end) >> 1], &this->data[end]);
@@ -75,18 +84,19 @@ static void _free(ArrayList* this){
 }
 
 ArrayList* new_ArrayList() {
-    ArrayList* arr = malloc(sizeof(ArrayList));
-    arr->length = 0;
-    arr->capacity = ARRAYLIST_START_CAPACITY;
-    arr->data = malloc(arr->capacity * sizeof(void*));
+    ArrayList* this = malloc(sizeof(ArrayList));
+    this->length = 0;
+    this->capacity = ARRAYLIST_START_CAPACITY;
+    this->data = malloc(this->capacity * sizeof(void*));
     
-    arr->push = push;
-    arr->pop = pop; 
-    arr->sort = sort;
-    arr->binarySearch = binarySearch;
-    arr->indexOf = indexOf;
+    this->push = push;
+    this->pop = pop; 
+    this->removeIdx = removeIdx;
+    this->sort = sort;
+    this->binarySearch = binarySearch;
+    this->indexOf = indexOf;
 
-    arr->clear = clear;
-    arr->free = _free;
-    return arr;
+    this->clear = clear;
+    this->free = _free;
+    return this;
 }
