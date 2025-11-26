@@ -12,6 +12,7 @@ typedef struct Input {
     unsigned down: 1;
 
     unsigned speed: 1;
+    unsigned pause: 1;
 } Input;
 
 typedef struct Controller {

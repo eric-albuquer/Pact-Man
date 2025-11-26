@@ -76,7 +76,7 @@ static inline void applyPlayerEffects(Player* p, CellType type, unsigned int upd
         p->cellType = type;
     }
 
-    if (input.speed && p->speed > 0) {
+    if (input.speed && p->speed > 0 && type != CELL_BONUS) {
         p->effects.speed.duration = 2;
     }
 
@@ -115,7 +115,7 @@ static inline void updatePlayerEffects(Player* p) {
         p->effects.slowness.duration--;
     }
 
-    if (p->lastX == p->x && p->lastY == p->y){
+    if (p->lastX == p->x && p->lastY == p->y) {
         p->effects.speed.duration = 0;
     } else if (p->effects.speed.duration > 0) {
         p->effects.speed.duration--;
@@ -592,10 +592,26 @@ static inline void generatePortal(ChunkManager* cm) {
 }
 
 //===============================================================
+//  FUNÇÃO PARA LIDAR COM PAUSA DO JOGO
+//===============================================================
+
+static float pauseDelay = 0.0f;
+
+static void handlePause(Map* this, Controller* controller, float deltaTime) {
+    if (pauseDelay > 0.0f) pauseDelay -= deltaTime;
+    if (controller->input.pause && pauseDelay <= 0.0f) {
+        this->running = !this->running;
+        pauseDelay = PAUSE_DELAY;
+    }
+}
+
+//===============================================================
 //  MÉTODO DA CLASSE DE ATUALIZAÇÃO
 //===============================================================
 
 static void update(Map* this, Controller* controller, float deltaTime) {
+    handlePause(this, controller, deltaTime);
+    if (this->running == false) return;
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
     updatePlayer(this, controller->input);
@@ -659,6 +675,7 @@ Map* new_Map(int biomeCols, int chunkRows, int spawnX, int spawnY) {
     this->tentacleCells = new_LinkedList();
 
     this->biomeTime = 0.0f;
+    this->running = true;
 
     this->manager = new_ChunkManager(biomeCols, chunkRows, this->player);
 

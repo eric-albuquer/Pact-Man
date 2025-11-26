@@ -71,6 +71,8 @@
 #define SPEED_DECAY 1
 #define SPEED_RELOAD 1
 
+#define PAUSE_DELAY 1.0f
+
 typedef struct Map {
     ChunkManager* manager;
     ArrayList* changedChunk;
@@ -83,6 +85,8 @@ typedef struct Map {
     Player* player;
     Score lastScore;
     unsigned int updateCount;
+
+    bool running;
 
     void (*update)(struct Map*, Controller*, float);
     void (*restart)(struct Map*);

@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void reset(Controller* this) { this->input = (Input){ 0 }; }
+static void reset(Controller* this) { 
+    this->input = (Input){ 0 };
+ }
 
 static void getKeyboardInputs(Controller* this) {
     if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
@@ -21,6 +23,10 @@ static void getKeyboardInputs(Controller* this) {
     if (IsKeyDown(KEY_SPACE)) {
         this->input.speed = 1;
     }
+
+    if (IsKeyDown(KEY_ENTER)) {
+        this->input.pause = 1;
+    }
 }
 
 static void getControllerInputs(Controller* this) {
@@ -28,6 +34,10 @@ static void getControllerInputs(Controller* this) {
 
     if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER) > MIN_SENSITIVITY){
         this->input.speed = 1;
+    }
+
+    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_RIGHT)) {
+        this->input.pause = 1;
     }
 
     float horizontal = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);

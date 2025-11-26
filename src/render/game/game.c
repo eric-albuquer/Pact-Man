@@ -148,6 +148,7 @@ static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, 
 //===============================================================
 
 static void updateAnimations(Game* this) {
+    if (this->map->running == false) return;
     for (int i = 0; i < ANIMATION_COUNT; i++) {
         UpdateAnimation(&this->animations[i]);
     }
@@ -215,7 +216,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     if (!itens) return;
 
     if (!tutorialVisibleBuffer[type]) {
-        this->tutorialDuration[type] -= GetFrameTime();
+        if (this->map->running)
+            this->tutorialDuration[type] -= GetFrameTime();
         tutorialVisibleBuffer[type] = 1;
     }
 
@@ -296,7 +298,7 @@ static void drawSpeedBar(Game* this, int x, int y, int width, int height) {
     int h = height * 0.35;
     int startW = width * 0.12;
     float t = this->map->player->speed / (float)START_SPEED;
-    Color color = LerpColor(BLUE, (Color){0, 255, 255, 255}, t);
+    Color color = LerpColor(BLUE, (Color) { 0, 255, 255, 255 }, t);
     int lx = w * t;
     DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);
     DrawRectangle(x + startW, y + h, lx, h, color);
@@ -516,6 +518,33 @@ static void drawArrowToNextBiome(Game* this, int x, int y, int width, int height
 }
 
 //===============================================================
+//  DESENHAR HUD DE PAUSA
+//===============================================================
+
+static void drawPauseHud(Game* this) {
+    DrawRectangle(0, 0, this->width, this->height, (Color) { 255, 0, 0, 50 });
+
+    static const char* text = "Pressione enter ou pause para voltar";
+    static const int fontSize = 60;
+    const int textW = MeasureText(text, fontSize);
+    const int halfX = this->width >> 1;
+    const int textH = this->height * 0.8f;
+    static const int margin = 10;
+    DrawRectangleRounded((Rectangle) { halfX - textW * 0.6, textH - margin, textW * 1.2f, fontSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
+    drawCenteredText(text, halfX, textH, fontSize, WHITE);
+
+    Player* p = this->map->player;
+    int mins = (int)(p->totalTime) / 60;
+    int secs = (int)(p->totalTime) % 60;
+    sprintf(buffer, "Tempo: %02d:%02d\nMoedas: %d\nFragmentos: %d", mins, secs, p->totalCoins, p->totalFragment);
+
+    static const int statsSize = 40;
+    const int statsH = this->height * 0.2f;
+    DrawRectangleRounded((Rectangle) { halfX - 200, statsH - margin, 400, 3 * statsSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
+    drawCenteredText(buffer, halfX, statsH, statsSize, WHITE);
+}
+
+//===============================================================
 //  DESENHAR A HUD
 //===============================================================
 
@@ -557,6 +586,9 @@ static void drawHud(Game* this) {
 
     if (p->biomeFragment >= 2 && this->map->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
+
+    if (this->map->running == false)
+        drawPauseHud(this);
 }
 
 //===============================================================
@@ -592,7 +624,7 @@ static void playAudio(Game* this) {
     if (p->effects.invisibility.duration == INVISIBILITY_DURATION - 1)
         audio->restartMusic(audio, MUSIC_INVISIBILITY);
 
-    if (this->frameCount != this->lastUpdate) return;
+    if (this->frameCount != this->lastUpdate || this->map->running == false) return;
 
     CellType type = p->cellType;
 
@@ -609,6 +641,8 @@ static void playAudio(Game* this) {
 
     if (p->effects.regeneration.duration > 0 && p->life < START_LIFE)
         audio->playSound(audio, SOUND_REGENERATE);
+    if (p->effects.speed.duration > 0)
+        audio->playSound(audio, SOUND_WIND);
 
     if (type == CELL_COIN) {
         audio->playSound(audio, SOUND_COIN);
@@ -709,8 +743,8 @@ static void drawMap(Game* this) {
     float offsetHalfXAnimated = this->offsetHalfX;
     float offsetHalfYAnimated = this->offsetHalfY;
 
-    if (dx) offsetHalfXAnimated += this->cellSize * t * dx;
-    if (dy) offsetHalfYAnimated += this->cellSize * t * dy;
+    if (dx && map->running) offsetHalfXAnimated += this->cellSize * t * dx;
+    if (dy && map->running) offsetHalfYAnimated += this->cellSize * t * dy;
 
     for (int i = -this->renderDistY; i <= this->renderDistY; i++) {
         int yIdx = i + py;
@@ -746,8 +780,12 @@ static void drawMap(Game* this) {
             int eDy = e->lastY - e->y;
             float dAnimationX = eDx * t * this->cellSize;
             float dAnimationY = eDy * t * this->cellSize;
-            int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize - dAnimationX;
-            int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize - dAnimationY;
+            int x = offsetHalfXAnimated + (e->lastX - px) * this->cellSize;
+            int y = offsetHalfYAnimated + (e->lastY - py) * this->cellSize;
+            if (this->map->running) {
+                x -= dAnimationX;
+                y -= dAnimationY;
+            }
 
             if (p->biome == 3) {
                 BeginTextureMode(this->shadowMap);
