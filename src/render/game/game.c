@@ -40,10 +40,12 @@ typedef enum {
     SPRITE_EFFECT_INVULNERABILITY,
     SPRITE_EFFECT_DEGENERATION,
     SPRITE_EFFECT_INVISIBILITY,
+    SPRITE_EFFECT_SPEED,
     SPRITE_EFFECT_FREEZE_TIME,
 
     SPRITE_MINIMAP,
     SPRITE_LIFE_BAR,
+    SPRITE_SPEED_BAR,
     SPRITE_BATERY_BAR,
     SPRITE_ARROW_NEXT_BIOME,
 
@@ -120,6 +122,7 @@ typedef enum {
     SOUND_REGENERATE,
     SOUND_POTION,
     SOUND_BATERY,
+    SOUND_SPEED_RELOAD,
     SOUND_MUD,
     SOUND_BIOME_FREE,
     SOUND_TENTACLE,
@@ -285,6 +288,23 @@ static void drawBateryBar(Game* this, int x, int y, int width, int height) {
 }
 
 //===============================================================
+//  DESENHAR VELOCIDADE DO PLAYER
+//===============================================================
+
+static void drawSpeedBar(Game* this, int x, int y, int width, int height) {
+    int w = width * 0.85;
+    int h = height * 0.35;
+    int startW = width * 0.12;
+    float t = this->map->player->speed / (float)START_SPEED;
+    Color color = LerpColor(BLUE, (Color){0, 255, 255, 255}, t);
+    int lx = w * t;
+    DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);
+    DrawRectangle(x + startW, y + h, lx, h, color);
+    DrawSprite(this->sprites[SPRITE_SPEED_BAR], x, y, width, height, WHITE);
+    //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
+}
+
+//===============================================================
 //  DESENHAR TEMPO NA HUD
 //===============================================================
 
@@ -373,7 +393,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
 
     Color hudColor;
 
-    static Sprite spritesBuffer[6];
+    static Sprite spritesBuffer[7];
     int length = 0;
 
     if (effects.degeneration.duration > 0) {
@@ -386,7 +406,7 @@ static void drawEffects(Game* this, int x, int y, int size) {
     }
     if (effects.regeneration.duration > 0) {
         spritesBuffer[length++] = sprites[SPRITE_EFFECT_REGENERATION];
-        hudColor = (Color){ 0, 255, 0, 255 };
+        hudColor = GREEN;
     }
     if (effects.invisibility.duration > 0) {
         spritesBuffer[length++] = sprites[SPRITE_EFFECT_INVISIBILITY];
@@ -394,7 +414,11 @@ static void drawEffects(Game* this, int x, int y, int size) {
     }
     if (effects.freezeTime.duration > 0) {
         spritesBuffer[length++] = sprites[SPRITE_EFFECT_FREEZE_TIME];
-        hudColor = (Color){ 0, 0, 255, 255 };
+        hudColor = BLUE;
+    }
+    if (effects.speed.duration > 0) {
+        spritesBuffer[length++] = sprites[SPRITE_EFFECT_SPEED];
+        hudColor = MAGENTA;
     }
     if (effects.invulnerability.duration > 0) {
         spritesBuffer[length++] = sprites[SPRITE_EFFECT_INVULNERABILITY];
@@ -500,9 +524,9 @@ static void drawHud(Game* this) {
     Player* p = map->player;
     // Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
     // sprintf(buffer,
-    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\nUpdate%d\n",
+    //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\nUpdate%d\nSpeed:%d\n",
     //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,
-    //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType, this->map->updateCount);
+    //     p->biome, p->totalCoins, p->biomeCoins, p->totalFragment, p->biomeFragment, p->effects.invulnerability.duration, p->cellType, this->map->updateCount, p->speed);
     // DrawRectangle(20, this->height - 600, 300, 600, HUD_OPACITY);
     // DrawText(buffer, 30, this->height - 580, 30, GREEN);
 
@@ -527,7 +551,8 @@ static void drawHud(Game* this) {
     }
 
     drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
-    drawBateryBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
+    drawSpeedBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
+    drawBateryBar(this, this->offsetHalfX - 200, this->height - 290, 400, 80);
     drawInfoHud(this, this->width - 280, 550, 80);
 
     if (p->biomeFragment >= 2 && this->map->updateCount & 4 && p->biome < VIOLENCIA)
@@ -607,6 +632,8 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_TENTACLE);
     } else if (type == CELL_FIRE_ON) {
         audio->playSound(audio, SOUND_FIRE);
+    } else if (type == CELL_BONUS && p->speed < START_SPEED) {
+        audio->playSound(audio, SOUND_SPEED_RELOAD);
     }
 
     if (IsKeyDown(KEY_EQUAL)) {
@@ -954,9 +981,11 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_EFFECT_INVISIBILITY] = LoadSprite("assets/sprites/effects/invisibility.png");
     sprites[SPRITE_EFFECT_FREEZE_TIME] = LoadSprite("assets/sprites/effects/time.png");
     sprites[SPRITE_EFFECT_INVULNERABILITY] = LoadSprite("assets/sprites/effects/star.png");
+    sprites[SPRITE_EFFECT_SPEED] = LoadSprite("assets/sprites/effects/speed.png");
 
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
     sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar.png");
+    sprites[SPRITE_SPEED_BAR] = LoadSprite("assets/sprites/hud/speed_hud.png");
     sprites[SPRITE_BATERY_BAR] = LoadSprite("assets/sprites/hud/batery_hud.png");
     sprites[SPRITE_ARROW_NEXT_BIOME] = LoadSprite("assets/sprites/hud/biomeNextArrow.png");
 
@@ -998,6 +1027,7 @@ static void loadSounds(Game* this) {
     audio->loadSound(audio, "assets/sounds/time.wav", SOUND_FREEZE_TIME);
     audio->loadSound(audio, "assets/sounds/potion.wav", SOUND_POTION);
     audio->loadSound(audio, "assets/sounds/batery.wav", SOUND_BATERY);
+    audio->loadSound(audio, "assets/sounds/speed_reload.wav", SOUND_SPEED_RELOAD);
     audio->loadSound(audio, "assets/sounds/mud.wav", SOUND_MUD);
     audio->loadSound(audio, "assets/sounds/biomeFree.wav", SOUND_BIOME_FREE);
     audio->loadSound(audio, "assets/sounds/tentacle.wav", SOUND_TENTACLE);

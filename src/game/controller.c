@@ -17,10 +17,18 @@ static void getKeyboardInputs(Controller* this) {
     if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
         this->input.right = 1;
     }
+
+    if (IsKeyDown(KEY_SPACE)) {
+        this->input.speed = 1;
+    }
 }
 
 static void getControllerInputs(Controller* this) {
     if (!IsGamepadAvailable(0)) return;
+
+    if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER) > MIN_SENSITIVITY){
+        this->input.speed = 1;
+    }
 
     float horizontal = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
     float vertical = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y);

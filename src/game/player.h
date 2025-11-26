@@ -6,6 +6,7 @@
 #include "chunk.h"
 
 #define START_LIFE 100
+#define START_SPEED 100 
 
 typedef struct Effect {
     unsigned strenght: 8;
@@ -19,6 +20,7 @@ typedef struct Effects {
     Effect degeneration;
     Effect invisibility;
     Effect freezeTime;
+    Effect speed;
 } Effects;
 
 typedef struct Player {
@@ -38,6 +40,8 @@ typedef struct Player {
     Effects effects;
 
     int life;
+    int speed;
+
     int totalFragment;
     int biomeFragment;
     bool fragmentByCoins;
@@ -50,6 +54,7 @@ typedef struct Player {
     unsigned damaged: 1;
     unsigned hitEnemy: 1;
     unsigned alive: 1;
+
     float batery;
 
     CellType cellType;

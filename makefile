@@ -31,5 +31,8 @@ database: $(EXEC_DATABASE)
 clean:
 	del /Q $(EXEC_MAIN) $(EXEC_DATABASE) 2>nul || true
 
+# Compilar e executar o jogo:
 # mingw32-make clean && mingw32-make run
+
+# Compilar e executar o banco de dados:
 # mingw32-make clean && mingw32-make database

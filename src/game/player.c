@@ -47,6 +47,8 @@ Player* new_Player(int x, int y) {
     this->spawnY = y;
 
     this->life = START_LIFE;
+    this->speed = START_SPEED;
+
     this->biomeCoins = 0;
     this->totalCoins = 0;
     this->totalFragment = 0;

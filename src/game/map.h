@@ -68,6 +68,8 @@
 
 #define BIOME_DEGEN_START_TIME 180.0f
 #define BATERY_DECAY 0.003f
+#define SPEED_DECAY 1
+#define SPEED_RELOAD 1
 
 typedef struct Map {
     ChunkManager* manager;

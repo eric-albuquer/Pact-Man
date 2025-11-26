@@ -10,6 +10,8 @@ typedef struct Input {
     unsigned left: 1;
     unsigned up: 1;
     unsigned down: 1;
+
+    unsigned speed: 1;
 } Input;
 
 typedef struct Controller {

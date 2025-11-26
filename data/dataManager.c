@@ -4,15 +4,28 @@
 #include "arraylist.h"
 #include <string.h>
 
+//===============================================================
+//  TIPOS DE OPERAÇÕES
+//===============================================================
+
+typedef enum {
+    OPERATION_DELETE,
+    OPERATION_INSERT,
+
+    OPERATION_EXIT,
+
+    OPERATION_COUNT,
+} Operations;
+
+//===============================================================
+//  DADOS NA MEMÓRIA RAM
+//===============================================================
+
 static ArrayList* scores = NULL;
 
-static void delete() {
-    unsigned int idx;
-    printf("Escolha um indice para remover: ");
-    scanf("%u", &idx);
-    Score* removedScore = scores->removeIdx(scores, idx);
-    free(removedScore);
-}
+//===============================================================
+//  FUNÇÕES AUXILIARES
+//===============================================================
 
 static void toUpperCase(char* str){
     while(*str){
@@ -21,6 +34,27 @@ static void toUpperCase(char* str){
         }
         str++;
     }
+}
+
+static int cmpTime(const void* a, const void* b) {
+    const Score* sa = a;
+    const Score* sb = b;
+
+    if (sa->totalTime < sb->totalTime) return -1;
+    if (sa->totalTime > sb->totalTime) return 1;
+    return 0;
+}
+
+//===============================================================
+//  FUNÇÕES DO CRUD
+//===============================================================
+
+static void delete() {
+    unsigned int idx;
+    printf("Escolha um indice para remover: ");
+    scanf("%u", &idx);
+    Score* removedScore = scores->removeIdx(scores, idx);
+    free(removedScore);
 }
 
 static void insert() {
@@ -52,6 +86,10 @@ static void view(){
     }
 }
 
+//===============================================================
+//  CARREGAR DADOS PARA A RAM
+//===============================================================
+
 static void loadData(const char* pathDatabase) {
     FILE* file = fopen(pathDatabase, "rb");
     if (file == NULL) return;
@@ -69,14 +107,9 @@ static void loadData(const char* pathDatabase) {
     fclose(file);
 }
 
-static int cmpTime(const void* a, const void* b) {
-    const Score* sa = a;
-    const Score* sb = b;
-
-    if (sa->totalTime < sb->totalTime) return -1;
-    if (sa->totalTime > sb->totalTime) return 1;
-    return 0;
-}
+//===============================================================
+//  SALVAR DADOS E LIBERAR MEMÓRIA
+//===============================================================
 
 static void saveData(const char* pathDatabase) {
     if (scores->length == 0) return;
@@ -93,21 +126,15 @@ static void saveData(const char* pathDatabase) {
     scores->free(scores);
 }
 
-typedef enum {
-    OPERATION_DELETE,
-    OPERATION_INSERT,
-
-    OPERATION_EXIT,
-
-    OPERATION_COUNT,
-} Operations;
+//===============================================================
+//  FLUXO PRINCIPAL DO PROGRAMA
+//===============================================================
 
 int main() {
     const char* pathDatabase = "data/scores.bin";
     loadData(pathDatabase);
-
     unsigned int operation;
-
+    
     do {
         view();
         printf("\nEscolha a operacao: (%d - Excluir), (%d - Incluir), (%d - Sair e salvar)\nOperacao: ", OPERATION_DELETE, OPERATION_INSERT, OPERATION_EXIT);

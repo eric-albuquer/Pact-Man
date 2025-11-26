@@ -26,7 +26,7 @@ static inline void updatePlayerBiome(Map* this, Cell* cell) {
     this->biomeTime = 0.0f;
 }
 
-static inline void collectItens(Player* p, Cell* cell, bool isFreeze) {
+static inline void collectItens(Player* p, Cell* cell) {
     if (cell->type == CELL_COIN) {
         cell->type = CELL_EMPTY;
         p->biomeCoins++;
@@ -44,7 +44,7 @@ static inline void collectItens(Player* p, Cell* cell, bool isFreeze) {
         cell->type = CELL_EMPTY;
     } else if (cell->type == CELL_REGENERATION) {
         cell->type = CELL_EMPTY;
-    } else if (cell->type == CELL_FRUIT && !isFreeze) {
+    } else if (cell->type == CELL_FRUIT && p->effects.freezeTime.duration == 0) {
         cell->type = CELL_EMPTY;
     }
     if (p->fragmentByCoins == false && p->biomeCoins / COINS_TO_FRAGMENT) {
@@ -64,41 +64,62 @@ static inline void applyRandomGoodEffects(Player* p) {
     else if (idx == 3) p->effects.freezeTime.duration = FREEZE_TIME_DURATION;
 }
 
-static inline void applyPlayerEffects(Player* p, Cell* cell, unsigned int updateCount) {
-    static const int mudDuration = (MUD_SLOWNESS_DURATION << 1) - 1;
-    static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1) - 1;
-    static const int mudDurationLimit = (MUD_SLOWNESS_DURATION << 1) - 2;
-    static const int spikeDurationLimit = (SPIKE_SLOWNESS_DURATION << 1) - 2;
+static inline void applyPlayerEffects(Player* p, CellType type, unsigned int updateCount, Input input) {
+    static const int mudDuration = (MUD_SLOWNESS_DURATION << 1);
+    static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1);
+    static const int mudDurationLimit = (MUD_SLOWNESS_DURATION << 1) - 1;
+    static const int spikeDurationLimit = (SPIKE_SLOWNESS_DURATION << 1) - 1;
 
-    if (cell->type == CELL_MUD && p->effects.slowness.duration < mudDurationLimit) {
+    if (p->effects.speed.duration < 2) {
+        p->cellType = type;
+    } else if (type >= CELL_COIN) {
+        p->cellType = type;
+    }
+
+    if (input.speed && p->speed > 0) {
+        p->effects.speed.duration = 2;
+    }
+
+    if (type == CELL_MUD && p->effects.slowness.duration < mudDurationLimit) {
         p->effects.slowness.duration = mudDuration;
-    } else if (cell->type == CELL_SPIKE && p->effects.slowness.duration < spikeDurationLimit) {
+    } else if (type == CELL_SPIKE && p->effects.slowness.duration < spikeDurationLimit) {
         p->effects.slowness.duration = spikeDuration;
-    } else if (cell->type == CELL_FRUIT && p->effects.freezeTime.duration == 0) {
+    } else if (type == CELL_FRUIT && p->effects.freezeTime.duration == 0) {
         p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
-    } else if (cell->type == CELL_FONT_HEALTH) {
+    } else if (type == CELL_FONT_HEALTH) {
         p->effects.regeneration.duration = FONT_REGENERATION_DURATION;
         p->effects.regeneration.strenght = max(FONT_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
-    } else if (cell->type == CELL_BONUS && updateCount % BONUS_DELAY == 0) {
-        applyRandomGoodEffects(p);
-    } else if (isDegenerated(cell->type)) {
+    }
+    // else if (type == CELL_BONUS && updateCount % BONUS_DELAY == 0) {
+    //     applyRandomGoodEffects(p);
+    // }
+    else if (type == CELL_BONUS) {
+        p->speed = min(p->speed + SPEED_RELOAD, START_SPEED);
+    } else if (isDegenerated(type)) {
         p->effects.degeneration.duration = DEGENERATION_DURATION;
-        p->effects.degeneration.strenght = (cell->type - CELL_DEGENERATED_1) + 1;
-    } else if (cell->type == CELL_INVISIBILITY) {
+        p->effects.degeneration.strenght = (type - CELL_DEGENERATED_1) + 1;
+    } else if (type == CELL_INVISIBILITY) {
         p->effects.invisibility.duration = INVISIBILITY_DURATION;
-    } else if (cell->type == CELL_REGENERATION) {
+    } else if (type == CELL_REGENERATION) {
         p->effects.regeneration.duration = POTION_REGENERATION_DURATION;
         p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
-    } else if (cell->type == CELL_TENTACLE && p->effects.slowness.duration < spikeDurationLimit) {
+    } else if (type == CELL_TENTACLE && p->effects.slowness.duration < spikeDurationLimit) {
         p->effects.slowness.duration = spikeDuration;
-    } else if (cell->type == CELL_FREEZE_TIME) {
+    } else if (type == CELL_FREEZE_TIME) {
         p->effects.freezeTime.duration = FREEZE_TIME_DURATION;
     }
 }
 
-static inline void updatePlayerEffects(Player* p, Cell* cell) {
+static inline void updatePlayerEffects(Player* p) {
     if (p->effects.slowness.duration > 0) {
         p->effects.slowness.duration--;
+    }
+
+    if (p->lastX == p->x && p->lastY == p->y){
+        p->effects.speed.duration = 0;
+    } else if (p->effects.speed.duration > 0) {
+        p->effects.speed.duration--;
+        p->speed = max(p->speed - SPEED_DECAY, 0);
     }
 
     if (p->effects.freezeTime.duration > 0) {
@@ -130,12 +151,12 @@ static inline void updatePlayerEffects(Player* p, Cell* cell) {
         p->batery -= BATERY_DECAY;
 }
 
-static inline void updateDamagePlayer(Player* p, Cell* cell) {
+static inline void updateDamagePlayer(Player* p, CellType type) {
     if (p->effects.invulnerability.duration > 0) return;
-    if (cell->type == CELL_FIRE_ON) {
+    if (type == CELL_FIRE_ON) {
         p->life -= FIRE_DAMAGE;
         p->damaged = true;
-    } else if (cell->type == CELL_SPIKE) {
+    } else if (type == CELL_SPIKE) {
         p->life -= SPIKE_DAMAGE;
         p->damaged = true;
     }
@@ -192,9 +213,9 @@ static inline Cell* movePlayer(Map* this, Vec2i newDir) {
     return nextCell;
 }
 
-static inline void updatePlayerWind(Map* this, Cell* cell) {
-    if (isWind(cell->type)) {
-        Vec2i dir = DIR_VECTOR[cell->type - CELL_WIND_RIGHT];
+static inline void updatePlayerWind(Map* this, CellType type) {
+    if (isWind(type)) {
+        Vec2i dir = DIR_VECTOR[type - CELL_WIND_RIGHT];
         movePlayer(this, dir);
     }
 }
@@ -233,6 +254,10 @@ static inline void updatePlayerByInput(Map* this, Cell* cell, Input input) {
             break;
         }
     }
+
+    applyPlayerEffects(p, cell->type, this->updateCount, input);
+    updateDamagePlayer(p, cell->type);
+    collectItens(p, cell);
 }
 
 static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
@@ -243,7 +268,10 @@ static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
     if ((p->effects.slowness.duration & 1) == 0)
         updatePlayerByInput(this, cell, input);
 
-    updatePlayerWind(this, cell);
+    if (p->effects.speed.duration > 0)
+        updatePlayerByInput(this, cell, input);
+
+    updatePlayerWind(this, cell->type);
 }
 
 //===============================================================
@@ -260,16 +288,9 @@ static inline void updatePlayer(Map* this, Input input) {
 
     if (cm->heaven)
         updatePlayerEndGame(this, cell);
-    applyPlayerEffects(p, cell, this->updateCount);
-
-    p->cellType = cell->type;
 
     updatePlayerMovement(this, cell, input);
-    bool isFreeze = p->effects.freezeTime.duration > 0;
-    updatePlayerEffects(p, cell);
-
-    updateDamagePlayer(p, cell);
-    collectItens(p, cell, isFreeze);
+    updatePlayerEffects(p);
 }
 
 //===============================================================
@@ -356,12 +377,12 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
 //===============================================================
 
 static inline void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedCells) {
-    if (e->biome == VIOLENCIA){
-        for (int i = -5; i < 6; i++){
-            for (int j = -5; j < 6; j++){
+    if (e->biome == VIOLENCIA) {
+        for (int i = -5; i < 6; i++) {
+            for (int j = -5; j < 6; j++) {
                 Cell* cell = cm->getUpdatedCell(cm, e->x + j, e->y + i);
                 if (cell == NULL) continue;
-                if (cell->type == CELL_EMPTY){
+                if (cell->type == CELL_EMPTY) {
                     int num = rand() % 1000;
                     if (num < FINAL_BOSS_GRAVE_PROBABILITY)
                         cell->type = CELL_GRAVE_INFESTED;
@@ -489,7 +510,7 @@ static inline void updateEnemies(Map* this) {
 //===============================================================
 
 static void updateTime(Map* this, float deltaTime) {
-    if (this->manager->heaven){
+    if (this->manager->heaven) {
         this->biomeTime = 0;
         return;
     }
