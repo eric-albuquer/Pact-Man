@@ -13,6 +13,8 @@
 
 #define TUTORIAL_DURATION 15.0f
 
+#define FRAGMENT_EFFECT_DURATION 3.0f
+
 typedef struct Game {
     int width;
     int height;

@@ -33,6 +33,7 @@ static inline void collectItens(Player* p, Cell* cell) {
         p->totalCoins++;
     } else if (cell->type == CELL_FRAGMENT) {
         cell->type = CELL_EMPTY;
+        p->getFragment = true;
         p->totalFragment++;
         p->biomeFragment++;
     } else if (cell->type == CELL_BATERY) {
@@ -51,6 +52,7 @@ static inline void collectItens(Player* p, Cell* cell) {
         p->fragmentByCoins = true;
         p->biomeFragment++;
         p->totalFragment++;
+        p->getFragment = true;
     }
 }
 
@@ -198,6 +200,7 @@ static inline Cell* movePlayer(Map* this, Vec2i newDir) {
     Cell* nextCell = cm->getUpdatedCell(cm, playerNextX, playerNextY);
     if (nextCell == NULL) return NULL;
 
+    if (this->manager->heaven && (nextCell->type != CELL_HEAVEN && nextCell->type != CELL_PORTAL)) return NULL;
     bool cantPassBiome = p->biomeFragment < 2 && nextCell->biome > p->biome;
     if (cantPassBiome || nextCell->biome < p->biome) return NULL;
     if (p->effects.invisibility.duration == 0 && !isPassable(nextCell->type) && isPassable(p->cellType)) return NULL;
@@ -285,6 +288,7 @@ static inline void updatePlayer(Map* this, Input input) {
 
     p->hitEnemy = false;
     p->damaged = false;
+    p->getFragment = false;
 
     if (cm->heaven)
         updatePlayerEndGame(this, cell);
@@ -439,6 +443,7 @@ static inline bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, Linke
                     if (e->isBoss) {
                         p->biomeFragment++;
                         p->totalFragment++;
+                        p->getFragment = true;
                         if (e->biome == VIOLENCIA)
                             cm->heaven = true;
                     }

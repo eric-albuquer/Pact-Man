@@ -69,7 +69,7 @@
 #define BIOME_DEGEN_START_TIME 180.0f
 #define BATERY_DECAY 0.003f
 #define SPEED_DECAY 1
-#define SPEED_RELOAD 1
+#define SPEED_RELOAD 2
 
 #define PAUSE_DELAY 1.0f
 

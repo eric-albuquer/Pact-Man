@@ -53,6 +53,7 @@ Player* new_Player(int x, int y) {
     this->totalCoins = 0;
     this->totalFragment = 0;
     this->biomeFragment = 0;
+    this->getFragment = 0;
     this->alive = 1;
     this->fragmentByCoins = false;
 

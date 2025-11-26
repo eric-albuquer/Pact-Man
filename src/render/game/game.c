@@ -209,7 +209,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         DrawAnimation(animations[ANIMATION_PORTAL], x, y, size, color);
     } else if (type == CELL_BONUS) {
         float t = (float)(this->map->updateCount % BONUS_DELAY) / BONUS_DELAY;
-        Color c = LerpColor(BLACK, p->cellType == CELL_BONUS ? PURPLE : BLUE, t);
+        Color c = LerpColor(BLACK, p->cellType == CELL_BONUS ? BLUE : PURPLE, t);
         DrawSprite(sprites[SPRITE_BONUS], x, y, size, size, c);
     }
 
@@ -304,6 +304,38 @@ static void drawSpeedBar(Game* this, int x, int y, int width, int height) {
     DrawRectangle(x + startW, y + h, lx, h, color);
     DrawSprite(this->sprites[SPRITE_SPEED_BAR], x, y, width, height, WHITE);
     //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
+}
+
+//===============================================================
+//  DESENHAR EFEITO DO FRAGMENTO
+//===============================================================
+
+static void drawFragmentEffect(Game* this) {
+    const int hx = (this->width - (this->cellSize >> 1)) >> 1;
+    const int hy = this->height >> 1;
+    static float fragmentEffectDuration = 0.0f;
+    static const float fragmentVel = 50.0f;
+    Player* p = this->map->player;
+    if (p->getFragment)
+        fragmentEffectDuration = FRAGMENT_EFFECT_DURATION;
+
+    if (fragmentEffectDuration > 0.0f){
+        fragmentEffectDuration -= GetFrameTime();
+        DrawAnimation(this->animations[ANIMATION_FRAGMENT], hx, (hy - 50) - fragmentVel * (FRAGMENT_EFFECT_DURATION - fragmentEffectDuration), this->cellSize * 1.5f, WHITE);
+    }
+}
+
+//===============================================================
+//  DESENHAR INDICAÇÃO DE FIM DE JOGO
+//===============================================================
+
+static void drawHeavenHud(Game* this) {
+    const int hx = this->width >> 1;
+    static const int y = 200;
+    static const int margin = 10;
+    static const int fontSize = 50;
+    DrawRectangleRounded((Rectangle){hx - 300, y, 600, fontSize + margin * 2}, 0.5f, 16, HUD_OPACITY);
+    drawCenteredText("Procure o portal!", hx, y + margin, fontSize, PURPLE);
 }
 
 //===============================================================
@@ -567,7 +599,10 @@ static void drawHud(Game* this) {
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
-    if (map->manager->heaven) return;
+    if (map->manager->heaven) {
+        drawHeavenHud(this);
+        return;
+    }
 
     static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
 
@@ -584,6 +619,8 @@ static void drawHud(Game* this) {
     drawBateryBar(this, this->offsetHalfX - 200, this->height - 290, 400, 80);
     drawInfoHud(this, this->width - 280, 550, 80);
 
+    drawFragmentEffect(this);
+
     if (p->biomeFragment >= 2 && this->map->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
 
@@ -599,7 +636,7 @@ static void playAudio(Game* this) {
     Player* p = this->map->player;
     Audio* audio = this->audio;
 
-    if (p->cellType == CELL_HEAVEN) {
+    if (this->map->manager->heaven) {
         audio->updateMusic(audio, MUSIC_HEAVEN);
         return;
     }
