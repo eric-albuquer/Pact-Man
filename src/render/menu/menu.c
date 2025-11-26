@@ -188,7 +188,8 @@ static void updateMainContent(Menu* this) {
         if (selected == -1) selected = 5;
     }
 
-    buttons[selected]->hovered = true;
+    if (IsGamepadAvailable(0))
+        buttons[selected]->hovered = true;
 }
 
 //===============================================================
