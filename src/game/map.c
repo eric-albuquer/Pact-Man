@@ -643,6 +643,7 @@ static void restart(Map* this) {
     this->lastScore.totalCoins = this->player->totalCoins;
     this->lastScore.totalFragments = this->player->totalFragment;
     this->lastScore.totalTime = this->player->totalTime;
+    this->lastScore.dificulty = dificulty;
     this->player->restart(this->player);
     int biomeCols = this->manager->biomeCols;
     int rows = this->manager->rows;

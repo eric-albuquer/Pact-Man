@@ -60,6 +60,8 @@ static void delete() {
 static void insert() {
     Score* score = malloc(sizeof(Score));
 
+    printf("Dificuldade: ");
+    scanf("%d", &score->dificulty);
     printf("Nome: ");
     scanf("%s", score->name);
     toUpperCase(score->name);
@@ -82,7 +84,7 @@ static void view(){
     for (int i = 0; i < scores->length; i++){
         Score* score = scores->data[i];
         int totalSeconds = score->totalTime;
-        printf("%d, Nome: %s, Tempo: %02d:%02d, Moedas: %d, Fragmentos: %d\n", i, score->name, totalSeconds / 60, totalSeconds % 60, score->totalCoins, score->totalFragments);
+        printf("%d, Dificuldade: %d, Nome: %s, Tempo: %02d:%02d, Moedas: %d, Fragmentos: %d\n", i, score->dificulty, score->name, totalSeconds / 60, totalSeconds % 60, score->totalCoins, score->totalFragments);
     }
 }
 

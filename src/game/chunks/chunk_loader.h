@@ -3,11 +3,11 @@
 
 #include "chunk.h"
 
-#define BIOME_ENEMY_PROBABILITY (int[4]){ 50, 40, 20, 20 }
+#define BIOME_ENEMY_PROBABILITY (int[4]){ 50, 40, 30, 25 }
 
 #define WALL_DENSITY 75
 
-#define MUD_DENSITY 7
+#define MUD_DENSITY 5
 
 #define GRAVE_DENSITY 5
 #define GRAVE_INFESTED_PROBABILITY 5
@@ -24,7 +24,7 @@
 
 #define REGENERATION_PROBABILITY 8
 
-#define BATERY_PROBABILITY 50
+#define BATERY_PROBABILITY 40
 
 #define FREEZE_TIME_PROBABILITY 4
 

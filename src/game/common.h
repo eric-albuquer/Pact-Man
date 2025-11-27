@@ -25,6 +25,7 @@ typedef struct {
     int totalCoins;
     int totalFragments;
     float totalTime;
+    int dificulty;
 } Score;
 
 typedef enum { RIGHT, LEFT, UP, DOWN } Direction;

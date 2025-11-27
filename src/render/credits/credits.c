@@ -183,6 +183,7 @@ static void updateAddScore(Credits* this) {
         score->totalCoins = this->score->totalCoins;
         score->totalFragments = this->score->totalFragments;
         score->totalTime = this->score->totalTime;
+        score->dificulty = this->score->dificulty;
         this->scores->push(this->scores, score);
         return;
     }
@@ -386,14 +387,22 @@ static void drawShowScore(Credits* this) {
     const int startX = (this->width - widthRow) >> 1;
 
     int y = 200;
-    int rows = min(10, scores->length);
 
-    DrawRectangleRounded((Rectangle){(this->width >> 1) - 200, 70, 400, 85}, 0.5f, 16, HUD_OPACITY);
-    drawCenteredText("SCORES", this->width >> 1, 80, 70, WHITE);
+    static const char* dificultyText[] = {
+        "EASY",
+        "MEDIUM",
+        "HARD"
+    };
 
-    for (int i = 0; i < rows; i++) {
-        Score* score = scores->data[i];
-        drawTableRow(this, score, startX, y, widthRow, heightRow, margin, i + 1);
+    DrawRectangleRounded((Rectangle){(this->width >> 1) - 400, 70, 800, 85}, 0.5f, 16, HUD_OPACITY);
+    sprintf(buffer, "SCORES - %s", dificultyText[dificulty]);
+    drawCenteredText(buffer, this->width >> 1, 80, 70, WHITE);
+
+    int idx = 0, i = 0;
+    while (idx < 10 && i < scores->length){
+        Score* score = scores->data[i++];
+        if (score->dificulty != dificulty) continue;
+        drawTableRow(this, score, startX, y, widthRow, heightRow, margin, ++idx);
         y += heightRow + margin;
     }
 
