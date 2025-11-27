@@ -23,7 +23,6 @@ typedef struct ChunkManager {
     bool portal;
 
     Chunk* (*getLoadedChunk)(struct ChunkManager*, int, int);
-    Chunk* (*getChunk)(struct ChunkManager*, int, int);
     Cell* (*getLoadedCell)(struct ChunkManager*, int, int);
     Cell* (*getUpdatedCell)(struct ChunkManager*, int, int);
     void (*updateChunks)(struct ChunkManager*);

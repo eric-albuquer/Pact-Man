@@ -6,11 +6,11 @@
 //  FUNÇÕES DE CHAVE E HASH
 //===============================================================
 
-static size_t chunkKey(int cx, int cy) {
+static inline size_t chunkKey(int cx, int cy) {
     return ((size_t)(cy) << 32) | cx;
 }
 
-static int hashCode(size_t key) {
+static inline int hashCode(size_t key) {
     size_t h = key * 0x9E3779B97F4A7C15ULL;
     return (int)(h ^ (h >> 32));
 }
@@ -19,7 +19,7 @@ static int hashCode(size_t key) {
 //  REHASH PARA TABELA QUASE CHEIA
 //===============================================================
 
-static void rehash(ChunkMap* map) {
+static void rehash(ChunkMap* restrict map) {
     int oldCapacity = map->capacity;
     map->capacity <<= 1;
     map->mask = map->capacity - 1;

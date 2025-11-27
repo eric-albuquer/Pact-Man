@@ -3,18 +3,38 @@
 #include <stdio.h>
 #include <string.h>
 
+//===============================================================
+//  STRUCT DO NÓ DA ÁRVORE DE CHEATS
+//===============================================================
+
 typedef struct TreeNode {
     struct TreeNode* nodes[12];
     int code;
 } TreeNode;
 
-TreeNode* cheats[12] = { 0 };
+//===============================================================
+//  ÁRVORES DE CHEATS
+//===============================================================
 
-static TreeNode* new_TreeNode() {
+TreeNode* roots[12] = { 0 };
+
+//===============================================================
+//  CONSTRUTOR DE UM NÓ DA ÁRVORE
+//===============================================================
+
+static inline TreeNode* new_TreeNode() {
     return calloc(1, sizeof(TreeNode));
 }
 
+//===============================================================
+//  HASH PERFEITO
+//===============================================================
+
 static int KEYS[512];
+
+//===============================================================
+//  CARREGAR TABELA
+//===============================================================
 
 static void loadKeys() {
     for (int i = 0; i < 512; i++) {
@@ -35,34 +55,46 @@ static void loadKeys() {
     KEYS[KEY_O] = KEYS[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = 11;
 }
 
-static inline int getNumber(char* str){
+//===============================================================
+//  FUNÇÃO AUXILIAR DE STRING
+//===============================================================
+
+static int getNumber(char* str) {
     char c;
     int number = 0;
-    while((c = *str++) != ' ' && c != 0){
+    while ((c = *str++) != ' ' && c != 0) {
         number *= 10;
         number += (c - '0') % 10;
     }
     return number;
 }
 
+//===============================================================
+//  ADICIONAR RAMIFICAÇÃO DO CHEAT VIA STRING
+//===============================================================
+
 static void addCheat(char* cheat) {
     int rootIdx = KEYS[(int)(*cheat)];
-    if (cheats[rootIdx] == NULL) {
-        cheats[rootIdx] = new_TreeNode();
+    if (roots[rootIdx] == NULL) {
+        roots[rootIdx] = new_TreeNode();
     }
-    TreeNode* node = cheats[rootIdx];
-    for (char* c = cheat + 2; *c; c+=2) {
+    TreeNode* node = roots[rootIdx];
+    for (char* c = cheat + 2; *c; c += 2) {
         int nodeIdx = KEYS[(int)(*c)];
         if (node->nodes[nodeIdx] == NULL) {
             node->nodes[nodeIdx] = new_TreeNode();
         }
         node = node->nodes[nodeIdx];
-        if (*(c + 1) == ':'){
+        if (*(c + 1) == ':') {
             node->code = getNumber(c + 2);
             return;
         }
     }
 }
+
+//===============================================================
+//  GERAR E CARREGAR A ÁRVORE COMPLETA
+//===============================================================
 
 void loadCheats() {
     loadKeys();
@@ -76,6 +108,43 @@ void loadCheats() {
     fclose(file);
 }
 
+//===============================================================
+//  PONTEIRO PARA O RAMO DO INPUT
+//===============================================================
+
+static TreeNode* node = NULL;
+
+//===============================================================
+//  FUNÇÃO QUE VERIFICA E ATUALIZA O PONTEIRO
+//===============================================================
+
+inline int hasCheat(int code) {
+    int idx = KEYS[code];
+
+    if (idx == -1) {
+        node = NULL;
+        return 0;
+    }
+
+    if (node == NULL) node = roots[idx]; // Sair da raiz
+    else node = node->nodes[idx]; // Avançar um galho
+
+    if (node) return node->code;
+    return 0;
+}
+
+//===============================================================
+//  LEVAR O PONTEIRO PARA A ORIGEM
+//===============================================================
+
+void resetCheatPointer() {
+    node = NULL;
+}
+
+//===============================================================
+//  LIBERAR MEMÓRIA DE UM NÓ
+//===============================================================
+
 static void freeRecursive(TreeNode* node) {
     for (int i = 0; i < 12; i++) {
         if (node->nodes[i] == NULL) continue;
@@ -84,30 +153,13 @@ static void freeRecursive(TreeNode* node) {
     free(node);
 }
 
-void unloadCheats() {
+//===============================================================
+//  DESCARREGAR ÁRVORE
+//===============================================================
+
+inline void unloadCheats() {
     for (int i = 0; i < 12; i++) {
-        if (cheats[i] == NULL) continue;
-        freeRecursive(cheats[i]);
+        if (roots[i] == NULL) continue;
+        freeRecursive(roots[i]);
     }
-}
-
-static TreeNode* node = NULL;
-
-int hasCheat(int code) {
-    int idx = KEYS[code];
-
-    if (idx == -1) {
-        node = NULL;
-        return 0;
-    }
-
-    if (node == NULL) node = cheats[idx]; // Sair da raiz
-    else node = node->nodes[idx]; // Avançar um galho
-
-    if (node) return node->code;
-    return 0;
-}
-
-void resetCheatPointer(){
-    node = NULL;
 }

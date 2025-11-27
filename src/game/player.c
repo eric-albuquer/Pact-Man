@@ -1,6 +1,10 @@
 #include "player.h"
 #include <stdlib.h>
 
+//===============================================================
+//  ATUALIZAR CHUNK DO PLAYER
+//===============================================================
+
 static bool updateChunk(Player* this) {
     int newChunkX = this->x >> CHUNK_SHIFT;
     int newChunkY = this->y >> CHUNK_SHIFT;
@@ -12,6 +16,10 @@ static bool updateChunk(Player* this) {
     return false;
 }
 
+//===============================================================
+//  ATUALIZAR DIREÇÃO DO PLAYER
+//===============================================================
+
 static void updateDirection(Player* this){
     int dx = this->x - this->lastX;
     int dy = this->y - this->lastY;
@@ -20,6 +28,10 @@ static void updateDirection(Player* this){
     else if (dy == 1) this->dir = DOWN;
     else if (dy == -1) this->dir = UP;
 }
+
+//===============================================================
+//  REINICIAR PLAYER
+//===============================================================
 
 static void restart(Player* this){
     this->life = START_LIFE;
@@ -34,7 +46,15 @@ static void restart(Player* this){
     this->batery = 1.0f;
 }
 
+//===============================================================
+//  LIBERAR MEMÓRIA
+//===============================================================
+
 static void _free(Player* this) { free(this); }
+
+//===============================================================
+//  CONSTRUTOR
+//===============================================================
 
 Player* new_Player(int x, int y) {
     Player* this = malloc(sizeof(Player));

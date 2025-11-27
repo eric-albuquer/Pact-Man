@@ -2,20 +2,28 @@
 #include <stdlib.h>
 #include "enemy.h"
 
+//===============================================================
+//  PEGAR CÉLULA DENTRO DO CHUNK
+//===============================================================
+
 static inline Cell* cellAt(Chunk* this, int x, int y) {
     return &this->cells[(y << CHUNK_SHIFT) | x];
 }
 
-static void resetDistance(Chunk* this) {
+//===============================================================
+//  RESETAR AS DISTANCIAS PARA -1
+//===============================================================
+
+static inline void resetDistance(Chunk* this) {
     Cell* cells = this->cells;
     for (int i = 0; i < CELLS_PER_CHUNK; i++) {
         cells[i].distance = -1;
     }
 }
 
-static bool inline isFire(Cell* cell) {
-    return cell->type == CELL_FIRE_OFF || cell->type == CELL_FIRE_ON;
-}
+//===============================================================
+//  ATUALIZAR DEGENERAÇÃO DO CHUNK
+//===============================================================
 
 static void updateDegenerescence(Chunk* this, int x, int y, int biome) {
     Cell* cell = cellAt(this, x, y);
@@ -25,6 +33,14 @@ static void updateDegenerescence(Chunk* this, int x, int y, int biome) {
         cell->type = CELL_DEGENERATED_1;
     else if (cell->type < CELL_DEGENERATED_3)
         cell->type++;
+}
+
+//===============================================================
+//  ATUALIZAR FOGO NO CHUNK
+//===============================================================
+
+static inline bool isFire(Cell* cell) {
+    return cell->type == CELL_FIRE_OFF || cell->type == CELL_FIRE_ON;
 }
 
 static void updateFire(Chunk* this, int x, int y) {
@@ -45,7 +61,11 @@ static void updateFire(Chunk* this, int x, int y) {
     }
 }
 
-static Node* hasEnemyInCell(Chunk* this, int x, int y) {
+//===============================================================
+//  ATUALIZAR LÁPIDES NO CHUNK
+//===============================================================
+
+static inline Node* hasEnemyInCell(Chunk* this, int x, int y) {
     Node* cur = this->enemies->head;
     while (cur) {
         Enemy* e = cur->data;
@@ -79,7 +99,11 @@ static void updateGraveInfested(Chunk* this, int x, int y) {
     cell->type = CELL_GRAVE_INFESTED;
 }
 
-static void updateHeaven(Chunk* this, int x, int y) {
+//===============================================================
+//  ATUALIZAR CHUNK PARA O PARAÍSO
+//===============================================================
+
+static inline void updateHeaven(Chunk* this, int x, int y) {
     Cell* cell = this->cellAt(this, x, y);
     if (cell->type == CELL_PORTAL) return;
     cell->biome = VIOLENCIA;
@@ -92,7 +116,11 @@ static void updateHeaven(Chunk* this, int x, int y) {
     }
 }
 
-static void update(Chunk* this, int biome, bool heaven) {
+//===============================================================
+//  ATUALIZAR CHUNK
+//===============================================================
+
+static inline void update(Chunk* this, int biome, bool heaven) {
     int y = rand() & CHUNK_MASK;
     int x = rand() & CHUNK_MASK;
     updateDegenerescence(this, x, y, biome);
@@ -105,8 +133,11 @@ static void update(Chunk* this, int biome, bool heaven) {
             updateHeaven(this, x, y);
         } 
     }
-        
 }
+
+//===============================================================
+//  LIBERAR MEMÓRIA DO CHUNK
+//===============================================================
 
 static void _free(Chunk* this) {
     Node* cur = this->enemies->head;
@@ -121,6 +152,10 @@ static void _free(Chunk* this) {
     free(this->enemies);
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR DO CHUNK
+//===============================================================
 
 Chunk* new_Chunk(int x, int y) {
     Chunk* this = malloc(sizeof(Chunk));

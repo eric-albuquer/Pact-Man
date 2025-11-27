@@ -1,6 +1,10 @@
 #include "enemy.h"
 #include <stdlib.h>
 
+//===============================================================
+//  ATUALIZAR CHUNK DO INIMIGO
+//===============================================================
+
 static bool updateChunk(Enemy* this) {
     int newChunkX = this->x >> CHUNK_SHIFT;
     int newChunkY = this->y >> CHUNK_SHIFT;
@@ -12,6 +16,10 @@ static bool updateChunk(Enemy* this) {
     return false;
 }
 
+//===============================================================
+//  ATUALIZAR DIREÇÃO DO INIMIGO
+//===============================================================
+
 static void updateDirection(Enemy* this){
     int dx = this->x - this->lastX;
     int dy = this->y - this->lastY;
@@ -21,9 +29,17 @@ static void updateDirection(Enemy* this){
     else if (dy == -1) this->dir = UP;
 }
 
+//===============================================================
+//  LIBERAR MEMÓRIA
+//===============================================================
+
 static void _free(Enemy* this){
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR
+//===============================================================
 
 Enemy* new_Enemy(int x, int y, int biome){
     Enemy* this = malloc(sizeof(Enemy));

@@ -1,11 +1,33 @@
 #include "pathfinding.h"
 
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "chunk.h"
 #include "linkedlist.h"
+
+static LinkedList* BFSQueue = NULL;
+
+//===============================================================
+//  ALOCAR E LIBERAR FILA BFS
+//===============================================================
+
+void loadBFS(){
+    BFSQueue = new_LinkedList();
+}
+
+void unloadBFS(){
+    Node* cur = BFSQueue->head;
+    while(cur){
+        free(cur->data);
+        cur = cur->next;
+    }
+    BFSQueue->free(BFSQueue);
+}
+
+//===============================================================
+//  ALGORITMO BFS PARA GERAR MAPA DE DISTÂNCIA
+//===============================================================
 
 void mapDistancePlayer(Map* map) {
     if (!map) return;
@@ -19,7 +41,6 @@ void mapDistancePlayer(Map* map) {
         if (chunk) chunk->resetDistance(chunk);
     }
 
-    LinkedList* BFSQueue = new_LinkedList();
     QNode* start = malloc(sizeof(*start));
 
     start->x = map->player->x;
@@ -51,8 +72,11 @@ void mapDistancePlayer(Map* map) {
         }
         free(curr);
     }
-    BFSQueue->free(BFSQueue);
 }
+
+//===============================================================
+//  POSIÇÕES VIZINHAS PARA UMA CORDENADA
+//===============================================================
 
 NextPos getNextPos(ChunkManager* cm, int x, int y, int biome) {
     NextPos nextPos = { 0 };
@@ -77,33 +101,71 @@ NextPos getNextPos(ChunkManager* cm, int x, int y, int biome) {
     return nextPos;
 }
 
+//===============================================================
+//  ORDENAR POSIÇÕES VIZINHAS PELA DISTÂNCIA
+//===============================================================
+
 void sortNextPos(NextPos* nextPos) {
-    for (int i = 0; i < nextPos->moves; i++) {
-        for (int j = i + 1; j < nextPos->moves; j++) {
-            if (nextPos->pos[i].d > nextPos->pos[j].d) {
-                QNode temp = nextPos->pos[i];
-                nextPos->pos[i] = nextPos->pos[j];
-                nextPos->pos[j] = temp;
-            }
+    int n = nextPos->moves;
+
+    if (n < 2) return;
+
+    QNode* p = nextPos->pos;
+
+    if (n == 2) {
+        if (p[0].d > p[1].d) {
+            QNode tmp = p[0]; p[0] = p[1]; p[1] = tmp;
         }
+        return;
+    }
+
+    if (n == 3) {
+        if (p[0].d > p[1].d) { QNode t = p[0]; p[0] = p[1]; p[1] = t; }
+        if (p[1].d > p[2].d) { QNode t = p[1]; p[1] = p[2]; p[2] = t; }
+        if (p[0].d > p[1].d) { QNode t = p[0]; p[0] = p[1]; p[1] = t; }
+        return;
+    }
+
+    if (n == 4) {
+        if (p[0].d > p[1].d) { QNode t = p[0]; p[0] = p[1]; p[1] = t; }
+        if (p[2].d > p[3].d) { QNode t = p[2]; p[2] = p[3]; p[3] = t; }
+        if (p[0].d > p[2].d) { QNode t = p[0]; p[0] = p[2]; p[2] = t; }
+        if (p[1].d > p[3].d) { QNode t = p[1]; p[1] = p[3]; p[3] = t; }
+        if (p[1].d > p[2].d) { QNode t = p[1]; p[1] = p[2]; p[2] = t; }
     }
 }
+
+//===============================================================
+//  PIOR DIREÇÃO
+//===============================================================
 
 Vec2i getWorstPos(NextPos nextPos) {
     if (nextPos.moves == 0) return (Vec2i) { 0 };
     return (Vec2i) { nextPos.pos[nextPos.moves - 1].x, nextPos.pos[nextPos.moves - 1].y };
 }
 
+//===============================================================
+//  MELHOR DIREÇÃO
+//===============================================================
+
 Vec2i getBestPos(NextPos nextPos) {
     if (nextPos.moves == 0) return (Vec2i) { 0 };
     return (Vec2i) { nextPos.pos[0].x, nextPos.pos[0].y };
 }
+
+//===============================================================
+//  DIREÇÃO ALEATÓRIA
+//===============================================================
 
 Vec2i getRandomPos(NextPos nextPos) {
     if (nextPos.moves == 0) return (Vec2i) { 0 };
     int idx = rand() % nextPos.moves;
     return (Vec2i) { nextPos.pos[idx].x, nextPos.pos[idx].y };
 }
+
+//===============================================================
+//  MELHOR DIREÇÃO PARA O SPAWN (EUCLIDIANA)
+//===============================================================
 
 Vec2i getCloserToSpawn(NextPos nextPos, int x, int y){
     Vec2i closer = {0};

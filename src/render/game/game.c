@@ -583,7 +583,7 @@ static void drawPauseHud(Game* this) {
 static void drawHud(Game* this) {
     Map* map = this->map;
     Player* p = map->player;
-    // Chunk* chunk = map->manager->getChunk(map->manager, p->chunkX, p->chunkY);
+    // Chunk* chunk = map->manager->getLoadedChunk(map->manager, p->chunkX, p->chunkY);
     // sprintf(buffer,
     //     "Life:%d\nChunk x: %d, y: %d\nCord x:%d, y:%d\ncx:%d, cy:%d\nChunkBiome: %d\nBiome:%d\nCoins:%d\nBiome Coins:%d\nFragment:%d\nBiome Fragment:%d\nInvulnerability:%d\nPlayerCell:%d\nUpdate%d\nSpeed:%d\n",
     //     p->life, p->chunkX, p->chunkY, p->x, p->y, p->x & CHUNK_MASK, p->y & CHUNK_MASK, chunk->biome,

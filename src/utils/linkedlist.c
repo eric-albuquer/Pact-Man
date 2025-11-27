@@ -1,6 +1,10 @@
 #include "linkedlist.h"
 #include <stdlib.h>
 
+//===============================================================
+//  CRIAR UM NÓ
+//===============================================================
+
 static Node* new_Node(Node* prev, Node* next, void* data){
     Node* node = malloc(sizeof(Node));
     node->next = next;
@@ -8,6 +12,10 @@ static Node* new_Node(Node* prev, Node* next, void* data){
     node->data = data;
     return node;
 }
+
+//===============================================================
+//  ADICIONAR
+//===============================================================
 
 static void addFirst(LinkedList* this, void* data){
     Node* node = new_Node(NULL, this->head, data);
@@ -24,6 +32,10 @@ static void addLast(LinkedList* this, void* data){
     this->tail = node;
     this->length++;
 }
+
+//===============================================================
+//  REMOVER
+//===============================================================
 
 static void* removeFirst(LinkedList* this){
     if (this->length == 0) return NULL;
@@ -49,16 +61,9 @@ static void* removeLast(LinkedList* this){
     return data;
 }
 
-static void _free(LinkedList* this){
-    Node* cur = this->head;
-    Node* temp = cur;
-    while(cur != NULL){
-        temp = cur;
-        cur = cur->next;
-        free(temp);
-    }
-    free(this);
-}
+//===============================================================
+//  REMOVER POR REFERÊNCIA
+//===============================================================
 
 static void* removeNode(LinkedList* this, Node* node){
     if (node->prev) node->prev->next = node->next;
@@ -71,6 +76,25 @@ static void* removeNode(LinkedList* this, Node* node){
     free(node);
     return data;
 }
+
+//===============================================================
+//  LIBERAR MEMÓRIA
+//===============================================================
+
+static void _free(LinkedList* this){
+    Node* cur = this->head;
+    Node* temp = cur;
+    while(cur != NULL){
+        temp = cur;
+        cur = cur->next;
+        free(temp);
+    }
+    free(this);
+}
+
+//===============================================================
+//  CONSTRUTOR
+//===============================================================
 
 LinkedList* new_LinkedList(){
     LinkedList* this = malloc(sizeof(LinkedList));

@@ -3,15 +3,19 @@
 #include <string.h>
 #include "common.h"
 
-void freeButton(Button* this) {
-    free(this);
-}
+//===============================================================
+//  VERIFICAR SE A CORDENADA ESTÁ DENTRO DO BOTÃO
+//===============================================================
 
-bool isInside(Button* this, Vector2 pos) {
+static inline bool isInside(Button* this, Vector2 pos) {
     return pos.x > this->x && pos.x < this->x + this->width && pos.y > this->y && pos.y < this->y + this->height;
 }
 
-void drawButton(Button* this) {
+//===============================================================
+//  DESENHAR BOTÃO
+//===============================================================
+
+static inline void drawButton(Button* this) {
     Color color = this->hovered ? this->fontColor : this->color;
     //DrawRectangle(this->x, this->y, this->width, this->height, color);
     DrawRectangleRounded((Rectangle) { this->x, this->y, this->width, this->height }, 0.7f, 16, color);
@@ -26,6 +30,17 @@ void drawButton(Button* this) {
     DrawText(this->text, textX, textY, this->fontSize, textColor);
 }
 
+//===============================================================
+//  LIBERAR MEMÓRIA 
+//===============================================================
+
+void freeButton(Button* this) {
+    free(this);
+}
+
+//===============================================================
+//  CONSTRUTOR
+//===============================================================
 
 Button* new_Button(int x, int y, int w, int h, Color color, Color fontColor, char* text, int fontSize, void (*action)()) {
     Button* this = malloc(sizeof(Button));

@@ -3,31 +3,6 @@
 
 #include "chunk.h"
 
-#define BIOME_ENEMY_PROBABILITY (int[4]){ 50, 40, 30, 20 }
-
-#define WALL_DENSITY 75
-
-#define MUD_DENSITY 5
-
-#define GRAVE_DENSITY 5
-#define GRAVE_INFESTED_PROBABILITY 5
-
-#define FIRE_DENSITY 30
-
-#define SPIKE_DENSITY 5
-
-#define COIN_DENSITY 15
-
-#define FRUIT_PROBABILITY 8
-
-#define INVISIBILITY_PROBABILITY 8
-
-#define REGENERATION_PROBABILITY 8
-
-#define BATERY_PROBABILITY 50
-
-#define FREEZE_TIME_PROBABILITY 4
-
 typedef struct ChunkLoader{
     int width, height;
     int biomeWidthChunks;

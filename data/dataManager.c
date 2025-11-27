@@ -116,7 +116,7 @@ static void loadData(const char* pathDatabase) {
 static void saveData(const char* pathDatabase) {
     if (scores->length == 0) return;
 
-    scores->sort(scores, cmpTime);
+    scores->mergeSort(scores, cmpTime);
 
     FILE* file = fopen(pathDatabase, "wb");
     for (int i = 0; i < scores->length; i++) {

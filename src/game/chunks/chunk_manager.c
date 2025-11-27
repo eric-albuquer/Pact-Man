@@ -2,11 +2,18 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <omp.h>
+
+//===============================================================
+//  IDX HASH PARA MATRIZ DE CHUNKS
+//===============================================================
 
 const int CLOSER_IDX[9] = {16, 17, 18, 23, 24, 25, 30, 31, 32};
 const int ADJACENT_IDX[8] = {16, 17, 18, 23, 25, 30, 31, 32};
 
-#include <omp.h>
+//===============================================================
+//  GERAR E GUARDAR CHUNKS NA MATRIZ (PARALELO)
+//===============================================================
 
 static void loadAdjacents(ChunkManager* this) {
     int cx = this->player->chunkX;
@@ -45,6 +52,10 @@ static void loadAdjacents(ChunkManager* this) {
     }
 }
 
+//===============================================================
+//  ATUALIZAR CHUNKS VIZINHOS (PARALELO)
+//===============================================================
+
 static void updateChunks(ChunkManager* this){
     #pragma omp parallel for
     for (int i = 0; i < 9; i++){
@@ -55,7 +66,11 @@ static void updateChunks(ChunkManager* this){
     }
 }
 
-static Cell* getLoadedCell(ChunkManager* this, int x, int y){
+//===============================================================
+//  PEGAR UMA CÉLULA CARREGADA
+//===============================================================
+
+static inline Cell* getLoadedCell(ChunkManager* this, int x, int y){
     if (x < 0 || y < 0) return NULL;
     int cx = (x >> CHUNK_SHIFT) - this->player->chunkX + 3;
     int cy = (y >> CHUNK_SHIFT) - this->player->chunkY + 3;
@@ -67,7 +82,11 @@ static Cell* getLoadedCell(ChunkManager* this, int x, int y){
     return &cells[(x & CHUNK_MASK) | ((y & CHUNK_MASK) << CHUNK_SHIFT)];
 }
 
-static Cell* getUpdatedCell(ChunkManager* this, int x, int y){
+//===============================================================
+//  PEGAR UMA CÉLULA CARREGADA E ATUALIZADA
+//===============================================================
+
+static inline Cell* getUpdatedCell(ChunkManager* this, int x, int y){
     if (x < 0 || y < 0) return NULL;
     int cx = (x >> CHUNK_SHIFT) - this->player->chunkX + 3;
     int cy = (y >> CHUNK_SHIFT) - this->player->chunkY + 3;
@@ -79,11 +98,11 @@ static Cell* getUpdatedCell(ChunkManager* this, int x, int y){
     return &cells[(x & CHUNK_MASK) | ((y & CHUNK_MASK) << CHUNK_SHIFT)];
 }
 
-static Chunk* getChunk(ChunkManager* this, int cx, int cy){
-    return this->chunks->get(this->chunks, cx, cy);
-}
+//===============================================================
+//  PEGAR UM CHUNK DA MATRIZ
+//===============================================================
 
-static Chunk* getLoadedChunk(ChunkManager* this, int cx, int cy){
+static inline Chunk* getLoadedChunk(ChunkManager* this, int cx, int cy){
     int rcx = cx - this->player->chunkX + 3;
     int rcy = cy - this->player->chunkY + 3;
 
@@ -91,9 +110,13 @@ static Chunk* getLoadedChunk(ChunkManager* this, int cx, int cy){
     return this->adjacents[rcy * 7 + rcx];
 }
 
+//===============================================================
+//  CARREGAR O SPAWN DO PLAYER
+//===============================================================
+
 static void loadSpawnChunk(ChunkManager* this){
     Player* p = this->player;
-    Chunk* chunk = getChunk(this, p->chunkX, p->chunkY);
+    Chunk* chunk = getLoadedChunk(this, p->chunkX, p->chunkY);
     LinkedList* enemies = chunk->enemies;
     while (enemies->length > 0){
         Enemy* e = enemies->removeFirst(enemies);
@@ -109,11 +132,19 @@ static void loadSpawnChunk(ChunkManager* this){
     }
 }
 
+//===============================================================
+//  LIBERAR MEMÓRIA
+//===============================================================
+
 static void _free(ChunkManager* this) {
     this->chunks->free(this->chunks);
     this->chunkLoader->free(this->chunkLoader);
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR
+//===============================================================
 
 ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
     ChunkManager* this = malloc(sizeof(ChunkManager));
@@ -139,7 +170,6 @@ ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
 
     loadSpawnChunk(this);
 
-    this->getChunk = getChunk;
     this->getLoadedChunk = getLoadedChunk;
     this->getLoadedCell = getLoadedCell;
     this->getUpdatedCell = getUpdatedCell;

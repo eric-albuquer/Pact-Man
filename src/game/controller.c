@@ -1,10 +1,17 @@
 #include "controller.h"
-#include <stdio.h>
 #include <stdlib.h>
+
+//===============================================================
+//  REINICIAR CONTROLE
+//===============================================================
 
 static void reset(Controller* this) {
     this->input = (Input){ 0 };
 }
+
+//===============================================================
+//  RECEBER INPUTS DO TECLADO
+//===============================================================
 
 static void getKeyboardInputs(Controller* this) {
     if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
@@ -31,6 +38,10 @@ static void getKeyboardInputs(Controller* this) {
     if (this->input.code == 0)
         this->input.code = GetKeyPressed();
 }
+
+//===============================================================
+//  RECEBER INPUTS DO CONTROLE
+//===============================================================
 
 static void getControllerInputs(Controller* this) {
     if (!IsGamepadAvailable(0)) return;
@@ -68,14 +79,26 @@ static void getControllerInputs(Controller* this) {
         this->input.code = GetGamepadButtonPressed();
 }
 
+//===============================================================
+//  RECEBER QUALQUER INPUT
+//===============================================================
+
 static void getInputs(Controller* this) {
     getKeyboardInputs(this);
     getControllerInputs(this);
 }
 
+//===============================================================
+//  LIBERAR MEMÓRIA
+//===============================================================
+
 static void _free(Controller* this) {
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR
+//===============================================================
 
 Controller* new_Controller() {
     Controller* this = malloc(sizeof(Controller));

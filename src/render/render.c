@@ -1,25 +1,32 @@
 #include "render.h"
-
 #include <raylib.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-#include "enemy.h"
+//===============================================================
+//  INTERFACE DE FUNÇÕES DE ATUALIZAÇÃO DO RENDER
+//===============================================================
 
-static void updateMenu(Render* this) { this->menu->update(this->menu); }
+static inline void updateMenu(Render* this) { this->menu->update(this->menu); }
 
-static void saveGame(Render* this) { this->game->saveUpdate(this->game); }
+static inline void saveGame(Render* this) { this->game->saveUpdate(this->game); }
 
-static void updateGame(Render* this) { this->game->update(this->game); }
+static inline void updateGame(Render* this) { this->game->update(this->game); }
 
-static void updateCredits(Render* this) { this->credits->update(this->credits); }
+static inline void updateCredits(Render* this) { this->credits->update(this->credits); }
 
+//===============================================================
+//  INTERFACE DE FUNÇÕES DE DESENHO DO RENDER
+//===============================================================
 
-static void drawMenu(Render* this) { this->menu->draw(this->menu); }
+static inline void drawMenu(Render* this) { this->menu->draw(this->menu); }
 
-static void drawGame(Render* this) { this->game->draw(this->game); }
+static inline void drawGame(Render* this) { this->game->draw(this->game); }
 
-static void drawCredits(Render* this) { this->credits->draw(this->credits); }
+static inline void drawCredits(Render* this) { this->credits->draw(this->credits); }
+
+//===============================================================
+//  LIBERAR MEMÓRIA
+//===============================================================
 
 static void _free(Render* this) {
     this->game->free(this->game);
@@ -27,6 +34,10 @@ static void _free(Render* this) {
     this->credits->free(this->credits);
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR DA CLASSE
+//===============================================================
 
 Render* new_Render(int width, int height, int cellSize, Map* map) {
     Render* this = malloc(sizeof(Render));

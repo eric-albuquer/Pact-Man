@@ -15,7 +15,7 @@
 //  FUNÇÕES AUXILIARES DA ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static inline void updatePlayerBiome(Map* this, Cell* cell) {
+static void updatePlayerBiome(Map* this, Cell* cell) {
     Player* p = this->player;
     if (cell->biome <= p->biome) return;
     p->biome = cell->biome;
@@ -27,7 +27,7 @@ static inline void updatePlayerBiome(Map* this, Cell* cell) {
     this->biomeTime = 0.0f;
 }
 
-static inline void collectItens(Player* p, Cell* cell) {
+static void collectItens(Player* p, Cell* cell) {
     if (cell->type == CELL_COIN) {
         cell->type = CELL_EMPTY;
         p->biomeCoins++;
@@ -57,17 +57,17 @@ static inline void collectItens(Player* p, Cell* cell) {
     }
 }
 
-static inline void applyRandomGoodEffects(Player* p) {
-    int idx = rand() % 4;
-    if (idx == 0) p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
-    else if (idx == 1) {
-        p->effects.regeneration.duration = POTION_REGENERATION_DURATION;
-        p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
-    } else if (idx == 2) p->effects.invisibility.duration = INVISIBILITY_DURATION;
-    else if (idx == 3) p->effects.freezeTime.duration = FREEZE_TIME_DURATION;
-}
+// static void applyRandomGoodEffects(Player* p) {
+//     int idx = rand() % 4;
+//     if (idx == 0) p->effects.invulnerability.duration = FRUIT_INVULNERABILITY_DURATION;
+//     else if (idx == 1) {
+//         p->effects.regeneration.duration = POTION_REGENERATION_DURATION;
+//         p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
+//     } else if (idx == 2) p->effects.invisibility.duration = INVISIBILITY_DURATION;
+//     else if (idx == 3) p->effects.freezeTime.duration = FREEZE_TIME_DURATION;
+// }
 
-static inline void applyPlayerEffects(Player* p, CellType type, unsigned int updateCount, Input input) {
+static void applyPlayerEffects(Player* p, CellType type, unsigned int updateCount, Input input) {
     static const int mudDuration = (MUD_SLOWNESS_DURATION << 1);
     static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1);
     static const int mudDurationLimit = (MUD_SLOWNESS_DURATION << 1) - 1;
@@ -115,7 +115,7 @@ static inline void applyPlayerEffects(Player* p, CellType type, unsigned int upd
     }
 }
 
-static inline void updatePlayerEffects(Player* p) {
+static void updatePlayerEffects(Player* p) {
     if (p->effects.slowness.duration > 0) {
         p->effects.slowness.duration--;
     }
@@ -158,7 +158,7 @@ static inline void updatePlayerEffects(Player* p) {
         p->batery -= BATERY_DECAY;
 }
 
-static inline void updateDamagePlayer(Player* p, CellType type) {
+static void updateDamagePlayer(Player* p, CellType type) {
     if (p->effects.invulnerability.duration > 0) return;
     if (type == CELL_FIRE_ON) {
         p->life -= FIRE_DAMAGE;
@@ -196,7 +196,7 @@ static const Vec2i DIR_VECTOR[4] = {
     {0, 1}
 };
 
-static inline Cell* movePlayer(Map* this, Vec2i newDir) {
+static Cell* movePlayer(Map* this, Vec2i newDir) {
     Player* p = this->player;
     ChunkManager* cm = this->manager;
     int playerNextX = p->x + newDir.x;
@@ -228,7 +228,7 @@ static inline void updatePlayerWind(Map* this, CellType type) {
     }
 }
 
-static inline void updatePlayerByInput(Map* this, Cell* cell, Input input) {
+static void updatePlayerByInput(Map* this, Cell* cell, Input input) {
     Player* p = this->player;
     static Vec2i dir[4];
     int length = 0;
@@ -268,7 +268,7 @@ static inline void updatePlayerByInput(Map* this, Cell* cell, Input input) {
     collectItens(p, cell);
 }
 
-static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
+static void updatePlayerMovement(Map* this, Cell* cell, Input input) {
     Player* p = this->player;
     p->lastX = p->x;
     p->lastY = p->y;
@@ -294,7 +294,7 @@ static inline void resetCheatTimer() {
     resetCheatPointer();
 }
 
-static inline void activateCheats(Map* this, Controller* controller) {
+static void activateCheats(Map* this, Controller* controller) {
     int deltaUpdates = this->updateCount - lastPressed;
     if (deltaUpdates > MAX_CHEAT_UPDATES_DELAY)
         resetCheatTimer();
@@ -310,7 +310,7 @@ static inline void activateCheats(Map* this, Controller* controller) {
     CHEAT_FLAGS[res] = !CHEAT_FLAGS[res];
 }
 
-static inline void handleCheats(Map* this, Controller* controller) {
+static void handleCheats(Map* this, Controller* controller) {
     activateCheats(this, controller);
     Player* p = this->player;
     Effects* effects = &p->effects;
@@ -337,7 +337,7 @@ static inline void handleCheats(Map* this, Controller* controller) {
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static inline void updatePlayer(Map* this, Controller* controller) {
+static void updatePlayer(Map* this, Controller* controller) {
     Player* p = this->player;
     ChunkManager* cm = this->manager;
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
@@ -371,11 +371,10 @@ static inline void updateEnemyChunk(ChunkManager* cm, Node* node, LinkedList* li
 
 static inline bool isFarAwayFromSpawn(Player* p, Enemy* e) {
     float distToSpawn = hypotf(p->x - e->spawnX, p->y - e->spawnY);
-
     return distToSpawn > MAX_PERSUIT_RADIUS_BIOME(e->biome);
 }
 
-static inline void findNewCell(ChunkManager* cm, Enemy* e) {
+static void findNewCell(ChunkManager* cm, Enemy* e) {
     int idx = rand() & 7;
     Chunk** adjacents = cm->adjacents;
     Chunk* chunk;
@@ -402,7 +401,7 @@ static inline void findNewCell(ChunkManager* cm, Enemy* e) {
 //  FUNÇÕES DE MOVIMENTAÇÃO DO INIMIGO
 //===============================================================
 
-static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
+static void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
     e->lastX = e->x;
     e->lastY = e->y;
 
@@ -438,7 +437,7 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
 //  FUNÇÕES DE ATUALIZAÇÃO DO BOSS
 //===============================================================
 
-static inline void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedCells) {
+static void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedCells) {
     if (e->biome == VIOLENCIA) {
         for (int i = -5; i < 6; i++) {
             for (int j = -5; j < 6; j++) {
@@ -490,7 +489,7 @@ static inline void bossMecanics(ChunkManager* cm, Enemy* e, LinkedList* firedCel
 //  FUNÇÕES DE COLISÃO DO INIMIGO COM O PLAYER
 //===============================================================
 
-static inline bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, LinkedList* enemies, Player* p) {
+static bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, LinkedList* enemies, Player* p) {
     Enemy* e = node->data;
 
     int start = e->isBoss;
@@ -537,7 +536,7 @@ static inline void updateEnemy(ChunkManager* cm, Node* node, LinkedList* list, P
     updateEnemyChunk(cm, node, list, changedChunk);
 }
 
-static inline void updateEnemies(Map* this) {
+static void updateEnemies(Map* this) {
     Player* p = this->player;
     ChunkManager* cm = this->manager;
 
@@ -572,7 +571,7 @@ static inline void updateEnemies(Map* this) {
 //  FUNÇÃO DE ATUALIZAÇÃO DO MAPA
 //===============================================================
 
-static void updateTime(Map* this, float deltaTime) {
+static inline void updateTime(Map* this, float deltaTime) {
     if (this->manager->heaven) {
         this->biomeTime = 0;
         return;
@@ -585,7 +584,7 @@ static void updateTime(Map* this, float deltaTime) {
     this->manager->degenerated = this->player->biome;
 }
 
-static void inline removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, LinkedList* tentacleCells) {
+static void removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, LinkedList* tentacleCells) {
     while (firedCells->length > BOSS_FIRE_QUANTITY) {
         Cell* cell = firedCells->removeFirst(firedCells);
         if (cell->biome >= HERESIA && rand() & 1) {
@@ -629,7 +628,7 @@ static void inline removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, 
 //  FUNÇÕES DE GERAÇÃO DO PORTAL NO FIM DO JOGO
 //===============================================================
 
-static inline void generatePortal(ChunkManager* cm) {
+static void generatePortal(ChunkManager* cm) {
     if (cm->portal) return;
     int idx = rand() & 7;
     Chunk** adjacents = cm->adjacents;
@@ -660,7 +659,7 @@ static inline void generatePortal(ChunkManager* cm) {
 
 static float pauseDelay = 0.0f;
 
-static void handlePause(Map* this, Controller* controller, float deltaTime) {
+static inline void handlePause(Map* this, Controller* controller, float deltaTime) {
     if (pauseDelay > 0.0f) pauseDelay -= deltaTime;
     if (controller->input.pause && pauseDelay <= 0.0f) {
         this->running = !this->running;
@@ -672,7 +671,7 @@ static void handlePause(Map* this, Controller* controller, float deltaTime) {
 //  MÉTODO DA CLASSE DE ATUALIZAÇÃO
 //===============================================================
 
-static void update(Map* this, Controller* controller, float deltaTime) {
+static inline void update(Map* this, Controller* controller, float deltaTime) {
     handlePause(this, controller, deltaTime);
     if (this->running == false) return;
     ChunkManager* cm = this->manager;
@@ -693,7 +692,7 @@ static void update(Map* this, Controller* controller, float deltaTime) {
 //  MÉTODO DA CLASSE DE REINÍCIO
 //===============================================================
 
-static void restart(Map* this) {
+static inline void restart(Map* this) {
     this->lastScore.totalCoins = this->player->totalCoins;
     this->lastScore.totalFragments = this->player->totalFragment;
     this->lastScore.totalTime = this->player->totalTime;
@@ -720,6 +719,7 @@ static void _free(Map* this) {
     this->firedCells->free(this->firedCells);
     this->tentacleCells->free(this->tentacleCells);
     unloadCheats();
+    unloadBFS();
 
     free(this);
 }
@@ -736,6 +736,7 @@ Map* new_Map(int biomeCols, int chunkRows, int spawnX, int spawnY) {
 
     this->changedChunk = new_ArrayList();
     loadCheats();
+    loadBFS();
 
     this->firedCells = new_LinkedList();
     this->tentacleCells = new_LinkedList();

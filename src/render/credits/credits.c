@@ -224,7 +224,7 @@ static void updateShowScore(Credits* this) {
     if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
     if (pressed && state == CREDITS_SCORE)
-        this->scores->sort(this->scores, cmp);
+        this->scores->mergeSort(this->scores, cmp);
 }
 
 //===============================================================
