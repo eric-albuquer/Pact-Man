@@ -1,10 +1,16 @@
 const keys = "WASD QIKLJUO";
+const gamepadKeys = ["UP", "LEFT", "DOWN", "RIGHT", "R2", "L2", "TRIANGLE", "X", "CIRCLE", "SQUARE", "L1", "R1"]
+const effects = ["Invencibilidade", "Regeneração", "Invisibilidade", "Congelar", "Velocidade", "Adicionar fragmento"]
+const codes = 10
+const keysPerCode = 8
 
-for (let i = 1; i <= 16; i++) {
+for (let i = 1; i <= codes; i++) {
     let str = ""
-    for (let j = 0; j < 10; j++) {
+    let gamepadStr = ""
+    for (let j = 0; j < keysPerCode; j++) {
         const idx = Math.floor(Math.random() * keys.length)
-        str += keys[idx]
+        str += keys[idx] + ((j < keysPerCode - 1) ? "," : "")
+        gamepadStr += (gamepadKeys[idx] + ((j < keysPerCode - 1) ? ", " : ""))
     }
-    console.log(str + String.fromCharCode(i + 48))
+    console.log(str + ":" + i + " / " + gamepadStr + " // " + effects[i - 1])
 }

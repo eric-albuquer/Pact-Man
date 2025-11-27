@@ -100,6 +100,7 @@
 
 #define PAUSE_DELAY 1.0f
 #define MAX_CHEAT_UPDATES_DELAY 20
+#define MIN_CHEAT_UPDATES_DELAY 2
 
 typedef struct Map {
     ChunkManager* manager;

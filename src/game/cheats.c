@@ -35,23 +35,32 @@ static void loadKeys() {
     KEYS[KEY_O] = KEYS[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = 11;
 }
 
+static inline int getNumber(char* str){
+    char c;
+    int number = 0;
+    while((c = *str++) != ' ' && c != 0){
+        number *= 10;
+        number += (c - '0') % 10;
+    }
+    return number;
+}
+
 static void addCheat(char* cheat) {
     int rootIdx = KEYS[(int)(*cheat)];
     if (cheats[rootIdx] == NULL) {
         cheats[rootIdx] = new_TreeNode();
     }
     TreeNode* node = cheats[rootIdx];
-    for (char* c = cheat + 1; *c; c++) {
+    for (char* c = cheat + 2; *c; c+=2) {
         int nodeIdx = KEYS[(int)(*c)];
-        int code = nodeIdx != -1 ? 0 : *c - '0';
-        if (code) {
-            node->code = code;
-            return;
-        }
         if (node->nodes[nodeIdx] == NULL) {
             node->nodes[nodeIdx] = new_TreeNode();
         }
         node = node->nodes[nodeIdx];
+        if (*(c + 1) == ':'){
+            node->code = getNumber(c + 2);
+            return;
+        }
     }
 }
 

@@ -295,8 +295,10 @@ static inline void resetCheatTimer() {
 }
 
 static inline void activateCheats(Map* this, Controller* controller) {
-    if (this->updateCount - lastPressed > MAX_CHEAT_UPDATES_DELAY)
+    int deltaUpdates = this->updateCount - lastPressed;
+    if (deltaUpdates > MAX_CHEAT_UPDATES_DELAY)
         resetCheatTimer();
+    else if (deltaUpdates <= MIN_CHEAT_UPDATES_DELAY && deltaUpdates >= 0) return;
     int code = controller->input.code;
     if (code == 0) return;
     lastPressed = this->updateCount;

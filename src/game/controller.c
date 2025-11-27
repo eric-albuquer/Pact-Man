@@ -37,6 +37,11 @@ static void getControllerInputs(Controller* this) {
 
     if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER) > MIN_SENSITIVITY) {
         this->input.speed = 1;
+        this->input.code = GAMEPAD_BUTTON_RIGHT_TRIGGER_2;
+    }
+
+    if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_TRIGGER) > MIN_SENSITIVITY){
+        this->input.code = GAMEPAD_BUTTON_LEFT_TRIGGER_2;
     }
 
     if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_RIGHT)) {
