@@ -15,8 +15,14 @@ typedef struct Input {
     unsigned pause: 1;
 } Input;
 
+typedef struct {
+    int length;
+    int data[100];
+} InputBuffer;
+
 typedef struct Controller {
     Input input;
+    InputBuffer lastInputs;
 
     void (*getInputs)(struct Controller*);
     void (*reset)(struct Controller*);

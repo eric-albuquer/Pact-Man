@@ -43,14 +43,14 @@ static void getControllerInputs(Controller* this) {
     float horizontal = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
     float vertical = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y);
 
-    if (horizontal > MIN_SENSITIVITY)
+    if (horizontal > MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_RIGHT)
         this->input.right = 1;
-    else if (horizontal < -MIN_SENSITIVITY)
+    else if (horizontal < -MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_LEFT)
         this->input.left = 1;
 
-    if (vertical > MIN_SENSITIVITY)
+    if (vertical > MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_DOWN)
         this->input.down = 1;
-    else if (vertical < -MIN_SENSITIVITY)
+    else if (vertical < -MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_UP)
         this->input.up = 1;
 }
 
