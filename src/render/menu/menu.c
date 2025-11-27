@@ -85,7 +85,7 @@ void onVolume() {
 }
 
 void onDifficulty() {
-    printf("[MENU] Rapaz, clicaram no botão de dificuldade\n");
+    dificulty = (dificulty + 1) % DIFICULTY_COUNT;
 }
 
 void onCutsceneNext() {
@@ -177,7 +177,16 @@ static void updateMainContent(Menu* this) {
         buttons[selected]->action();
     }
 
-    if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
+    static const char* dificultyText[] = {
+        "EASY",
+        "MEDIUM",
+        "HARD"
+    };
+
+    if (pressed){
+        audio->playSound(audio, SOUND_CLICK_BUTTON);
+        strcpy(this->difficulty->text, dificultyText[dificulty]);
+    } 
 
     if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) > 0.5f && this->frameCount % 8 == 0)){
         buttons[selected]->hovered = false;
@@ -199,10 +208,10 @@ static void updateMainContent(Menu* this) {
 static void updateCutscene(Menu* this) {
     playSound(this);
 
-    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
         onCutsceneNext();
     }
-    if (IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+    if (IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2)) {
         onCutscenePrev();
     }
 
@@ -535,12 +544,12 @@ static void loadButtons(Menu* this) {
         buttonWidth,
         buttonHeight,
         (Color) {
-        80, 80, 80, 100
+        80, 80, 80, 150
     },
         (Color) {
         255, 255, 255, 150
     },
-        "DIFFICULTY",
+        "MEDIUM",
         40,
         onDifficulty
     );

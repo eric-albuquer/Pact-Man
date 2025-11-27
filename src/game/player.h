@@ -6,11 +6,17 @@
 #include "chunk.h"
 
 #define START_LIFE 100
-#define START_SPEED 100 
+
+#define START_SPEED \
+((const int[DIFICULTY_COUNT]){ \
+        150, \
+        100, \
+        50 \
+}[dificulty])
 
 typedef struct Effect {
-    unsigned strenght: 8;
-    unsigned duration: 24;
+    unsigned strenght : 8;
+    unsigned duration : 24;
 } Effect;
 
 typedef struct Effects {
@@ -49,12 +55,12 @@ typedef struct Player {
     unsigned short totalCoins;
 
     float totalTime;
-    
+
     unsigned biome : 2;
-    unsigned damaged: 1;
-    unsigned hitEnemy: 1;
-    unsigned getFragment: 1;
-    unsigned alive: 1;
+    unsigned damaged : 1;
+    unsigned hitEnemy : 1;
+    unsigned getFragment : 1;
+    unsigned alive : 1;
 
     float batery;
 

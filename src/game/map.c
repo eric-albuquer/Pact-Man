@@ -71,6 +71,8 @@ static inline void applyPlayerEffects(Player* p, CellType type, unsigned int upd
     static const int spikeDuration = (SPIKE_SLOWNESS_DURATION << 1);
     static const int mudDurationLimit = (MUD_SLOWNESS_DURATION << 1) - 1;
     static const int spikeDurationLimit = (SPIKE_SLOWNESS_DURATION << 1) - 1;
+    static const int tentacleDuration = (TENTACLE_SLOWNESS_DURATION << 1);
+    static const int tentacleDurationLimit = (TENTACLE_SLOWNESS_DURATION << 1) - 1;
 
     if (p->effects.speed.duration < 2) {
         p->cellType = type;
@@ -105,8 +107,8 @@ static inline void applyPlayerEffects(Player* p, CellType type, unsigned int upd
     } else if (type == CELL_REGENERATION) {
         p->effects.regeneration.duration = POTION_REGENERATION_DURATION;
         p->effects.regeneration.strenght = max(POTION_REGENERATION_STRENGTH, p->effects.regeneration.strenght);
-    } else if (type == CELL_TENTACLE && p->effects.slowness.duration < spikeDurationLimit) {
-        p->effects.slowness.duration = spikeDuration;
+    } else if (type == CELL_TENTACLE && p->effects.slowness.duration < tentacleDurationLimit) {
+        p->effects.slowness.duration = tentacleDuration;
     } else if (type == CELL_FREEZE_TIME) {
         p->effects.freezeTime.duration = FREEZE_TIME_DURATION;
     }
@@ -123,6 +125,8 @@ static inline void updatePlayerEffects(Player* p) {
         p->effects.speed.duration--;
         p->speed = max(p->speed - SPEED_DECAY, 0);
     }
+    p->speed = min(p->speed, START_SPEED);
+    p->life = min(p->life, START_LIFE);
 
     if (p->effects.freezeTime.duration > 0) {
         p->effects.freezeTime.duration--;
@@ -314,7 +318,7 @@ static inline void updateEnemyChunk(ChunkManager* cm, Node* node, LinkedList* li
 static inline bool isFarAwayFromSpawn(Player* p, Enemy* e) {
     float distToSpawn = hypotf(p->x - e->spawnX, p->y - e->spawnY);
 
-    return distToSpawn > MAX_PERSUIT_RADIUS_BIOME[e->biome];
+    return distToSpawn > MAX_PERSUIT_RADIUS_BIOME(e->biome);
 }
 
 static inline void findNewCell(ChunkManager* cm, Enemy* e) {
@@ -360,7 +364,7 @@ static inline void updateEnemyMovement(ChunkManager* cm, Enemy* e, Player* p) {
 
     sortNextPos(&pos);
 
-    bool normalMovement = rand() % 100 < BEST_PATH_PROBABILITY_BIOME[e->biome];
+    bool normalMovement = rand() % 100 < BEST_PATH_PROBABILITY_BIOME(e->biome);
 
     Vec2i nextPos = normalMovement ? getBestPos(pos) : getRandomPos(pos);
     if (isFarAwayFromSpawn(p, e))

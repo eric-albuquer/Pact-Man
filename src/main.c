@@ -14,6 +14,7 @@ Controller* controller;
 Map* map;
 Render* render;
 Font InfernoFont;
+Dificulty dificulty = DIFICULTY_MEDIUM;
 
 void updateGame() {
     static float lastTime = 0;

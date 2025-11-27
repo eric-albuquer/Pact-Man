@@ -297,7 +297,7 @@ static void drawSpeedBar(Game* this, int x, int y, int width, int height) {
     int w = width * 0.85;
     int h = height * 0.35;
     int startW = width * 0.12;
-    float t = this->map->player->speed / (float)START_SPEED;
+    float t = this->map->player->speed / ((float)START_SPEED);
     Color color = LerpColor(BLUE, (Color) { 0, 255, 255, 255 }, t);
     int lx = w * t;
     DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);

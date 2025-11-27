@@ -7,13 +7,14 @@
 #include "linkedlist.h"
 #include "player.h"
 #include "chunk_manager.h"
+#include "common.h"
 
 //===============================================================
 //  ⚔️ Constantes de Dano e Combate
 //===============================================================
 
 #define FIRE_DAMAGE 10
-#define SPIKE_DAMAGE 2 
+#define SPIKE_DAMAGE 4 
 #define ENEMY_DAMAGE 15
 #define DEGENERATION_DAMAGE 1
 
@@ -31,13 +32,21 @@
 
 #define MUD_SLOWNESS_DURATION 3
 #define SPIKE_SLOWNESS_DURATION 2 
-#define FRUIT_INVULNERABILITY_DURATION 100
+#define TENTACLE_SLOWNESS_DURATION 4 
+
+#define FRUIT_INVULNERABILITY_DURATION \
+((const int[DIFICULTY_COUNT]){ \
+        120, \
+        90, \
+        70 \
+}[dificulty]) 
+
 #define FREEZE_TIME_DURATION 90
 #define DEGENERATION_DURATION 5
-#define INVISIBILITY_DURATION 100
+#define INVISIBILITY_DURATION 80
 #define FONT_REGENERATION_DURATION 2
 #define POTION_REGENERATION_DURATION 50
-#define BONUS_DELAY 48
+#define BONUS_DELAY 24
 
 //===============================================================
 //  ✨ Constantes de Regeneração e Saúde
@@ -50,8 +59,19 @@
 //  🤖 Constantes de Inteligência Artificial (IA)
 //===============================================================
 
-#define MAX_PERSUIT_RADIUS_BIOME (const int[4]) {40, 45, 50, 55}
-#define BEST_PATH_PROBABILITY_BIOME (const int[4]) {40, 50, 60, 70}
+#define MAX_PERSUIT_RADIUS_BIOME(i) \
+    ((const int[DIFICULTY_COUNT][4]){ \
+        {30, 35, 40, 45}, \
+        {50, 55, 60, 65}, \
+        {70, 75, 80, 85} \
+    }[dificulty][i])
+
+#define BEST_PATH_PROBABILITY_BIOME(i) \
+    ((const int[DIFICULTY_COUNT][4]){ \
+        {30, 35, 40, 45}, \
+        {40, 50, 60, 70}, \
+        {60, 70, 80, 85}  \
+    }[dificulty][i])
 
 //===============================================================
 //  💥 Constantes de Chefes (Bosses)
@@ -66,9 +86,16 @@
 //  🗺️ Constantes de Mapa e Ambiente
 //===============================================================
 
-#define BIOME_DEGEN_START_TIME 180.0f
+#define BIOME_DEGEN_START_TIME \
+    ((const float[DIFICULTY_COUNT]){ \
+        240.0f, \
+        180.0f, \
+        120.0f \
+    }[dificulty])
+
 #define BATERY_DECAY 0.003f
-#define SPEED_DECAY 1
+
+#define SPEED_DECAY 2
 #define SPEED_RELOAD 2
 
 #define PAUSE_DELAY 1.0f

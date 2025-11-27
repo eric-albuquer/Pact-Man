@@ -12,6 +12,14 @@ typedef enum {
     VIOLENCIA,
 } Biome;
 
+typedef enum {
+    DIFICULTY_EASY,
+    DIFICULTY_MEDIUM,
+    DIFICULTY_HARD,
+
+    DIFICULTY_COUNT,
+} Dificulty;
+
 typedef struct {
     char name[100];
     int totalCoins;
@@ -26,6 +34,8 @@ typedef enum { MENU_MAIN_CONTENT, MENU_CUTSCENE1, MENU_CUTSCENE2, MENU_CUTSCENE3
 extern GameState state;
 
 extern Font InfernoFont;
+
+extern Dificulty dificulty;
 
 static inline int max(int a, int b) { return (a > b) ? a : b; }
 
