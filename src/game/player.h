@@ -16,7 +16,7 @@
 
 typedef struct Effect {
     unsigned strenght : 8;
-    unsigned duration : 24;
+    unsigned int duration;
 } Effect;
 
 typedef struct Effects {

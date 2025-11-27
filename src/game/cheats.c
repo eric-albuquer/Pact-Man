@@ -14,17 +14,17 @@ static TreeNode* new_TreeNode() {
     return calloc(1, sizeof(TreeNode));
 }
 
-static int KEYS[127];
+static int KEYS[512];
 
 static void loadKeys() {
-    for (int i = 0; i < 127; i++) {
+    for (int i = 0; i < 512; i++) {
         KEYS[i] = -1;
     }
 
-    KEYS[KEY_W] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_UP] = 0;
-    KEYS[KEY_S] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = 1;
-    KEYS[KEY_D] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = 2;
-    KEYS[KEY_A] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = 3;
+    KEYS[KEY_W] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_UP] = KEYS[KEY_UP] = 0;
+    KEYS[KEY_S] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = KEYS[KEY_DOWN] = 1;
+    KEYS[KEY_D] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = KEYS[KEY_RIGHT] = 2;
+    KEYS[KEY_A] = KEYS[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = KEYS[KEY_LEFT] = 3;
     KEYS[KEY_SPACE] = KEYS[GAMEPAD_BUTTON_RIGHT_TRIGGER_2] = 4;
     KEYS[KEY_Q] = KEYS[GAMEPAD_BUTTON_LEFT_TRIGGER_2] = 5;
     KEYS[KEY_I] = KEYS[GAMEPAD_BUTTON_RIGHT_FACE_UP] = 6;
@@ -36,25 +36,28 @@ static void loadKeys() {
 }
 
 static void addCheat(char* cheat) {
-    int rootIdx = KEYS[*cheat];
-    TreeNode* node = new_TreeNode();
-    cheats[rootIdx] = node;
+    int rootIdx = KEYS[(int)(*cheat)];
+    if (cheats[rootIdx] == NULL) {
+        cheats[rootIdx] = new_TreeNode();
+    }
+    TreeNode* node = cheats[rootIdx];
     for (char* c = cheat + 1; *c; c++) {
-        int nodeIdx = KEYS[*c];
+        int nodeIdx = KEYS[(int)(*c)];
         int code = nodeIdx != -1 ? 0 : *c - '0';
         if (code) {
             node->code = code;
             return;
         }
-        TreeNode* proxNode = new_TreeNode();
-        node->nodes[nodeIdx] = proxNode;
-        node = proxNode;
+        if (node->nodes[nodeIdx] == NULL) {
+            node->nodes[nodeIdx] = new_TreeNode();
+        }
+        node = node->nodes[nodeIdx];
     }
 }
 
 void loadCheats() {
     loadKeys();
-    FILE* file = fopen("assets/cheats.txt", "r");
+    FILE* file = fopen("data/cheats.txt", "r");
     static char buffer[1000];
 
     while (fgets(buffer, sizeof(buffer), file)) {
@@ -64,20 +67,38 @@ void loadCheats() {
     fclose(file);
 }
 
-void unloadCheats() {
-
+static void freeRecursive(TreeNode* node) {
+    for (int i = 0; i < 12; i++) {
+        if (node->nodes[i] == NULL) continue;
+        freeRecursive(node->nodes[i]);
+    }
+    free(node);
 }
 
-int hasCheat(InputBuffer* inputs) {
-    if (inputs->length == 0) return -1;
-    int idx = KEYS[inputs->data[0]];
-    TreeNode* node = cheats[idx];
-    if (node == NULL) return -1;
-    for (int i = 1; i < inputs->length; i++){
-        node = node->nodes[KEYS[inputs->data[i]]];
-        if (node == NULL) return -1;
-        if (node->code > 0) return node->code;
+void unloadCheats() {
+    for (int i = 0; i < 12; i++) {
+        if (cheats[i] == NULL) continue;
+        freeRecursive(cheats[i]);
     }
-    if (node != NULL) return 0;
-    return -1;
+}
+
+static TreeNode* node = NULL;
+
+int hasCheat(int code) {
+    int idx = KEYS[code];
+
+    if (idx == -1) {
+        node = NULL;
+        return 0;
+    }
+
+    if (node == NULL) node = cheats[idx]; // Sair da raiz
+    else node = node->nodes[idx]; // Avançar um galho
+
+    if (node) return node->code;
+    return 0;
+}
+
+void resetCheatPointer(){
+    node = NULL;
 }

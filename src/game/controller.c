@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void reset(Controller* this) { 
+static void reset(Controller* this) {
     this->input = (Input){ 0 };
- }
+}
 
 static void getKeyboardInputs(Controller* this) {
     if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
@@ -27,12 +27,15 @@ static void getKeyboardInputs(Controller* this) {
     if (IsKeyDown(KEY_ENTER)) {
         this->input.pause = 1;
     }
+
+    if (this->input.code == 0)
+        this->input.code = GetKeyPressed();
 }
 
 static void getControllerInputs(Controller* this) {
     if (!IsGamepadAvailable(0)) return;
 
-    if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER) > MIN_SENSITIVITY){
+    if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_TRIGGER) > MIN_SENSITIVITY) {
         this->input.speed = 1;
     }
 
@@ -43,15 +46,21 @@ static void getControllerInputs(Controller* this) {
     float horizontal = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X);
     float vertical = GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y);
 
-    if (horizontal > MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_RIGHT)
+    if (horizontal > MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_RIGHT) {
         this->input.right = 1;
-    else if (horizontal < -MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_LEFT)
+    } else if (horizontal < -MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_LEFT) {
         this->input.left = 1;
+    }
 
-    if (vertical > MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_DOWN)
+
+    if (vertical > MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_DOWN) {
         this->input.down = 1;
-    else if (vertical < -MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_UP)
+    } else if (vertical < -MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_UP) {
         this->input.up = 1;
+    }
+
+    if (this->input.code == 0)
+        this->input.code = GetGamepadButtonPressed();
 }
 
 static void getInputs(Controller* this) {

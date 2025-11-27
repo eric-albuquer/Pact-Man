@@ -9,6 +9,7 @@
 #include "enemy.h"
 #include "pathfinding.h"
 #include "chunk_loader.h"
+#include "cheats.h"
 
 //===============================================================
 //  FUNÇÕES AUXILIARES DA ATUALIZAÇÃO DO PLAYER
@@ -282,10 +283,59 @@ static inline void updatePlayerMovement(Map* this, Cell* cell, Input input) {
 }
 
 //===============================================================
+//  FUNÇÃO PARA ATIVAR CHEATS
+//===============================================================
+
+static unsigned int lastPressed = 0;
+static bool CHEAT_FLAGS[CHEAT_COUNT] = { 0 };
+
+static inline void resetCheatTimer() {
+    lastPressed = INT_MAX;
+    resetCheatPointer();
+}
+
+static inline void activateCheats(Map* this, Controller* controller) {
+    if (this->updateCount - lastPressed > MAX_CHEAT_UPDATES_DELAY)
+        resetCheatTimer();
+    int code = controller->input.code;
+    if (code == 0) return;
+    lastPressed = this->updateCount;
+    int res = hasCheat(code);
+    if (res == 0) return;
+    resetCheatTimer();
+
+    if (res >= CHEAT_COUNT) return;
+    CHEAT_FLAGS[res] = !CHEAT_FLAGS[res];
+}
+
+static inline void handleCheats(Map* this, Controller* controller) {
+    activateCheats(this, controller);
+    Player* p = this->player;
+    Effects* effects = &p->effects;
+    if (CHEAT_FLAGS[CHEAT_INFINITY_INVULNERABILITY]) effects->invulnerability.duration = 1;
+    if (CHEAT_FLAGS[CHEAT_INFINITY_REGENERATION]) {
+        effects->regeneration.duration = 1;
+        effects->regeneration.strenght = FONT_REGENERATION_STRENGTH;
+    } 
+    if (CHEAT_FLAGS[CHEAT_INFINITY_INVISIBILITY]) effects->invisibility.duration = 1;
+    if (CHEAT_FLAGS[CHEAT_INFINITY_FREEZE_TIME]) effects->freezeTime.duration = 1;
+    if (CHEAT_FLAGS[CHEAT_INFINITY_SPEED]) {
+        effects->speed.duration = 1;
+        p->speed = START_SPEED;
+    }
+    if (CHEAT_FLAGS[CHEAT_ADD_FRAGMENT]){
+        p->biomeFragment++;
+        p->totalFragment++;
+        p->getFragment = true;
+        CHEAT_FLAGS[CHEAT_ADD_FRAGMENT] = false;
+    }
+}
+
+//===============================================================
 //  FUNÇÃO DE ATUALIZAÇÃO DO PLAYER
 //===============================================================
 
-static inline void updatePlayer(Map* this, Input input) {
+static inline void updatePlayer(Map* this, Controller* controller) {
     Player* p = this->player;
     ChunkManager* cm = this->manager;
     Cell* cell = cm->getUpdatedCell(cm, p->x, p->y);
@@ -297,8 +347,10 @@ static inline void updatePlayer(Map* this, Input input) {
     if (cm->heaven)
         updatePlayerEndGame(this, cell);
 
-    updatePlayerMovement(this, cell, input);
+    updatePlayerMovement(this, cell, controller->input);
     updatePlayerEffects(p);
+
+    handleCheats(this, controller);
 }
 
 //===============================================================
@@ -623,7 +675,7 @@ static void update(Map* this, Controller* controller, float deltaTime) {
     if (this->running == false) return;
     ChunkManager* cm = this->manager;
     cm->updateChunks(cm);
-    updatePlayer(this, controller->input);
+    updatePlayer(this, controller);
     updateEnemies(this);
 
     removeBossMecanics(cm, this->firedCells, this->tentacleCells);
@@ -665,6 +717,7 @@ static void _free(Map* this) {
     this->changedChunk->free(this->changedChunk);
     this->firedCells->free(this->firedCells);
     this->tentacleCells->free(this->tentacleCells);
+    unloadCheats();
 
     free(this);
 }
@@ -680,6 +733,7 @@ Map* new_Map(int biomeCols, int chunkRows, int spawnX, int spawnY) {
     this->player = new_Player(spawnX, spawnY);
 
     this->changedChunk = new_ArrayList();
+    loadCheats();
 
     this->firedCells = new_LinkedList();
     this->tentacleCells = new_LinkedList();

@@ -13,16 +13,12 @@ typedef struct Input {
 
     unsigned speed: 1;
     unsigned pause: 1;
-} Input;
 
-typedef struct {
-    int length;
-    int data[100];
-} InputBuffer;
+    int code;
+} Input;
 
 typedef struct Controller {
     Input input;
-    InputBuffer lastInputs;
 
     void (*getInputs)(struct Controller*);
     void (*reset)(struct Controller*);

@@ -99,6 +99,10 @@ Clyde (fantasma laranja)
 ALGORÍTMOS
 Tabela Hash (endereçamento aberto)
 Tabela Hash (encadeamento)
+Perfect Hashing (Minimal Perfect Hashing)
+Prefix Tree (Trie)
+Tree Node Pointer
+Busca em Árvore (DFS)
 Busca em Grafos (BFS)
 Matrizes Espaciais
 Bubble Sort

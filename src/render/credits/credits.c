@@ -641,7 +641,7 @@ static void saveScores(Credits* this) {
 
 static void loadCredits(Credits* this) {
     ArrayList* lines = this->lines;
-    FILE* file = fopen("assets/end_credits.txt", "r");
+    FILE* file = fopen("data/end_credits.txt", "r");
     while (1) {
         char* line = malloc(200 * sizeof(char));
         if (fgets(line, 200, file) == NULL) {

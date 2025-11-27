@@ -99,6 +99,7 @@
 #define SPEED_RELOAD 2
 
 #define PAUSE_DELAY 1.0f
+#define MAX_CHEAT_UPDATES_DELAY 20
 
 typedef struct Map {
     ChunkManager* manager;
