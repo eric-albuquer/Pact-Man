@@ -23,7 +23,7 @@ static void updateDirection(Player* this){
 
 static void restart(Player* this){
     this->life = START_LIFE;
-    this->speed = START_SPEED;
+    this->speed = 1000;
     this->effects = (Effects){0};
     this->x = this->lastX = this->spawnX;
     this->y = this->lastY = this->spawnY;
@@ -48,7 +48,7 @@ Player* new_Player(int x, int y) {
     this->spawnY = y;
 
     this->life = START_LIFE;
-    this->speed = START_SPEED;
+    this->speed = 1000;
 
     this->biomeCoins = 0;
     this->totalCoins = 0;
