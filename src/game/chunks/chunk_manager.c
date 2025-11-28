@@ -155,7 +155,7 @@ ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
     this->chunks = new_ChunkMap();
     this->cols = (biomeCols << 2) - 1;
     this->rows = rows;
-    this->chunkLoader = new_ChunkLoader(biomeCols, rows, time(NULL));
+    this->chunkLoader = new_ChunkLoader(biomeCols, this->cols, rows, time(NULL));
     
     this->player = p;
 

@@ -12,6 +12,6 @@ typedef struct ChunkLoader{
     void (*free)(struct ChunkLoader*);
 } ChunkLoader;
 
-ChunkLoader* new_ChunkLoader(const int biomeWidth, const int height, const int seed);
+ChunkLoader* new_ChunkLoader(const int biomeWidth, const int width, const int height, const int seed);
 
 #endif

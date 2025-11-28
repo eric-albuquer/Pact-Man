@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     UnloadImage(icon);  
 
     controller = new_Controller();
-    map = new_Map(5, 9, 11, 61);
+    map = new_Map(5, 9, 16, 61);
     render = new_Render(GetScreenWidth(), GetScreenHeight(), 50, map);
 
     while (!WindowShouldClose()) {

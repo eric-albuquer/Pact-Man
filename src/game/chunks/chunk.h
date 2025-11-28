@@ -98,7 +98,7 @@ typedef struct Chunk {
 
     unsigned type : 3;
     unsigned biome : 2;
-    unsigned isBorder : 1;
+    unsigned isBorder : 2;
 
     unsigned int randCounter;
 

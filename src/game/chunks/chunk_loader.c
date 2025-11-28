@@ -89,7 +89,9 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
     int biome = (chunk->x + 1) / this->biomeWidthChunks;
     chunk->biome = biome < 4 ? biome : 3;
 
-    chunk->isBorder = chunk->y == 0 || chunk->y == (this->height - 1);
+    int borderHorizontal = chunk->y == 0 || chunk->y == (this->height - 1);
+    int borderVertical = chunk->x == 0 || chunk->x == (this->width - 1);
+    chunk->isBorder = borderHorizontal | (borderVertical << 1);
 
     chunk->type = CHUNK_NORMAL;
 
@@ -98,7 +100,7 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
         return;
     }
 
-    if ((chunk->x + 2) % this->biomeWidthChunks == 0) {
+    if ((chunk->x + 3) % this->biomeWidthChunks == 0) {
         int bonusY = (hash2D(chunk->x, 1, this->seed) % (this->height - 2)) + 1;
         if (chunk->y == bonusY) {
             chunk->type = CHUNK_BONUS;
@@ -134,8 +136,8 @@ static void preLoad(ChunkLoader* this, Chunk* chunk) {
 //  FUNÇÕES DE GERAÇÃO DE CHUNKS
 //===============================================================
 
-static void generateBorder(ChunkLoader* this, Chunk* chunk) {
-    if (!chunk->isBorder) return;
+static void generateHorizontalBorder(ChunkLoader* this, Chunk* chunk) {
+    if (!(chunk->isBorder & 1)) return;
 
     int mask = 7;
 
@@ -153,6 +155,26 @@ static void generateBorder(ChunkLoader* this, Chunk* chunk) {
                 for (int j = yLevel; j < CHUNK_SIZE; j++) {
                     chunk->cellAt(chunk, i, j)->type = CELL_WALL;
                 }
+    }
+}
+
+static void generateVerticalBorder(ChunkLoader* this, Chunk* chunk) {
+    if (!(chunk->isBorder & 2)) return;
+
+    int mask = 7;
+
+    int x0 = 3 + (hash2D(chunk->x, chunk->y, this->seed) & mask);
+    int x1 = 3 + (hash2D(chunk->x, chunk->y + 1, this->seed) & mask);
+
+    int delta = x1 - x0;
+
+    for (int y = 0; y < CHUNK_SIZE; y++) {
+        float t = y / (float)CHUNK_SIZE;
+        int bx = x0 + delta * t;
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            Cell* cell = chunk->cellAt(chunk, x, y);
+            if ((chunk->x == 0 && x < bx) || (chunk->x == this->width - 1 && x > bx)) cell->type = CELL_WALL;
+        }
     }
 }
 
@@ -350,8 +372,7 @@ static void generateWind(ChunkLoader* this, Chunk* chunk) {
     if (horizontal) {
         windDir += CELL_WIND_RIGHT;
         windDelta = windDelta == 0 ? CHUNK_MASK : 0;
-    }
-    else {
+    } else {
         windDir += CELL_WIND_UP;
         windDelta *= CHUNK_MASK;
     }
@@ -554,7 +575,8 @@ static ChunkGeneratorFn GENERATORS[] = {
     generateWalls1x1,
     generateWalls2x2,
     generateWalls3x3,
-    generateBorder,
+    generateHorizontalBorder,
+    generateVerticalBorder,
     generateWind,
     generateMud,
     generateGraves,
@@ -590,9 +612,9 @@ static void _free(ChunkLoader* this) {
 //  CONSTRUTOR DA CLASSE
 //===============================================================
 
-ChunkLoader* new_ChunkLoader(const int biomeWidth, const int height, const int seed) {
+ChunkLoader* new_ChunkLoader(const int biomeWidth, const int width, const int height, const int seed) {
     ChunkLoader* this = malloc(sizeof(ChunkLoader));
-    this->width = biomeWidth << 2;
+    this->width = width;
     this->height = height;
     this->seed = seed;
     this->biomeWidthChunks = biomeWidth;

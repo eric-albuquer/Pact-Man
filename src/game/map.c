@@ -325,8 +325,8 @@ static void handleCheats(Map* this, Controller* controller) {
         p->speed = START_SPEED;
     }
     if (CHEAT_FLAGS[CHEAT_ADD_FRAGMENT]){
-        p->biomeFragment++;
-        p->totalFragment++;
+        p->biomeFragment += 2;
+        p->totalFragment += 2;
         p->getFragment = true;
         CHEAT_FLAGS[CHEAT_ADD_FRAGMENT] = false;
     }

@@ -35,6 +35,8 @@ typedef enum {
 
     SPRITE_BONUS,
 
+    SPRITE_PLAYER_EYE_MASK,
+
     SPRITE_EFFECT_REGENERATION,
     SPRITE_EFFECT_SLOWNESS,
     SPRITE_EFFECT_INVULNERABILITY,
@@ -142,6 +144,7 @@ static char buffer[1000];
 static bool tutorialVisibleBuffer[CELL_COUNT];
 
 static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, {0, 255, 0, 255}, {0, 255, 255, 255} };
+static const Color PLAYER_COLOR[4] = { {254, 194, 212, 255},  {74, 223, 202, 255}, {254, 58, 15, 255}, {255, 190, 87, 255} };
 
 //===============================================================
 //  ATUALIZAR ANIMAÇÕES
@@ -319,7 +322,7 @@ static void drawFragmentEffect(Game* this) {
     if (p->getFragment)
         fragmentEffectDuration = FRAGMENT_EFFECT_DURATION;
 
-    if (fragmentEffectDuration > 0.0f){
+    if (fragmentEffectDuration > 0.0f) {
         fragmentEffectDuration -= GetFrameTime();
         DrawAnimation(this->animations[ANIMATION_FRAGMENT], hx, (hy - 50) - fragmentVel * (FRAGMENT_EFFECT_DURATION - fragmentEffectDuration), this->cellSize * 1.5f, WHITE);
     }
@@ -334,7 +337,7 @@ static void drawHeavenHud(Game* this) {
     static const int y = 200;
     static const int margin = 10;
     static const int fontSize = 50;
-    DrawRectangleRounded((Rectangle){hx - 300, y, 600, fontSize + margin * 2}, 0.5f, 16, HUD_OPACITY);
+    DrawRectangleRounded((Rectangle) { hx - 300, y, 600, fontSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
     drawCenteredText("Procure o portal!", hx, y + margin, fontSize, PURPLE);
 }
 
@@ -556,14 +559,28 @@ static void drawArrowToNextBiome(Game* this, int x, int y, int width, int height
 static void drawPauseHud(Game* this) {
     DrawRectangle(0, 0, this->width, this->height, (Color) { 255, 0, 0, 50 });
 
+    static const char* dificultyText[] = {
+        "EASY",
+        "MEDIUM",
+        "HARD"
+    };
+
+    static const Color dificultyColor[3] = {
+        {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0}
+    };
+
     static const char* text = "Pressione enter ou pause para voltar";
     static const int fontSize = 60;
     const int textW = MeasureText(text, fontSize);
     const int halfX = this->width >> 1;
     const int textH = this->height * 0.8f;
+    const int halfY = this->height >> 1;
     static const int margin = 10;
     DrawRectangleRounded((Rectangle) { halfX - textW * 0.6, textH - margin, textW * 1.2f, fontSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
     drawCenteredText(text, halfX, textH, fontSize, WHITE);
+
+    DrawRectangleRounded((Rectangle) { halfX - 200, halfY - margin, 400, fontSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
+    drawCenteredText(dificultyText[dificulty], halfX, halfY, fontSize, dificultyColor[dificulty]);
 
     Player* p = this->map->player;
     int mins = (int)(p->totalTime) / 60;
@@ -727,10 +744,12 @@ static void playAudio(Game* this) {
 
 static inline void drawPlayer(Game* this) {
     Player* p = this->map->player;
-    Color color = WHITE;
-    if (p->damaged) color = RED;
+    Color color = PLAYER_COLOR[p->biome];
+    Color mask = WHITE;
+    if (p->damaged) color = mask = RED;
+    if (p->effects.invulnerability.duration > 0) color = this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION ? PURPLE : YELLOW;
     if (p->effects.invisibility.duration > 0) color.a = 100;
-    if (p->effects.invulnerability.duration > 0 && this->frameCount - this->lastUpdate < HALF_FRAMES_ANIMATION) color = PURPLE;
+    else DrawSprite(this->sprites[SPRITE_PLAYER_EYE_MASK], this->offsetHalfX, this->offsetHalfY, this->cellSize, this->cellSize, mask);
     DrawAnimation(this->animations[ANIMATION_GHOST_RIGHT + p->dir], this->offsetHalfX, this->offsetHalfY, this->cellSize, color);
 }
 
@@ -1065,6 +1084,8 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_ARROW_NEXT_BIOME] = LoadSprite("assets/sprites/hud/biomeNextArrow.png");
 
     sprites[SPRITE_GAME_OVER] = LoadSprite("assets/sprites/hud/game_over.jpg");
+
+    sprites[SPRITE_PLAYER_EYE_MASK] = LoadSprite("assets/sprites/ghost/ghostEyesMask.png");
 }
 
 //===============================================================
