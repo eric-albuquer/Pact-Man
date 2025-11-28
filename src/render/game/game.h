@@ -15,6 +15,8 @@
 
 #define FRAGMENT_EFFECT_DURATION 3.0f
 
+#define BIOME_TRANSITION_DURATION 2.0f
+
 typedef struct Game {
     int width;
     int height;

@@ -19,6 +19,7 @@ static void updatePlayerBiome(Map* this, Cell* cell) {
     Player* p = this->player;
     if (cell->biome <= p->biome) return;
     p->biome = cell->biome;
+    p->biomeChange = 1;
     p->biomeCoins = 0;
     p->biomeFragment = 0;
     p->fragmentByCoins = false;
@@ -344,6 +345,7 @@ static void updatePlayer(Map* this, Controller* controller) {
     p->hitEnemy = false;
     p->damaged = false;
     p->getFragment = false;
+    p->biomeChange = false;
 
     if (cm->heaven)
         updatePlayerEndGame(this, cell);

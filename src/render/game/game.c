@@ -132,6 +132,7 @@ typedef enum {
 
     SOUND_DEATH,
     SOUND_CLICK_BUTTON,
+    SOUND_BIOME_CHANGE,
 
     SOUND_COUNT
 } SoundsEnum;
@@ -419,6 +420,25 @@ static void drawActionHud(Game* this, Color color) {
 }
 
 //===============================================================
+//  DESENHAR EFEITO DE TRANSIÇÃO DE BIOMA
+//===============================================================
+
+static void drawBiomeChange(Game* this) {
+    Player* p = this->map->player;
+    static float effectDuration = 0.0f;
+    const int halfY = this->height >> 1;
+    static const float deltaY = 50;
+    if (p->biomeChange) effectDuration = BIOME_TRANSITION_DURATION;
+    if (effectDuration > 0.0f) {
+        float remainingTime = BIOME_TRANSITION_DURATION - effectDuration;
+        this->offsetHalfY = halfY + sinf(remainingTime * 15) * deltaY * effectDuration;
+        if (this->frameCount & 4)
+            drawActionHud(this, BLACK);
+        effectDuration -= GetFrameTime();
+    } else if (this->offsetHalfY != halfY) this->offsetHalfY = halfY;
+}
+
+//===============================================================
 //  DESENHAR EFEITOS DO PLAYER
 //===============================================================
 
@@ -637,6 +657,7 @@ static void drawHud(Game* this) {
     drawInfoHud(this, this->width - 280, 550, 80);
 
     drawFragmentEffect(this);
+    drawBiomeChange(this);
 
     if (p->biomeFragment >= 2 && this->map->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
@@ -689,8 +710,12 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_KILL_ENEMY);
     }
 
-    if (p->biomeFragment >= 2) {
+    if (p->biomeFragment >= 2 && this->frameCount % 16 == 0) {
         audio->playSound(audio, SOUND_BIOME_FREE);
+    }
+
+    if (p->biomeChange){
+        audio->playSound(audio, SOUND_BIOME_CHANGE);
     }
 
     if (p->effects.regeneration.duration > 0 && p->life < START_LIFE)
@@ -1131,6 +1156,7 @@ static void loadSounds(Game* this) {
 
     audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
     audio->loadSound(audio, "assets/sounds/death.wav", SOUND_DEATH);
+    audio->loadSound(audio, "assets/sounds/biomeChange.wav", SOUND_BIOME_CHANGE);
 }
 
 //===============================================================

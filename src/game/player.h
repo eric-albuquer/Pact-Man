@@ -61,6 +61,7 @@ typedef struct Player {
     unsigned hitEnemy : 1;
     unsigned getFragment : 1;
     unsigned alive : 1;
+    unsigned biomeChange: 1;
 
     float batery;
 
