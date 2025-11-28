@@ -15,6 +15,7 @@ typedef struct Input {
     unsigned pause: 1;
 
     int code;
+    int lastCode;
 } Input;
 
 typedef struct Controller {

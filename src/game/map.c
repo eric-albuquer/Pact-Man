@@ -286,23 +286,22 @@ static void updatePlayerMovement(Map* this, Cell* cell, Input input) {
 //  FUNÇÃO PARA ATIVAR CHEATS
 //===============================================================
 
-static unsigned int lastPressed = 0;
+static unsigned int lastUpdatePressed = 0;
 static bool CHEAT_FLAGS[CHEAT_COUNT] = { 0 };
 
 static inline void resetCheatTimer() {
-    lastPressed = INT_MAX;
+    lastUpdatePressed = INT_MAX;
     resetCheatPointer();
-    printf("\nResetou\n");
 }
 
 static void activateCheats(Map* this, Controller* controller) {
-    int deltaUpdates = this->updateCount - lastPressed;
+    int deltaUpdates = this->updateCount - lastUpdatePressed;
     if (deltaUpdates > MAX_CHEAT_UPDATES_DELAY)
         resetCheatTimer();
-    else if (deltaUpdates <= MIN_CHEAT_UPDATES_DELAY && deltaUpdates >= 0) return;
     int code = controller->input.code;
-    if (code == 0) return;
-    lastPressed = this->updateCount;
+    if (code == 0 || code == controller->input.lastCode) return;
+    printf("%d\n", code);
+    lastUpdatePressed = this->updateCount;
     int res = hasCheat(code);
     if (res == 0) return;
     resetCheatTimer();

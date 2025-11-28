@@ -6,7 +6,9 @@
 //===============================================================
 
 static void reset(Controller* this) {
+    int lastCode = this->input.code;
     this->input = (Input){ 0 };
+    this->input.lastCode = lastCode;
 }
 
 //===============================================================
@@ -68,7 +70,6 @@ static void getControllerInputs(Controller* this) {
         this->input.left = 1;
     }
 
-
     if (vertical > MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_DOWN) {
         this->input.down = 1;
     } else if (vertical < -MIN_SENSITIVITY || GetGamepadButtonPressed() == GAMEPAD_BUTTON_LEFT_FACE_UP) {
@@ -103,6 +104,7 @@ static void _free(Controller* this) {
 Controller* new_Controller() {
     Controller* this = malloc(sizeof(Controller));
     reset(this);
+    this->input.lastCode = 0;
 
     this->getInputs = getInputs;
     this->reset = reset;
