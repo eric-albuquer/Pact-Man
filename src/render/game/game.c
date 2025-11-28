@@ -153,8 +153,14 @@ static const Color PLAYER_COLOR[4] = { {254, 194, 212, 255},  {74, 223, 202, 255
 
 static void updateAnimations(Game* this) {
     if (this->map->running == false) return;
-    for (int i = 0; i < ANIMATION_COUNT; i++) {
-        UpdateAnimation(&this->animations[i]);
+    if (this->map->player->effects.freezeTime.duration == 0) {
+        for (int i = 0; i < ANIMATION_COUNT; i++) {
+            UpdateAnimation(&this->animations[i]);
+        }
+    } else {
+        for (int i = ANIMATION_GHOST_RIGHT; i <= ANIMATION_GHOST_DOWN; i++) {
+            UpdateAnimation(&this->animations[i]);
+        }
     }
 }
 
@@ -542,7 +548,7 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
             DrawAnimation(animations[ANIMATION_PACMAN_RIGHT + e->dir], x, y, size, color);
 
             if (p->effects.freezeTime.duration > 0)
-                DrawSprite(sprites[SPRITE_ICE], x, y, size, size, (Color) { 255, 255, 255, 150 });
+                DrawSprite(sprites[SPRITE_ICE], x, y, size, size, (Color) { 255, 255, 255, 40 });
 
             cur = cur->next;
         }
@@ -714,7 +720,7 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_BIOME_FREE);
     }
 
-    if (p->biomeChange){
+    if (p->biomeChange) {
         audio->playSound(audio, SOUND_BIOME_CHANGE);
     }
 

@@ -318,18 +318,22 @@ static void handleCheats(Map* this, Controller* controller) {
     if (CHEAT_FLAGS[CHEAT_INFINITY_REGENERATION]) {
         effects->regeneration.duration = 1;
         effects->regeneration.strenght = FONT_REGENERATION_STRENGTH;
-    } 
+    }
     if (CHEAT_FLAGS[CHEAT_INFINITY_INVISIBILITY]) effects->invisibility.duration = 1;
     if (CHEAT_FLAGS[CHEAT_INFINITY_FREEZE_TIME]) effects->freezeTime.duration = 1;
     if (CHEAT_FLAGS[CHEAT_INFINITY_SPEED]) {
         effects->speed.duration = 1;
         p->speed = START_SPEED;
     }
-    if (CHEAT_FLAGS[CHEAT_ADD_FRAGMENT]){
+    if (CHEAT_FLAGS[CHEAT_ADD_FRAGMENT]) {
         p->biomeFragment += 2;
         p->totalFragment += 2;
         p->getFragment = true;
         CHEAT_FLAGS[CHEAT_ADD_FRAGMENT] = false;
+    }
+    if (CHEAT_FLAGS[CHEAT_ALL_EFFECTS]) {
+        CHEAT_FLAGS[CHEAT_ALL_EFFECTS] = 0;
+        CHEAT_FLAGS[CHEAT_INFINITY_INVULNERABILITY] = CHEAT_FLAGS[CHEAT_INFINITY_FREEZE_TIME] = CHEAT_FLAGS[CHEAT_INFINITY_INVISIBILITY] = CHEAT_FLAGS[CHEAT_INFINITY_REGENERATION] = CHEAT_FLAGS[CHEAT_INFINITY_SPEED] = 1;
     }
 }
 

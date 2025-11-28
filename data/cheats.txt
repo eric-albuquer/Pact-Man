@@ -4,7 +4,7 @@ A,S,K,W,Q,S:3 / LEFT, DOWN, X, UP, L2, DOWN             // Invisibilidade
 U,A,S,W,K,K:4 / L1, LEFT, DOWN, UP, X, X                // Congelar
 W,Q,I,A,W,L:5 / UP, L2, TRIANGLE, LEFT, UP, CIRCLE      // Velocidade
 U,A,S,U,I,A:6 / L1, LEFT, DOWN, L1, TRIANGLE, LEFT      // Adicionar fragmento
-Q,U, ,J,U,W:7 / L2, L1, R2, SQUARE, L1, UP              // undefined
+Q,U, ,J,U,W:7 / L2, L1, R2, SQUARE, L1, UP              // Todos efeitos
 Q,L,Q,S,Q,O:8 / L2, CIRCLE, L2, DOWN, L2, R1            // undefined
  ,J,D,S,A,D:9 / R2, SQUARE, RIGHT, DOWN, LEFT, RIGHT    // undefined
 O,S,I, ,S,J:10 / R1, DOWN, TRIANGLE, R2, DOWN, SQUARE   // undefined
