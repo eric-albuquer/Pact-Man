@@ -86,7 +86,7 @@
 //  ⏸️ DELAY DE INPUTS
 //===============================================================
 #define PAUSE_DELAY 1.0f                            // Delay do pause
-#define MAX_CHEAT_UPDATES_DELAY 20                  // Máx. delay para cheats
+#define MAX_CHEAT_UPDATES_DELAY 30                  // Máx. delay para cheats
 #define MIN_CHEAT_UPDATES_DELAY 2                   // Mín. delay para cheats
 
 // ######################################################################################################################################################################### CHUNK LOADER

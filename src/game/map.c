@@ -292,6 +292,7 @@ static bool CHEAT_FLAGS[CHEAT_COUNT] = { 0 };
 static inline void resetCheatTimer() {
     lastPressed = INT_MAX;
     resetCheatPointer();
+    printf("\nResetou\n");
 }
 
 static void activateCheats(Map* this, Controller* controller) {
@@ -719,7 +720,6 @@ static void _free(Map* this) {
     this->firedCells->free(this->firedCells);
     this->tentacleCells->free(this->tentacleCells);
     unloadCheats();
-    unloadBFS();
 
     free(this);
 }
@@ -736,7 +736,6 @@ Map* new_Map(int biomeCols, int chunkRows, int spawnX, int spawnY) {
 
     this->changedChunk = new_ArrayList();
     loadCheats();
-    loadBFS();
 
     this->firedCells = new_LinkedList();
     this->tentacleCells = new_LinkedList();

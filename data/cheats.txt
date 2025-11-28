@@ -1,10 +1,10 @@
-A,W,A,J, ,S, ,S:1 / LEFT, UP, LEFT, SQUARE, R2, DOWN, R2, DOWN             // Invencibilidade
-A,J,L,A,U, ,J,O:2 / LEFT, SQUARE, CIRCLE, LEFT, L1, R2, SQUARE, R1         // Regeneração
-U, ,S,A,K,S,I,W:3 / L1, R2, DOWN, LEFT, X, DOWN, TRIANGLE, UP              // Invisibilidade
-D,L,W,S,Q,J,J, :4 / RIGHT, CIRCLE, UP, DOWN, L2, SQUARE, SQUARE, R2        // Congelar
- ,S,S,K,J,I,W,L:5 / R2, DOWN, DOWN, X, SQUARE, TRIANGLE, UP, CIRCLE        // Velocidade
-D,I,D,O,Q,W, ,K:6 / RIGHT, TRIANGLE, RIGHT, R1, L2, UP, R2, X              // Adicionar fragmento
-D,J,I,I,S,K,S,A:7 / RIGHT, SQUARE, TRIANGLE, TRIANGLE, DOWN, X, DOWN, LEFT // undefined
- ,S,Q,S,Q,Q,D,Q:8 / R2, DOWN, L2, DOWN, L2, L2, RIGHT, L2                  // undefined
-I,J,S,O,W,U,L,W:9 / TRIANGLE, SQUARE, DOWN, R1, UP, L1, CIRCLE, UP         // undefined
-S, ,D,I,L,Q,K,K:10 / DOWN, R2, RIGHT, TRIANGLE, CIRCLE, L2, X, X           // undefined'
+ ,D,L,W,J,U:1 / R2, RIGHT, CIRCLE, UP, SQUARE, L1       // Invencibilidade
+ ,K,I,U,O,S:2 / R2, X, TRIANGLE, L1, R1, DOWN           // Regeneração
+A,S,K,W,Q,S:3 / LEFT, DOWN, X, UP, L2, DOWN             // Invisibilidade
+U,A,S,W,K,K:4 / L1, LEFT, DOWN, UP, X, X                // Congelar
+W,Q,I,A,W,L:5 / UP, L2, TRIANGLE, LEFT, UP, CIRCLE      // Velocidade
+U,A,S,U,I,A:6 / L1, LEFT, DOWN, L1, TRIANGLE, LEFT      // Adicionar fragmento
+Q,U, ,J,U,W:7 / L2, L1, R2, SQUARE, L1, UP              // undefined
+Q,L,Q,S,Q,O:8 / L2, CIRCLE, L2, DOWN, L2, R1            // undefined
+ ,J,D,S,A,D:9 / R2, SQUARE, RIGHT, DOWN, LEFT, RIGHT    // undefined
+O,S,I, ,S,J:10 / R1, DOWN, TRIANGLE, R2, DOWN, SQUARE   // undefined

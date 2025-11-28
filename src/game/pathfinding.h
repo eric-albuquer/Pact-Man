@@ -18,8 +18,6 @@ typedef struct {
     int moves;
 } NextPos;
 
-void loadBFS();
-void unloadBFS();
 void mapDistancePlayer(Map* map);
 
 NextPos getNextPos(ChunkManager* cm, int x, int y, int biome);

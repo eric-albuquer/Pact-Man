@@ -79,6 +79,7 @@ Player* new_Player(int x, int y) {
     this->fragmentByCoins = false;
 
     this->totalTime = 0;
+    this->cellType = CELL_EMPTY;
 
     this->effects = (Effects){0};
     this->biome = 0;

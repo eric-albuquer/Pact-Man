@@ -68,7 +68,8 @@ Paint
 FERRAMENTAS AUXILIARES
 Github
 Vscode
-MinGW
+GCC
+MSYS2
 CMake / Make
 Discord
 WhatsApp
@@ -96,21 +97,24 @@ Blinky (fantasma vermelho)
 Inky (fantasma ciano)
 Clyde (fantasma laranja)
 
-ALGORÍTMOS
-Tabela Hash (endereçamento aberto)
-Tabela Hash (encadeamento)
+ALGORÍTMOS E ESTRUTURA DE DADOS
+Hash Table (open addressing)
+Hash Table (chaining)
 Perfect Hashing (Minimal Perfect Hashing)
 Prefix Tree (Trie)
 Tree Node Pointer
-Busca em Árvore (DFS)
-Busca em Grafos (BFS)
-Matrizes Espaciais
-Bubble Sort
+Tree Search (DFS)
+Graph Search (BFS)
+Local Spatial Matrix
+Sorting Network
 Quick Sort
-Listas Encadeadas (Pilha / Fila)
-Arrays Dinâmicos
-Bitwise Operations
+Merge Sort
+LinkedList
+Stack
+Queue
 Sliding Window
+ArrayList
+Bitwise Operations
 
 PROFESSORES
 Natacha Targino AED

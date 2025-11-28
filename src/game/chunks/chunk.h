@@ -48,18 +48,6 @@ typedef enum {
     CELL_COUNT,
 } CellType;
 
-inline bool isDegenerated(CellType type){
-    return type >= CELL_DEGENERATED_1 && type <= CELL_DEGENERATED_3;
-}
-
-inline bool isWind(CellType type) {
-    return type >= CELL_WIND_RIGHT && type <= CELL_WIND_DOWN;
-}
-
-inline bool isPassable(CellType type) {
-    return type != CELL_WALL && type != CELL_GRAVE && type != CELL_GRAVE_INFESTED;
-}
-
 typedef struct {
     unsigned type : 5;
     unsigned biome : 2;
@@ -74,10 +62,38 @@ typedef enum {
     CHUNK_FONT,
     CHUNK_BONUS,
     CHUNK_FRAGMENT,
+
+    CHUNK_COUNT,
 } ChunkType;
 
-inline bool isStructure(ChunkType type) {
-    return type >= CHUNK_TEMPLE && type <= CHUNK_BONUS;
+typedef enum {
+    CELL_PROPRERTY_PASSABLE = 1,
+    CELL_PROPRERTY_DEGENERATED = 2,
+    CELL_PROPRERTY_WIND = 4,
+} CellProprerty;
+
+typedef enum {
+    CHUNK_PROPRERTY_STRUCTURE = 1,
+} ChunkProprerty;
+
+extern int CELL_PROPRERTIES[CELL_COUNT];
+
+extern int CHUNK_PROPRERTIES[CHUNK_COUNT];
+
+inline int isPassable(CellType type){
+    return CELL_PROPRERTIES[type] & CELL_PROPRERTY_PASSABLE;
+}
+
+inline int isDegenerated(CellType type){
+    return CELL_PROPRERTIES[type] & CELL_PROPRERTY_DEGENERATED;
+}
+
+inline int isWind(CellType type){
+    return CELL_PROPRERTIES[type] & CELL_PROPRERTY_WIND;
+}
+
+inline int isStructure(ChunkType type){
+    return CHUNK_PROPRERTIES[type] & CHUNK_PROPRERTY_STRUCTURE;
 }
 
 typedef struct Chunk {
@@ -100,5 +116,7 @@ typedef struct Chunk {
 } Chunk;
 
 Chunk* new_Chunk(int x, int y);
+
+void preComputeChunksProprerties();
 
 #endif

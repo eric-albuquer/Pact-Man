@@ -2,27 +2,24 @@
 
 #include <math.h>
 #include <stdlib.h>
-
+#include <omp.h>
 #include "chunk.h"
-#include "linkedlist.h"
 
-static LinkedList* BFSQueue = NULL;
+#define MAX_CELLS_PROCESSED (CELLS_PER_CHUNK * 9)
+static QNode BFSQueue[MAX_CELLS_PROCESSED];
+static int head = 0;
+static int tail = 0;
 
 //===============================================================
-//  ALOCAR E LIBERAR FILA BFS
+//  FUNÇÕES DE FILA COM ARRAY
 //===============================================================
 
-void loadBFS(){
-    BFSQueue = new_LinkedList();
+static inline void enqueue(int x, int y, int d) {
+    BFSQueue[tail++] = (QNode){ x, y, d };
 }
 
-void unloadBFS(){
-    Node* cur = BFSQueue->head;
-    while(cur){
-        free(cur->data);
-        cur = cur->next;
-    }
-    BFSQueue->free(BFSQueue);
+static inline QNode dequeue() {
+    return BFSQueue[head++];
 }
 
 //===============================================================
@@ -35,42 +32,39 @@ void mapDistancePlayer(Map* map) {
     ChunkManager* cm = map->manager;
     Chunk** adjacents = cm->adjacents;
 
+    #pragma omp parallel for
     for (int i = 0; i < 9; i++) {
         int idx = CLOSER_IDX[i];
         Chunk* chunk = adjacents[idx];
         if (chunk) chunk->resetDistance(chunk);
     }
 
-    QNode* start = malloc(sizeof(*start));
+    head = tail = 0;
 
-    start->x = map->player->x;
-    start->y = map->player->y;
-    start->d = 0;
+    int x = map->player->x;
+    int y = map->player->y;
 
-    BFSQueue->addLast(BFSQueue, start);
-    Cell* cell = cm->getUpdatedCell(cm, start->x, start->y);
+    enqueue(x, y, 0);
+
+    Cell* cell = cm->getUpdatedCell(cm, x, y);
     cell->distance = 0;
 
     static const int DX[4] = { 1, -1, 0, 0 };
     static const int DY[4] = { 0, 0, 1, -1 };
 
-    while (BFSQueue->length > 0) {
-        QNode* curr = BFSQueue->removeFirst(BFSQueue);
+    while (tail > head) {
+        QNode curr = dequeue();
+        const int nextDist = curr.d + 1;
         for (int i = 0; i < 4; i++) {
-            int neighborX = curr->x + DX[i];
-            int neighborY = curr->y + DY[i];
+            int neighborX = curr.x + DX[i];
+            int neighborY = curr.y + DY[i];
 
             Cell* next = cm->getUpdatedCell(cm, neighborX, neighborY);
-            if (!next || !isPassable(next->type) || next->distance != -1) continue;
+            if (!next || !isPassable(next->type) || next->distance >= 0) continue;
 
-            next->distance = curr->d + 1;
-            QNode* neighborNew = malloc(sizeof(*neighborNew));
-            neighborNew->x = neighborX;
-            neighborNew->y = neighborY;
-            neighborNew->d = curr->d + 1;
-            BFSQueue->addLast(BFSQueue, neighborNew);
+            next->distance = nextDist;
+            enqueue(neighborX, neighborY, nextDist);
         }
-        free(curr);
     }
 }
 
@@ -167,14 +161,14 @@ Vec2i getRandomPos(NextPos nextPos) {
 //  MELHOR DIREÇÃO PARA O SPAWN (EUCLIDIANA)
 //===============================================================
 
-Vec2i getCloserToSpawn(NextPos nextPos, int x, int y){
-    Vec2i closer = {0};
+Vec2i getCloserToSpawn(NextPos nextPos, int x, int y) {
+    Vec2i closer = { 0 };
     if (nextPos.moves == 0) return closer;
     float dist = 10000000.0f;
-    for (int i = 0; i < nextPos.moves; i++){
+    for (int i = 0; i < nextPos.moves; i++) {
         QNode pos = nextPos.pos[i];
         float posDist = hypotf(pos.x - x, pos.y - y);
-        if (posDist < dist){
+        if (posDist < dist) {
             dist = posDist;
             closer.x = pos.x;
             closer.y = pos.y;

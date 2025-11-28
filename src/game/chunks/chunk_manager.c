@@ -1,6 +1,5 @@
 #include "chunk_manager.h"
 #include <stdlib.h>
-#include <math.h>
 #include <time.h>
 #include <omp.h>
 
@@ -130,6 +129,8 @@ static void loadSpawnChunk(ChunkManager* this){
             cell->type = CELL_EMPTY;
         }
     }
+
+    p->cellType = CELL_EMPTY;
 }
 
 //===============================================================
@@ -150,6 +151,7 @@ ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
     ChunkManager* this = malloc(sizeof(ChunkManager));
     this->biomeCols = biomeCols;
     biomeCols++;
+    preComputeChunksProprerties();
     this->chunks = new_ChunkMap();
     this->cols = (biomeCols << 2) - 1;
     this->rows = rows;
