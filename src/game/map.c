@@ -300,7 +300,6 @@ static void activateCheats(Map* this, Controller* controller) {
         resetCheatTimer();
     int code = controller->input.code;
     if (code == 0 || code == controller->input.lastCode) return;
-    printf("%d\n", code);
     lastUpdatePressed = this->updateCount;
     int res = hasCheat(code);
     if (res == 0) return;

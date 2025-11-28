@@ -1,93 +1,107 @@
 # Pact-Man 
 
-<b>Pact-Man</b> é a versão alternativa de Pac-Man, onde o jogador deve explorar as profundezas dos círculos do Inferno de Dante. 
+**Pact-Man** é a versão alternativa de Pac-Man, onde o jogador deve explorar as profundezas dos círculos do Inferno de Dante.
 
-O jogo mistura o arcade clássico do Pac-Man com o novo estilo exploratório, que implementa uma inversão de personagens. Agora o player é o fantasminha, que deve fugir dos corrompidos Pacts-Man, enfrentar os chefes dos confins do inferno, coletar fragmentos de memória e derrubar o próprio diabo para escapar do inferno!
+O jogo mistura o arcade clássico do Pac-Man com um estilo exploratório moderno, invertendo os papéis tradicionais: agora o jogador é o fantasminha e deve fugir dos corrompidos Pacts-Man, enfrentar chefes infernais, coletar fragmentos de memória e derrotar o próprio diabo para escapar do inferno.
 
-O jogo foi desenvolvido como projeto da disciplina de <b>Algoritmos e Estrutura de Dados</b> (AED) do curso de Ciência da Computação, 3º período, ministrada pela professora Natasha Targino, da CESAR School.
+O jogo foi desenvolvido como projeto da disciplina de **Algoritmos e Estrutura de Dados (AED)** do curso de Ciência da Computação, 3º período, ministrada pela professora Natasha Targino, na CESAR School.
 
-* [Vídeo Demonstrativo](https://www.youtube.com/watch?v=YwxyXMzec_8)
+📺 **Vídeo Demonstrativo:** https://www.youtube.com/watch?v=YwxyXMzec_8
 
-<details>
-<summary><b>Nossa Inspiração</b></summary>
+---
 
-Tivemos como inspiração principal o clássico jogo arcade Pac-Man, que teve presença em inúmeros fliperamas nos anos 90, marcou gerações e até os dias de hoje é jogado com frequência. 
+## Nossa Inspiração
 
-Além disso, nos baseamos no Inferno de <b>Dante Alighieri</b> para caracterizar a proposta de ser um jogo exploratório ambientado nos círculos do inferno com suas respectivas particularidades, personagens e características que contribuem para a mistura da obra literária com o core central do jogo virtual.
+Tivemos como inspiração principal o clássico arcade **Pac-Man**, marcado por décadas de presença nos fliperamas.  
+Também nos baseamos no **Inferno de Dante Alighieri**, criando biomas temáticos, personagens e estruturas infernais que simulam os círculos descritos na obra.
 
-</details>
+---
 
-<details>
-<summary><b>Objetivo do Jogo</b></summary>
+## Objetivo do Jogo
 
-O objetivo principal do jogo é sobreviver e alcançar a saída do inferno, para isso, é necessário a coleta de fragmentos de memória, no qual possibilitam a passagem de círculo para círculo. Dessa maneira, ao coletar fragmentos e atravessar os círculos. Ao chegar no ultimo, encontrará o vilão final, o próprio diabo, em que deverá sobreviver e lutar bravamente para alcançar a saída do inferno e chegar ao céu, feito que ninguém, até agora, conseguiu. Será que você consegue?
+O objetivo é sobreviver aos círculos do inferno e alcançar a saída.  
+Para avançar, o jogador deve coletar **fragmentos de memória** — ao menos 2 dos 3 disponíveis por círculo — exceto no último nível.
 
-</details>
+Ao final, o jogador enfrentará o **Diabo**, derrotando-o para finalmente escapar para o céu.
 
-<details>
-<summary><b>Como Funciona</b></summary>
+---
 
-### Mecânica Principal
+## Como Funciona
 
-* O jogador pode movimentar pelo mapa através das teclas WASD ou pelas setas.
+### 🎮 Mecânica Principal
 
+* Movimentação: **WASD**, **setas** ou **controle (PS3, PS4, PS5 e Xbox)**.
+* Habilidade de corrida: **Barra de espaço** ou **R2 (controle)**.
+* Três fragmentos de memória por círculo:
+  - Coletar 100 moedas  
+  - Derrotar o chefe  
+  - Encontrar o fragmento escondido  
+* Encostar em inimigos causa dano.
+* A **estrelinha mágica** permite derrotar inimigos e chefes.
+* Cada círculo possui **3 estruturas especiais**:
+  - **Fonte** → Recupera vida  
+  - **Templo** → Local de spawn do chefe  
+  - **Altar da Velocidade** → Recarrega a habilidade de corrida  
+* O jogo possui **3 dificuldades**:
+  - Fácil  
+  - Médio  
+  - Difícil  
+  *Os scores são comparados apenas com jogadores da mesma dificuldade.*
+* Após o tempo limite da fase, ocorre a **desintegração** do mapa:
+  - Buracos surgem  
+  - Obstáculos aparecem  
+  - O cenário torna-se mais letal  
+* Poderes temporários:
+  - Invisibilidade  
+  - Invencibilidade  
+  - Congelamento do tempo  
+  - Regeneração  
+  - Velocidade  
 
-* O jogo terá 3 fragmentos de memória por circulo, sendo necessário a coleta de pelo menos 2 para ir para o próximo nivel, isso é global para todas as fases, com exceção do ultimo.
+### 🔥 Círculos/Biomas
 
+* Luxúria  
+* Gula  
+* Heresia  
+* Violência  
 
-* Para coletar fragmentos, você deve
-    * Coletar 100 moedas 
-    * Derrotar o chefão do Círculo 
-    * Encontrar o fragmento escondido no mapa.
+Cada círculo possui layout, obstáculos e comportamentos únicos.  
+A progressão para o próximo círculo é sempre **para a direita**.
 
+### 💥 Desintegração
 
-* O jogador deve evitar que os inimigos encostem, caso isso aconteça, perderá vida.
+* Cada círculo possui **3 minutos antes de colapsar**.
+* Após o timer, lacunas aparecem e causam dano ao jogador.
 
+---
 
-* Para atacar inimigos ou derrotar o chefão, o jogador pode pegar a estrelinha mágica, que permite derrotar inimigos ao encostar neles.
+## Algoritmos e Estruturas de Dados Utilizados
 
+O jogo faz uso intensivo de estruturas e algoritmos estudados na disciplina de AED:
 
-* O jogo tem tempo pré definido por fase, ao terminar o tempo da fase, o mapa começará a desintegrar, partes obscuras irão surgir e causar dano durante o colapso.
+- Hash Table (open addressing)  
+- Hash Table (chaining)  
+- Perfect Hashing (Minimal Perfect Hashing)  
+- Prefix Tree (Trie)  
+- Tree Node Pointer  
+- Tree Search (DFS)  
+- Graph Search (BFS)  
+- Local Spatial Matrix  
+- Sorting Network  
+- Quick Sort  
+- Merge Sort  
+- LinkedList  
+- Stack  
+- Queue  
+- Sliding Window  
+- ArrayList  
+- Bitwise Operations  
 
+Essas técnicas foram aplicadas para otimizar desempenho, IA dos inimigos, reorganização de entidades, organização do mapa, busca de caminhos, filtragens, ordenações e mais.
 
-* O jogador irá dispor de poderes , disponíveis em formato de itens coletáveis no mapa. Os poderes duram um tempo limitado.
-* É importante frisar que para der
-rotar o chefão, é necessário exclusivamente consumir a estrelinha mágica.
-* Cada círculo terá uma fonte de vida, ao entrar no espaço delimitado o jogador recupera vida.
-* Existirá o coletável de vida distribuido pelo mapa, seu consumo gera retorno de vida.
+---
 
-### Círculos/Biomas
-
-* Os circulos são 4: Luxúria, Gula , Heresia, Violência, cada um com sua respectiva particularidade e estratégia para passar.
-
-* O formato de mapa e obstaculos variam de acordo com o circulo.
-
-* Existem circulos tão específicos que o jogador precisa elaborar estratégias restritas para cada circulo que for enfrentar.
-
-* O sentido para atravessar de um circulo para o outro é sempre para a direita.
-
-### Desintegração
-
-* Cada circulo possui 3 minutos até ser degenerado.
-* A partir do momento que o tempo finaliza, o mapa passa por um processo de desintegração, lacunas irão surgir, e caso o jogador encoste, perderá vida.
-
-### Poderes
-
-* Os poderes duram por tempo limitado.
-* Os poderes dão vantagem no mapa, seu consumo é opcional, com exceção da estrela mágica que permite derrotar o boss.
-
-* Entre os poderes alguns são: 
-    * Invisibilidade
-    * Intangibilidade
-    * Congelamento do tempo
-    * Estrela do Mário: permite matar os inimigos
-
-</details>
-
-<details>
-<summary><b>Instruções de Instalação</b></summary>
-
-Siga estes passos para configurar o ambiente e executar o projeto:
+## Instruções de Instalação
 
 1.  **Instalar o MSYS2**
     * Baixe e instale o MSYS2 a partir do site oficial: [https://www.msys2.org/](https://www.msys2.org/)

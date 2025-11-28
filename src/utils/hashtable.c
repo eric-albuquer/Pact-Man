@@ -3,8 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+//===============================================================
+//  CONSTANTES PARA O HASH
+//===============================================================
+
 #define FNV32_OFFSET 2166136261u
 #define FNV32_PRIME 16777619u
+
+//===============================================================
+//  CONSTRUTOR DE UM NÓ
+//===============================================================
 
 static HashNode* new_Node(HashNode* prev, HashNode* next, HashNode* prevKey,
                           HashNode* nextKey, char* key, void* data) {
@@ -18,7 +26,15 @@ static HashNode* new_Node(HashNode* prev, HashNode* next, HashNode* prevKey,
     return node;
 }
 
+//===============================================================
+//  CONSTRUTOR DE UM BALDE
+//===============================================================
+
 static Bucket* new_Bucket() { return calloc(1, sizeof(Bucket)); }
+
+//===============================================================
+//  VERIFICAR A EXISTENCIA DE UMA CHAVE EM UM BALDE
+//===============================================================
 
 static HashNode* hasBucket(Bucket* b, char* key) {
     HashNode* cur = b->head;
@@ -28,6 +44,10 @@ static HashNode* hasBucket(Bucket* b, char* key) {
     }
     return NULL;
 }
+
+//===============================================================
+//  FUNÇÃO HASH
+//===============================================================
 
 static unsigned int fnv1a(const char* str) {
     unsigned int hash = FNV32_OFFSET;
@@ -40,6 +60,10 @@ static unsigned int fnv1a(const char* str) {
 
     return hash;
 }
+
+//===============================================================
+//  ADICIONAR / MODIFICAR ELEMENTO NA TABELA
+//===============================================================
 
 static void set(HashTable* this, char* key, void* data) {
     unsigned int idx = fnv1a(key) % this->length;
@@ -65,6 +89,10 @@ static void set(HashTable* this, char* key, void* data) {
     keys->tail = node;
 }
 
+//===============================================================
+// PEGAR ELEMENTO DA TABELA
+//===============================================================
+
 static void* get(HashTable* this, char* key) {
     unsigned int idx = fnv1a(key) % this->length;
     Bucket* b = this->buckets[idx];
@@ -72,11 +100,19 @@ static void* get(HashTable* this, char* key) {
     return node != NULL ? node->data : NULL;
 }
 
+//===============================================================
+//  VERIFICAR SE EXISTE ELEMENTO NA TABELA
+//===============================================================
+
 bool has(HashTable* this, char* key) {
     unsigned int idx = fnv1a(key) % this->length;
     Bucket* b = this->buckets[idx];
     return hasBucket(b, key) != NULL;
 }
+
+//===============================================================
+//  DELETAR ELEMENTO DA TABELA
+//===============================================================
 
 static void* delete(HashTable* this, char* key) {
     unsigned int idx = fnv1a(key) % this->length;
@@ -108,6 +144,10 @@ static void* delete(HashTable* this, char* key) {
     return data;
 }
 
+//===============================================================
+//  LIBERAR MEMÓRIA
+//===============================================================
+
 static void _free(HashTable* this) {
     HashNode* cur = this->keys->head;
     HashNode* temp;
@@ -123,6 +163,10 @@ static void _free(HashTable* this) {
     free(this->keys);
     free(this);
 }
+
+//===============================================================
+//  CONSTRUTOR
+//===============================================================
 
 HashTable* new_HashTable(unsigned int length) {
     HashTable* h = malloc(sizeof(HashTable));

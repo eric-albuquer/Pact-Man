@@ -82,6 +82,8 @@
 #define SPEED_DECAY 2                               // Decaimento de velocidade
 #define SPEED_RELOAD 2                              // Recarga de velocidade
 
+#define HEAVEN_SPEED 5
+
 //===============================================================
 //  ⏸️ DELAY DE INPUTS
 //===============================================================
@@ -103,6 +105,7 @@
 #define GRAVE_INFESTED_PROBABILITY 5               // Probabilidade de túmulos infestados
 #define FIRE_DENSITY 30                             // Densidade de fogo
 #define SPIKE_DENSITY 5                             // Densidade de espinhos
+#define DEGENERATION_PROBABILITY 50
 
 //===============================================================
 //  🪙 Densidades de Itens Colecionáveis
