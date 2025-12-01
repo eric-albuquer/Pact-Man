@@ -162,3 +162,18 @@ Essas técnicas foram aplicadas para otimizar desempenho, IA dos inimigos, reorg
     * LinkedIn: [https://www.linkedin.com/in/ricardospfreitas](https://www.linkedin.com/in/ricardospfreitas)
 
 </details>
+
+## 🔒 Tabela de Códigos
+
+| Código | Teclado          | Controle                             | Efeito                  |
+| ------ | ---------------- | ------------------------------------ | ----------------------- |
+| **1**  | D, L, W, J, U, ␣ | R2, Right, Circle, Up, Square, L1    | **Invencibilidade**     |
+| **2**  | K, I, U, O, S, ␣ | R2, X, Triangle, L1, R1, Down        | **Regeneração**         |
+| **3**  | A, S, K, W, Q, S | Left, Down, X, Up, L2, Down          | **Invisibilidade**      |
+| **4**  | U, A, S, W, K, K | L1, Left, Down, Up, X, X             | **Congelar o tempo**    |
+| **5**  | W, Q, I, A, W, L | Up, L2, Triangle, Left, Up, Circle   | **Velocidade**          |
+| **6**  | U, A, S, U, I, A | L1, Left, Down, L1, Triangle, Left   | **Adicionar fragmento** |
+| **7**  | Q, U, ␣, J, U, W | L2, L1, R2, Square, L1, Up           | **Todos os efeitos**    |
+| **8**  | Q, L, Q, S, Q, O | L2, Circle, L2, Down, L2, R1         | (indefinido)            |
+| **9**  | ␣, J, D, S, A, D | R2, Square, Right, Down, Left, Right | (indefinido)            |
+| **10** | O, S, I, ␣, S, J | R1, Down, Triangle, R2, Down, Square | (indefinido)            |

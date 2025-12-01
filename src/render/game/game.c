@@ -1094,7 +1094,7 @@ static void loadSprites(Game* this) {
 
     sprites[SPRITE_HEAVEN] = LoadSprite("assets/sprites/common_cells/heaven.png");
 
-    sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova.png");
+    sprites[SPRITE_GRAVE] = LoadSprite("assets/sprites/heresia/cova2.png");
 
     sprites[SPRITE_ICE] = LoadSprite("assets/sprites/common_cells/ice.png");
 

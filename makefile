@@ -12,7 +12,7 @@ src/render/*.c src/render/game/*.c src/game/chunks/*.c src/render/credits/*.c)
 
 SRC_DATABASE = $(wildcard src/utils/*.c data/*.c)
 
-EXEC_MAIN = game.exe
+EXEC_MAIN = Pact-Man.exe
 
 EXEC_DATABASE = manager.exe
 

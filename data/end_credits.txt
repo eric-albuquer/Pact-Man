@@ -81,7 +81,6 @@ Denival Albuquerque
 
 INSPIRAÇÂO
 Pac-Man
-Namco
 Inferno de Dante
 Minecraft
 Super Mario
@@ -163,6 +162,7 @@ Sandra Souto
 Ernesto Arturo
 Olga Albuquerque
 Igor Albuquerque
+Denival Albuquerque
 Temaki
 Whey
 Laura
@@ -216,6 +216,9 @@ Pedro Loss
 
 OFERECIMENTO
 Cesar School
+Cesar Apolo
+Cesar Brum
+Cesar Tiradentes
 Ministério da Cultúra
 Ministério da Educação
 Governo federal
@@ -228,25 +231,16 @@ HOMENAGEM
 Peia de calça
 Mohamed
 Magnus Carlsen
-Hikaru Nakamura
-Garry Kasparov
-Bobby Fischer
 Viniccius 13
 Gabriel Borteleto
 Ayrton Senna
-Max Vestappen
-Lewis Hamilton
-Arnold Schwarzenegger
 Vagner Moura
 Walter Salles
 Fernanda Torres
 Fernanda Montenegro
 Selton Mello
 Kleber Mendonça
-Tom Hanks
-Tom Cruise
 Tom Cavalcanti
-Harrison Ford
 Ivete Sangalo
 Sport
 Náutico
@@ -254,6 +248,3 @@ Santa Cruz
 Cara da cantina
 Moça da portaria
 Seguranças do Cesar
-Cesar Apolo
-Cesar Brum
-Cesar Tiradentes

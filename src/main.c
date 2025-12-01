@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     ChangeDirectory(GetApplicationDirectory());
 
     InfernoFont = LoadFont("assets/fonts/Berani.ttf");
-    Image icon = LoadImage("assets/sprites/icon.png");   
+    Image icon = LoadImage("assets/sprites/icon.ico");   
     SetWindowIcon(icon);
     UnloadImage(icon);  
 
