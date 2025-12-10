@@ -10,7 +10,7 @@
 
 #define UPDATE_TIME 0.15f
 
-GameState state = MENU_MAIN_CONTENT;
+GameState state = CREDITS_CUTSCENE1;
 Controller* controller;
 Map* map;
 Render* render;
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     //SetConfigFlags(FLAG_FULLSCREEN_MODE);
     //SetConfigFlags(FLAG_WINDOW_MOUSE_PASSTHROUGH);
 
-    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Man");
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Men");
     SetExitKey(KEY_F12);
     InitAudioDevice();
     SetTargetFPS(60);

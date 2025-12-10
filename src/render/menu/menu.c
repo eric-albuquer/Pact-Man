@@ -319,7 +319,7 @@ static void drawTutorial(Menu* this) {
     textY += 20;
 
     PRINT("PAUSAR:");
-    PRINT("- Enter ou o botao Pause do controle.");
+    PRINT("- ESC ou o botao Pause do controle.");
 
     textY += 20;
 
@@ -669,7 +669,7 @@ static void loadButtons(Menu* this) {
         (Color) {
         255, 255, 255, 150
     },
-        "CRÉDITOS",
+        "CREDITS",
         40,
         onCredits
     );

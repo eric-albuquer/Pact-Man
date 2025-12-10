@@ -41,6 +41,7 @@ Ricardo Freitas
 
 EQUIPE DE TESTES
 Amanda Luz
+Denival Albuquerque
 
 DOCUMENTAÇÃO
 Lucas Menezes

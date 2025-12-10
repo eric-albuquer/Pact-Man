@@ -9,8 +9,10 @@ static void cancelFunc(){}
 
 static int margin = 70;
 static int btnWidth = 300;
-static int btnHeight = 100;
+static int btnHeight = 80;
 static int btnFontSize = 40;
+
+static int btnY;
 
 static int selected = 0;
 
@@ -18,8 +20,10 @@ void loadPopup(int width, int height, void (*exit)()) {
     const int hw = width >> 1;
     const int hh = height >> 1;
     const int hm = margin >> 1;
-    btnExit = new_Button(hw + hm, hh, btnWidth, btnHeight, RED, BLACK, "SAIR", btnFontSize, exit);
-    btnCancel = new_Button(hw - (btnWidth + hm), hh, btnWidth, btnHeight, WHITE, BLACK, "CANCELAR", btnFontSize, cancelFunc);
+    btnY = height >> 1;
+    Color defaultColor = {255, 255, 255, 100};
+    btnExit = new_Button(hw + hm, hh, btnWidth, btnHeight, defaultColor, BLACK, "SAIR", btnFontSize, exit);
+    btnCancel = new_Button(hw - (btnWidth + hm), hh, btnWidth, btnHeight, defaultColor, BLACK, "CANCELAR", btnFontSize, cancelFunc);
 }
 
 void unloadPopup() {
@@ -29,9 +33,9 @@ void unloadPopup() {
 
 void drawPopup() {
     const int w = (btnExit->x + margin + btnExit->width) - (btnCancel->x - margin);
-    const int h = btnCancel->height + (margin << 1);
+    const int h = btnHeight + (margin << 1);
     Color backgroundColor = {127, 127, 127, 200};
-    DrawRectangleRounded((Rectangle){btnCancel->x - margin, btnCancel->y - margin, w, h}, 0.5f, 16, backgroundColor);
+    DrawRectangleRounded((Rectangle){btnCancel->x - margin, btnY - margin, w, h}, 0.5f, 16, backgroundColor);
     btnExit->draw(btnExit);
     btnCancel->draw(btnCancel);
 }
@@ -39,6 +43,7 @@ void drawPopup() {
 bool updatePopup() {
     Button* buttons[2] = {btnCancel, btnExit};
     if (updateButtons(buttons, 2)) return true;
+
     if (IsKeyPressed(KEY_RIGHT) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){
         selected = (selected + 1) & 1;
     } 
@@ -50,12 +55,16 @@ bool updatePopup() {
         return true;
     }
     buttons[selected]->hovered = true;
+
+    buttons[selected]->height = btnHeight + 30;
+    buttons[selected]->y = btnY - 15;
+    buttons[(selected + 1) & 1]->height = btnHeight;
+    buttons[(selected + 1) & 1]->y = btnY;
     return false;
 }
 
 void setPopupY(int y){
-    btnExit->y = y;
-    btnCancel->y = y;
+    btnY = y;
 }
 
 void resetSelected(){
