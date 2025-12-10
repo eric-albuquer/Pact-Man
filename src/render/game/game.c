@@ -977,7 +977,6 @@ static void updateMainContent(Game* this) {
         if (updatePopup()) this->map->running = true;
 }
 
-
 //===============================================================
 //  MÉTODO DA CLASSE PARA ATUALIZAR
 //===============================================================

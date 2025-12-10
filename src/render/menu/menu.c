@@ -172,7 +172,7 @@ static void updateMainContent(Menu* this) {
         }
         return;
     } else {
-        if (IsKeyPressed(KEY_ESCAPE)) {
+        if (IsKeyPressed(KEY_ESCAPE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_MIDDLE_RIGHT)) {
             exitPopup = !exitPopup;
         }
     }
@@ -247,7 +247,10 @@ static void updateCutscene(Menu* this) {
                 audio->restartMusic(audio, MUSIC_CUTSCENE1 + i);
             }
         }
-        if (state == GAME_MAIN_CONTENT) setPopupY(this->height * 0.65f);
+        if (state == GAME_MAIN_CONTENT) {
+            setPopupY(this->height * 0.65f);
+            resetSelected();
+        }
     }
 }
 
@@ -289,7 +292,9 @@ static void drawTutorial(Menu* this) {
     static int scrollOffset = 0;
     int wheel = GetMouseWheelMove();
 
-    scrollOffset -= wheel * 25;
+    int scroll = - GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) * 10;
+
+    scrollOffset -= wheel * 25 + scroll;
     if (scrollOffset < 0) scrollOffset = 0;
 
     BeginScissorMode(scrollX, scrollY, scrollW, scrollH);

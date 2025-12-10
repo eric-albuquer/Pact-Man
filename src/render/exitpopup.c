@@ -12,6 +12,8 @@ static int btnWidth = 300;
 static int btnHeight = 100;
 static int btnFontSize = 40;
 
+static int selected = 0;
+
 void loadPopup(int width, int height, void (*exit)()) {
     const int hw = width >> 1;
     const int hh = height >> 1;
@@ -35,11 +37,27 @@ void drawPopup() {
 }
 
 bool updatePopup() {
-    Button* buttons[2] = {btnExit, btnCancel};
-    return updateButtons(buttons, 2);
+    Button* buttons[2] = {btnCancel, btnExit};
+    if (updateButtons(buttons, 2)) return true;
+    if (IsKeyPressed(KEY_RIGHT) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){
+        selected = (selected + 1) & 1;
+    } 
+    if (IsKeyPressed(KEY_LEFT) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_LEFT)){
+        selected = (selected - 1) & 1;
+    }    
+    if (IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)){
+        buttons[selected]->action();
+        return true;
+    }
+    buttons[selected]->hovered = true;
+    return false;
 }
 
 void setPopupY(int y){
     btnExit->y = y;
     btnCancel->y = y;
+}
+
+void resetSelected(){
+    selected = 0;
 }
