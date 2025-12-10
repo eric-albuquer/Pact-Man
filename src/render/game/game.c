@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "enemy.h"
+#include "exitpoput.h"
 
 //===============================================================
 //  SPRITES E ANIMAÇÕES
@@ -231,7 +232,7 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         tutorialVisibleBuffer[type] = 1;
     }
 
-    if (this->tutorialDuration[type] > 0) {
+    if (this->tutorialDuration[type] > 0 && this->map->running) {
         Color color = this->frameCount & 32 ? YELLOW : RED;
         int fhw = MeasureText(this->tutorialText[type], 25) >> 1;
         DrawRectangle(x - fhw, y - 25, fhw << 1, 25, HUD_OPACITY);
@@ -595,28 +596,23 @@ static void drawPauseHud(Game* this) {
         {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0}
     };
 
-    static const char* text = "Pressione enter ou pause para voltar";
     static const int fontSize = 60;
-    const int textW = MeasureText(text, fontSize);
     const int halfX = this->width >> 1;
-    const int textH = this->height * 0.8f;
-    const int halfY = this->height >> 1;
-    static const int margin = 10;
-    DrawRectangleRounded((Rectangle) { halfX - textW * 0.6, textH - margin, textW * 1.2f, fontSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
-    drawCenteredText(text, halfX, textH, fontSize, WHITE);
 
-    DrawRectangleRounded((Rectangle) { halfX - 200, halfY - margin, 400, fontSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
-    drawCenteredText(dificultyText[dificulty], halfX, halfY, fontSize, dificultyColor[dificulty]);
+    static const int statsSize = 40;
+    const int statsH = this->height * 0.4f;
+
+    DrawRectangleRounded((Rectangle) { halfX - 500, this->height * 0.15f, 1000, this->height * 0.7f }, 0.1f, 16, HUD_OPACITY);
+    drawCenteredText(dificultyText[dificulty], halfX, this->height * 0.2f, fontSize, dificultyColor[dificulty]);
 
     Player* p = this->map->player;
     int mins = (int)(p->totalTime) / 60;
     int secs = (int)(p->totalTime) % 60;
     sprintf(buffer, "Tempo: %02d:%02d\nMoedas: %d\nFragmentos: %d", mins, secs, p->totalCoins, p->totalFragment);
-
-    static const int statsSize = 40;
-    const int statsH = this->height * 0.2f;
-    DrawRectangleRounded((Rectangle) { halfX - 200, statsH - margin, 400, 3 * statsSize + margin * 2 }, 0.5f, 16, HUD_OPACITY);
+    
     drawCenteredText(buffer, halfX, statsH, statsSize, WHITE);
+
+    drawPopup();
 }
 
 //===============================================================
@@ -972,10 +968,13 @@ static void updateDeathScreen(Game* this) {
 //  REINICAR CONTADOR DE TUTORIAL
 //===============================================================
 
-static void resetTutorialBuffer(Game* this) {
+static void updateMainContent(Game* this) {
     for (int i = 0; i < CELL_COUNT; i++) {
         tutorialVisibleBuffer[i] = false;
     }
+
+    if (this->map->running == false)
+        if (updatePopup()) this->map->running = true;
 }
 
 
@@ -984,8 +983,8 @@ static void resetTutorialBuffer(Game* this) {
 //===============================================================
 
 static void update(Game* this) {
-    if (state == GAME_DEATH) updateDeathScreen(this);
-    else if (state == GAME_MAIN_CONTENT) resetTutorialBuffer(this);
+    if (state == GAME_MAIN_CONTENT) updateMainContent(this);
+    else if (state == GAME_DEATH) updateDeathScreen(this);
 }
 
 //===============================================================

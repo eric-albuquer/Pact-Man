@@ -126,11 +126,15 @@ static void updateCutscenes(Credits* this) {
     else if (state < CREDITS_CUTSCENE3)
         next();
 
-    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
+    bool changedScreen = false;
+
+    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)) {
         next();
+        changedScreen = true;
     }
-    if ((IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) && state > CREDITS_CUTSCENE1) {
+    if ((IsKeyPressed(KEY_ESCAPE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) && state > CREDITS_CUTSCENE1) {
         prev();
+        changedScreen = true;
     }
 
     Button* buttons[2];
@@ -145,7 +149,7 @@ static void updateCutscenes(Credits* this) {
     bool pressed = updateButtons(buttons, len);
     if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
-    if (pressed && state <= CREDITS_CUTSCENE3) {
+    if ((pressed || changedScreen) && state <= CREDITS_CUTSCENE3) {
         audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
     } else if (state == CREDITS_ADD_SCORE) {
         this->name[0] = 0;
@@ -166,7 +170,7 @@ static void updateAddScore(Credits* this) {
     bool pressed = updateButtons(buttons, 1);
     if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
-    if (IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
+    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
         pressed = true;
         next();
     }
@@ -206,11 +210,15 @@ static void updateAddScore(Credits* this) {
 //===============================================================
 
 static void updateShowScore(Credits* this) {
-    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
+    bool changedScreen = false;
+
+    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
         next();
+        changedScreen = true;
     }
-    if ((IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2)) && state > CREDITS_CUTSCENE1) {
+    if ((IsKeyPressed(KEY_ESCAPE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2)) && state > CREDITS_CUTSCENE1) {
         prev();
+        changedScreen = true;
     }
 
     if (this->updateCount % 8 == 0)
@@ -223,7 +231,7 @@ static void updateShowScore(Credits* this) {
     bool pressed = updateButtons(buttons, 5);
     if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
-    if (pressed && state == CREDITS_SCORE)
+    if ((pressed || changedScreen) && state == CREDITS_SCORE)
         this->scores->mergeSort(this->scores, cmp);
 }
 
@@ -232,7 +240,7 @@ static void updateShowScore(Credits* this) {
 //===============================================================
 
 static void updateFinalCredits(Credits* this) {
-    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+    if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
         this->creditsMove = 0;
         state = MENU_MAIN_CONTENT;
         return;
@@ -436,7 +444,7 @@ static void drawFinalCredits(Credits* this) {
         drawCenteredText(line, halfX, y, fontSize, WHITE);
     }
 
-    DrawText("Pressione barra de espaço para voltar ao menu", 50, this->height - 100, 20, GRAY);
+    //DrawText("Pressione barra de espaço para voltar ao menu", 50, this->height - 100, 20, GRAY);
 }
 
 //===============================================================

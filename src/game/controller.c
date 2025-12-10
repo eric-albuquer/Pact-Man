@@ -33,7 +33,7 @@ static void getKeyboardInputs(Controller* this) {
         this->input.speed = 1;
     }
 
-    if (IsKeyDown(KEY_ENTER)) {
+    if (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_ESCAPE)) {
         this->input.pause = 1;
     }
 

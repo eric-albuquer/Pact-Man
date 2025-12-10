@@ -6,6 +6,7 @@
 #include "render.h"
 #include "common.h"
 #include <stdio.h>
+#include "exitpoput.h"
 
 #define UPDATE_TIME 0.15f
 
@@ -50,19 +51,29 @@ void updateCredits() {
     EndDrawing();
 }
 
-int main(int argc, char *argv[]) {
+static bool running = true;
+
+void exitGame(){
+    running = false;
+}
+
+int main(int argc, char* argv[]) {
     //SetConfigFlags(FLAG_WINDOW_UNDECORATED);
     //SetConfigFlags(FLAG_FULLSCREEN_MODE);
-    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Men");
+    //SetConfigFlags(FLAG_WINDOW_MOUSE_PASSTHROUGH);
+
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Man");
+    SetExitKey(KEY_F12);
     InitAudioDevice();
     SetTargetFPS(60);
 
     ChangeDirectory(GetApplicationDirectory());
 
     InfernoFont = LoadFont("assets/fonts/Berani.ttf");
-    Image icon = LoadImage("assets/sprites/icon.ico");   
+    Image icon = LoadImage("assets/sprites/icon.ico");
     SetWindowIcon(icon);
-    UnloadImage(icon);  
+    UnloadImage(icon);
+    loadPopup(GetScreenWidth(), GetScreenHeight(), exitGame);
 
     controller = new_Controller();
     map = new_Map(5, 9, 16, 61);
@@ -72,6 +83,8 @@ int main(int argc, char *argv[]) {
         if (state >= GAME_MAIN_CONTENT && state <= GAME_DEATH) updateGame();
         else if (state >= MENU_MAIN_CONTENT && state <= MENU_CUTSCENE5) updateMenu();
         else if (state >= CREDITS_CUTSCENE1 && state <= CREDITS_FINAL) updateCredits();
+
+        if (!running) break;
     }
 
     map->free(map);
@@ -79,6 +92,7 @@ int main(int argc, char *argv[]) {
     controller->free(controller);
 
     UnloadFont(InfernoFont);
+    unloadPopup();
     CloseAudioDevice();
     CloseWindow();
     return 0;

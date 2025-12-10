@@ -7,6 +7,7 @@
 #include <raylib.h> 
 #include <math.h>
 #include <string.h>
+#include "exitpoput.h"
 
 //===============================================================
 //  MUSICAS E SONS
@@ -74,7 +75,8 @@ void onTutorial() {
 }
 
 void onVolume() {
-    volumeLevel = (volumeLevel + 1) % 101;
+    volumeLevel += 10;
+    if (volumeLevel > 100) volumeLevel = 0;
 
     SetMasterVolume(volumeLevel / 100.0f);
 
@@ -156,23 +158,34 @@ static void playSound(Menu* this) {
 //===============================================================
 
 static int selected = 0;
+static bool exitPopup = false;
 
 static void updateMainContent(Menu* this) {
     Audio* audio = this->audio;
-    Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->score, this->credits  };
+    Button* buttons[6] = { this->play, this->tutorial, this->volume, this->difficulty, this->score, this->credits };
 
     playSound(this);
 
     if (showTutorial) {
-        if (IsKeyPressed(KEY_BACKSPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+        if (IsKeyPressed(KEY_ESCAPE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
             showTutorial = false;
         }
+        return;
+    } else {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            exitPopup = !exitPopup;
+        }
+    }
+
+    if (exitPopup) {
+        setPopupY(this->height >> 1);
+        if (updatePopup()) exitPopup = false;
         return;
     }
 
     bool pressed = updateButtons(buttons, 6);
 
-    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)){
+    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2) || IsKeyPressed(KEY_ENTER)) {
         pressed = true;
         buttons[selected]->action();
     }
@@ -183,15 +196,15 @@ static void updateMainContent(Menu* this) {
         "HARD"
     };
 
-    if (pressed){
+    if (pressed) {
         audio->playSound(audio, SOUND_CLICK_BUTTON);
         strcpy(this->difficulty->text, dificultyText[dificulty]);
-    } 
+    }
 
-    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) > 0.5f && this->frameCount % 8 == 0)){
+    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) > 0.5f && this->frameCount % 8 == 0) || IsKeyPressed(KEY_DOWN)) {
         buttons[selected]->hovered = false;
         selected = (selected + 1) % 6;
-    } else if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) < -0.5f && this->frameCount % 8 == 0)){
+    } else if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) < -0.5f && this->frameCount % 8 == 0) || IsKeyPressed(KEY_UP)) {
         buttons[selected]->hovered = false;
         selected = selected - 1;
         if (selected == -1) selected = 5;
@@ -208,11 +221,15 @@ static void updateMainContent(Menu* this) {
 static void updateCutscene(Menu* this) {
     playSound(this);
 
-    if (IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
+    bool changedScreen = false;
+
+    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_2)) {
         onCutsceneNext();
+        changedScreen = true;
     }
-    if (IsKeyPressed(KEY_BACKSPACE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2)) {
+    if (IsKeyPressed(KEY_ESCAPE) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2)) {
         onCutscenePrev();
+        changedScreen = true;
     }
 
     Audio* audio = this->audio;
@@ -220,10 +237,123 @@ static void updateCutscene(Menu* this) {
     Button* buttons[2] = { this->cutscenePrev, this->cutsceneNext };
 
     bool pressed = updateButtons(buttons, 2);
-    if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
-    if (pressed && state <= MENU_CUTSCENE5)
-        audio->restartMusic(audio, MUSIC_CUTSCENE1 + state - MENU_CUTSCENE1);
+    if (pressed || changedScreen) {
+        audio->playSound(audio, SOUND_CLICK_BUTTON);
+        if (state <= MENU_CUTSCENE5 && state >= MENU_CUTSCENE1) {
+            audio->restartMusic(audio, MUSIC_CUTSCENE1 + state - MENU_CUTSCENE1);
+        } else {
+            for (int i = 0; i < 5; i++) {
+                audio->restartMusic(audio, MUSIC_CUTSCENE1 + i);
+            }
+        }
+        if (state == GAME_MAIN_CONTENT) setPopupY(this->height * 0.65f);
+    }
+}
+
+//===============================================================
+//  DESENHAR TUTORIAL
+//===============================================================
+
+static void drawTutorial(Menu* this) {
+    int sw = this->width;
+    int sh = this->height;
+
+    float panelScale = 0.75f; // painel um pouco menor
+    int panelW = (int)(sw * panelScale);
+    int panelH = (int)(sh * panelScale);
+    int panelX = (sw - panelW) / 2;
+    int panelY = (sh - panelH) / 2;
+
+    DrawRectangle(panelX, panelY, panelW, panelH, (Color){0, 0, 0, 200});
+    DrawRectangleLines(panelX, panelY, panelW, panelH, (Color){255, 120, 80, 255});
+
+    // -------- TITULO --------
+    int titleSize = panelH * 0.08f;  
+    const char* title = "TUTORIAL";
+    int titleWidth = MeasureText(title, titleSize);
+
+    DrawText(title,
+        panelX + (panelW - titleWidth) / 2,
+        panelY + 15,
+        titleSize,
+        (Color){255, 200, 150, 255});
+
+    // -------- AREA DE SCROLL --------
+    int margin = 30;
+    int scrollX = panelX + margin;
+    int scrollY = panelY + titleSize + 40;
+    int scrollW = panelW - margin * 2;
+    int scrollH = panelH - (titleSize + 60);
+
+    static int scrollOffset = 0;
+    int wheel = GetMouseWheelMove();
+
+    scrollOffset -= wheel * 25;
+    if (scrollOffset < 0) scrollOffset = 0;
+
+    BeginScissorMode(scrollX, scrollY, scrollW, scrollH);
+
+    // -------- TEXTO --------
+    int textSize = panelH * 0.035f; 
+    int textY = scrollY + 10 - scrollOffset;
+    int line = (int)(textSize * 1.35f);
+
+    #define PRINT(txt) DrawText(txt, scrollX, textY, textSize, RAYWHITE); textY += line
+
+    PRINT("MOVIMENTACAO:");
+    PRINT("- W, A, S, D ou Setas para se mover.");
+    PRINT("- No controle, use o analogico ou o D-Pad.");
+
+    textY += 20;
+
+    PRINT("CORRER:");
+    PRINT("- Barra de Espaco ou R2 no controle.");
+    PRINT("- Correr consome sua Energia de Velocidade.");
+
+    textY += 20;
+
+    PRINT("PAUSAR:");
+    PRINT("- Enter ou o botao Pause do controle.");
+
+    textY += 20;
+
+    PRINT("OBJETIVO DO CIRCULO:");
+    PRINT("- Pegue 2 chaves para avancar ao proximo circulo.");
+    PRINT("- Possiveis chaves:");
+    PRINT("  * Derrotando o Boss.");
+    PRINT("  * Coletando 100 moedas.");
+    PRINT("  * Encontrando no mapa.");
+
+    textY += 20;
+
+    PRINT("VIDA E CURA:");
+    PRINT("- Sua vida aparece no HUD.");
+    PRINT("- Recupere-se pegando Regen ou indo a Fonte de Cura.");
+
+    textY += 20;
+
+    PRINT("ENERGIA DE VELOCIDADE:");
+    PRINT("- Usada ao correr; recarregue no Altar da Velocidade.");
+
+    textY += 20;
+
+    PRINT("INIMIGOS:");
+    PRINT("- Os Pacmans ficam mais rapidos e agressivos a cada circulo.");
+
+    textY += 20;
+
+    PRINT("O BOSS:");
+    PRINT("- Um Pacman gigante no fim de cada circulo.");
+    PRINT("- Ele acumula habilidades dos circulos anteriores.");
+    PRINT("- No circulo final, mate-o para abrir o Portal da Libertacao.");
+
+    textY += 20;
+
+    PRINT("DEGENERACAO:");
+    PRINT("- Ficar 3 min sem progredir causa dano continuo ate avancar.");
+
+    EndScissorMode();
 }
 
 //===============================================================
@@ -255,58 +385,7 @@ static void drawMainContent(Menu* this) {
     }
 
     if (showTutorial) {
-        int sw = this->width;
-        int sh = this->height;
-
-        int panelW = (int)(sw * 0.7f);
-        int panelH = (int)(sh * 0.7f);
-        int panelX = (sw - panelW) / 2;
-        int panelY = (sh - panelH) / 2;
-
-        DrawRectangle(panelX, panelY, panelW, panelH, (Color) { 0, 0, 0, 200 });
-        DrawRectangleLines(panelX, panelY, panelW, panelH, (Color) { 255, 120, 80, 255 });
-
-        int titleSize = 40;
-        const char* title = "TUTORIAL";
-        int titleWidth = MeasureText(title, titleSize);
-        DrawText(title,
-            panelX + (panelW - titleWidth) / 2,
-            panelY + 20,
-            titleSize,
-            (Color) {
-            255, 200, 150, 255
-        });
-
-        int textSize = 20;
-        int textX = panelX + 40;
-        int textY = panelY + 90;
-        const int deltaH = 30;
-
-        DrawText("MOVIMENTACAO:", textX, textY, textSize, RAYWHITE);
-        textY += deltaH;
-        DrawText("- WASD ou Setas para mover o fantasma", textX, textY, textSize, RAYWHITE);
-        textY += deltaH;
-        DrawText("- Evite o Pact-Man e seus clones", textX, textY, textSize, RAYWHITE);
-        textY += deltaH;
-        DrawText("- Colete moedas e fragmentos para progredir", textX, textY, textSize, RAYWHITE);
-        textY += 40;
-        DrawText("DICAS:", textX, textY, textSize, RAYWHITE);
-        textY += deltaH;
-        DrawText("- Observe o mapa e planeje sua rota", textX, textY, textSize, RAYWHITE);
-        textY += deltaH;
-        DrawText("- Fique atento aos biomas se desintegrando com o tempo", textX, textY, textSize, RAYWHITE);
-
-        const char* backMsg = "Pressione BACKSPACE (<-) ou clique para voltar";
-        int backSize = 18;
-        int backWidth = MeasureText(backMsg, backSize);
-        DrawText(backMsg,
-            panelX + (panelW - backWidth) / 2,
-            panelY + panelH - 40,
-            backSize,
-            (Color) {
-            255, 180, 120, 255
-        });
-
+        drawTutorial(this);
         return;
     }
 
@@ -316,6 +395,10 @@ static void drawMainContent(Menu* this) {
     if (this->difficulty) this->difficulty->draw(this->difficulty);
     if (this->credits)    this->credits->draw(this->credits);
     if (this->score)      this->score->draw(this->score);
+
+    if (exitPopup) {
+        drawPopup();
+    }
 }
 
 //===============================================================
