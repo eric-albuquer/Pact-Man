@@ -210,8 +210,10 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     } else if (type == CELL_FONT_HEALTH) {
         if (p->cellType == CELL_FONT_HEALTH)
             DrawAnimationFrame(animations[ANIMATION_FONT], x, y, size, color, 3);
-        else
+        else {
             DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
+            DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, y, size, size, (Color){255, 255, 255, 150});
+        }    
     } else if (type == CELL_GRAVE) {
         DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, color);
     } else if (type == CELL_GRAVE_INFESTED) {
@@ -222,6 +224,9 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         float t = (float)(this->map->updateCount % BONUS_DELAY) / BONUS_DELAY;
         Color c = LerpColor(BLACK, p->cellType == CELL_BONUS ? BLUE : PURPLE, t);
         DrawSprite(sprites[SPRITE_BONUS], x, y, size, size, c);
+        if (p->cellType != CELL_BONUS){
+            DrawSprite(sprites[SPRITE_EFFECT_SPEED], x, y, size, size, (Color){255, 255, 255, 150});
+        }
     }
 
     if (!itens) return;
