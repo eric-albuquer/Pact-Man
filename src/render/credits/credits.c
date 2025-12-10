@@ -149,11 +149,16 @@ static void updateCutscenes(Credits* this) {
     bool pressed = updateButtons(buttons, len);
     if (pressed) audio->playSound(audio, SOUND_CLICK_BUTTON);
 
-    if ((pressed || changedScreen) && state <= CREDITS_CUTSCENE3) {
-        audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
-    } else if (state == CREDITS_ADD_SCORE) {
-        this->name[0] = 0;
-        this->nameIdx = 0;
+    if ((pressed || changedScreen)) {
+        if (state <= CREDITS_CUTSCENE3)
+            audio->restartMusic(audio, MUSIC_CUTSCENE1 + (state - CREDITS_CUTSCENE1));
+        else {
+            for (int i = 0; i < 3; i++) {
+                audio->restartMusic(audio, MUSIC_CUTSCENE1 + i);
+            }
+            this->name[0] = 0;
+            this->nameIdx = 0;
+        }
     }
 }
 
@@ -240,13 +245,13 @@ static void updateShowScore(Credits* this) {
 //===============================================================
 
 static void updateFinalCredits(Credits* this) {
+    Audio* audio = this->audio;
     if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_TRIGGER_2) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
         this->creditsMove = 0;
         state = MENU_MAIN_CONTENT;
+        audio->restartMusic(audio, MUSIC_CREDITS);
         return;
     }
-
-    Audio* audio = this->audio;
     audio->updateMusic(audio, MUSIC_CREDITS);
 
     this->creditsMove += CREDITS_SPEED;
@@ -391,7 +396,7 @@ static void drawShowScore(Credits* this) {
     static const int margin = 10;
     static const int heightRow = 60;
     const int widthRow = this->width * 0.7;
-    
+
     const int startX = (this->width - widthRow) >> 1;
 
     int y = 200;
@@ -402,12 +407,12 @@ static void drawShowScore(Credits* this) {
         "HARD"
     };
 
-    DrawRectangleRounded((Rectangle){(this->width >> 1) - 400, 70, 800, 85}, 0.5f, 16, HUD_OPACITY);
+    DrawRectangleRounded((Rectangle) { (this->width >> 1) - 400, 70, 800, 85 }, 0.5f, 16, HUD_OPACITY);
     sprintf(buffer, "SCORES - %s", dificultyText[dificulty]);
     drawCenteredText(buffer, this->width >> 1, 80, 70, WHITE);
 
     int idx = 0, i = 0;
-    while (idx < 10 && i < scores->length){
+    while (idx < 10 && i < scores->length) {
         Score* score = scores->data[i++];
         if (score->dificulty != dificulty) continue;
         drawTableRow(this, score, startX, y, widthRow, heightRow, margin, ++idx);

@@ -78,7 +78,9 @@
 #define BIOME_DEGEN_START_TIME \
     ((const float[DIFICULTY_COUNT]){ 240.0f, 180.0f, 120.0f }[dificulty]) // Tempo de degeneração por bioma
 
-#define BATERY_DECAY 0.003f                        // Decaimento de bateria
+#define BATERY_DECAY \
+    ((const float[DIFICULTY_COUNT]){ 0.001f, 0.002f, 0.003f }[dificulty]) // Decaimento de bateria
+
 #define SPEED_DECAY 2                               // Decaimento de velocidade
 #define SPEED_RELOAD 2                              // Recarga de velocidade
 
