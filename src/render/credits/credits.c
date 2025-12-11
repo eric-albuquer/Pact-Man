@@ -514,7 +514,7 @@ static void loadAudio(Credits* this) {
 
     audio->loadMusic(audio, "assets/music/end_background.mp3", MUSIC_CUTSCENE_BACKGROUND);
 
-    audio->loadMusic(audio, "assets/music/creditos.mp3", MUSIC_CREDITS);
+    audio->loadMusic(audio, "assets/music/F1.mp3", MUSIC_CREDITS);
     audio->loadMusic(audio, "assets/music/score.mp3", MUSIC_SCORE);
 
     audio->loadSound(audio, "assets/sounds/click.wav", SOUND_CLICK_BUTTON);
