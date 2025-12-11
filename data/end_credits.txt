@@ -161,8 +161,8 @@ Thiago Fernandes
 Cassian Ferrari
 
 JOGOS PARCEIROS
-Bomber Clean
-Smash toons
+Bomber Rush
+Smash Toons
 Ecos da infância
 
 EQUIPE DE SUPORTE
@@ -198,120 +198,123 @@ Cara da cantina
 Moça da portaria
 Seguranças do Cesar
 
-MENÇÃO HONRROSA
+MENÇÃO HONRROSA LENDAS
 
-Matemáticos e Teóricos Essenciais
-Leonhard Euler - um dos maiores matemáticos de todos os tempos
-Carl Friedrich Gauss - “o príncipe dos matemáticos”
-Alan Turing - pai da computação moderna (já estava, ficou aqui definido)
-George Boole - lógica booleana (base de circuitos digitais)
-Gottfried Wilhelm Leibniz - cocriador do cálculo e máquinas computacionais
-Kurt Gödel - teoremas da incompletude
-Emmy Noether - bases matemáticas da física moderna
-Henri Poincaré - pai dos sistemas dinâmicos e topologia
-Euclides - fundador da geometria
-Arquimedes - pai da geometria prática e da hidrostática.
-Pitágoras - formulou o famoso teorema e influenciou a matemática ocidental.
-Fibonacci (Leonardo de Pisa) - popularização da famosa sequência
-Blaise Pascal - probabilidade e máquinas precursoras de computadores
-Andrei Markov - processos estocásticos e cadeias de Markov
-David Hilbert - bases da matemática do século XX
-Stephen Wolfram - computação, autômatos e Wolfram|Alpha
-Pierre de Fermat - pioneiro da teoria dos números e do Último Teorema.
-René Descartes - criador da geometria analítica e do sistema cartesiano.
-Pierre-Simon Laplace - desenvolveu a mecânica celeste e a teoria das probabilidades.
-Joseph Fourier - criou a análise de Fourier, base da física e processamento de sinais.
+MATEMÁTICOS
 
-Física e Astronomia
-Stephen Hawking - buracos negros e cosmologia
-Galileo Galilei - pai da ciência moderna
-Johannes Kepler - leis do movimento planetário
-Max Planck - pai da mecânica quântica
-Niels Bohr - modelo atômico e fundamentos da quântica
-Richard Feynman - eletrodinâmica quântica e ensino da física
+Leonhard Euler - gênio da matemática
+Carl Friedrich Gauss - príncipe dos matemáticos
+Alan Turing - pai da computação
+George Boole - lógica booleana
+Gottfried Wilhelm Leibniz - cálculo e máquinas
+Kurt Gödel - incompletude
+Emmy Noether - álgebra e física
+Henri Poincaré - sistemas dinâmicos
+Euclides - geometria
+Arquimedes - geometria prática
+Pitágoras - teorema e matemática
+Fibonacci - sequência famosa
+Blaise Pascal - probabilidade
+Andrei Markov - cadeias de Markov
+David Hilbert - fundamentos do século XX
+Stephen Wolfram - autômatos e Wolfram|Alpha
+Pierre de Fermat - teoria dos números
+René Descartes - geometria analítica
+Pierre-Simon Laplace - probabilidade e mecânica
+Joseph Fourier - análise de Fourier
+
+FÍSICA E ASTRONOMIA
+Stephen Hawking - buracos negros
+Galileo Galilei - ciência moderna
+Johannes Kepler - leis planetárias
+Max Planck - mecânica quântica
+Niels Bohr - modelo atômico
+Richard Feynman - eletrodinâmica
 Enrico Fermi - física nuclear
-Paul Dirac - teoria quântica e antimatéria
-Erwin Schrödinger - formulou a equação fundamental da mecânica quântica.
-Werner Heisenberg - fundador da mecânica quântica e do Princípio da Incerteza.
-Louis de Broglie - propôs a dualidade onda-partícula da matéria.
-Vera Rubin - descoberta da evidência moderna de matéria escura
-Carl Sagan - divulgação científica e exploração espacial
-Neil deGrasse Tyson - divulgação científica contemporânea
-Michio Kaku - teoria de cordas e divulgação científica
-Isaac Newton - leis do movimento e gravitação universal
-Albert Einstein - relatividade e física moderna
-Hipátia de Alexandria - matemática e astrônoma da antiguidade
+Paul Dirac - teoria quântica
+Erwin Schrödinger - equação quântica
+Werner Heisenberg - incerteza
+Louis de Broglie - dualidade onda-partícula
+Vera Rubin - matéria escura
+Carl Sagan - divulgação científica
+Neil deGrasse Tyson - ciência contemporânea
+Michio Kaku - teoria de cordas
+Isaac Newton - movimento e gravitação
+Albert Einstein - relatividade
+Hipátia de Alexandria - matemática antiga
 
-Ciência, Biologia e Engenharia
-Marie Curie - pioneira da radioatividade, Nobel dupla
-Louis Pasteur - teoria dos germes, vacinas
-Gregor Mendel - pai da genética
-Nikola Tesla - sistemas elétricos, rádio e bobina de Tesla
-Alexander Graham Bell - inventor do telefone
-James Watt - máquina a vapor e revolução industrial
-Hedy Lamarr - inventora do spread spectrum, base do Wi-Fi e Bluetooth
-Rosalind Franklin - estrutura do DNA
+CIÊNCIA, BIOLOGIA E ENGENHARIA
+Marie Curie - radioatividade
+Louis Pasteur - germes e vacinas
+Gregor Mendel - genética
+Nikola Tesla - eletricidade e rádio
+Alexander Graham Bell - telefone
+James Watt - máquina a vapor
+Hedy Lamarr - Wi-Fi e Bluetooth
+Rosalind Franklin - DNA
 
-Desenvolvedores de Jogos
-Toru Iwatani - criador de Pac-Man
-Markus Persson (Notch) - criador de Minecraft
-Shigeru Miyamoto - criador de Mario, Zelda, Donkey Kong
-John Carmack - criador das engines de Doom e Quake, ícone do 3D moderno
-Hideo Kojima - criador de Metal Gear e Death Stranding
-Sid Meier - criador da série Civilization
+DESENVOLVEDORES DE JOGOS
+Toru Iwatani - Pac-Man
+Markus Persson - Minecraft
+Shigeru Miyamoto - Mario e Zelda
+John Carmack - Doom e Quake
+Hideo Kojima - Metal Gear
+Sid Meier - Civilization
 
-Cientistas da Computação / Tecnologia
-Claude Shannon - pai da teoria da informação
-John McCarthy - inventor do termo Inteligência Artificial e criador de LISP
-Donald Knuth - autor de The Art of Computer Programming
-Niklaus Wirth - criador das linguagens Pascal, Modula e Oberon
-Brian Kernighan - coautor de UNIX e cocriador do C
-Ken Thompson - criador do UNIX e da linguagem B
-Vint Cerf - um dos pais da Internet (TCP/IP)
-Tim Berners-Lee - criador da World Wide Web
-Bjarne Stroustrup - criador do C++
-James Gosling - criador do Java
-Guido van Rossum - criador do Python
-Rasmus Lerdorf - criador do PHP
-Brendan Eich - criador do JavaScript
-Margaret Hamilton - líder do software das missões Apollo
-Linus Torvalds - criador do Linux e do Git
-Grace Hopper - pioneira de compiladores e popularização do termo bug
-Dennis Ritchie - criador da linguagem C e cocriador do UNIX
-Larry Page - cofundador do Google e criador do PageRank
-John von Neumann - pai da arquitetura moderna de computadores
-Edsger Dijkstra - algoritmo de caminhos mínimos e fundamentos da ciência da computação
-Ada Lovelace - primeira programadora da história
-Charles Babbage - idealizador da máquina analítica, precursor do computador
-Silvio Meira - referência brasileira em inovação, computação e engenharia de software
-Steve Jobs - cofundador da Apple, visão de design e tecnologia
-Bill Gates - cofundador da Microsoft
-Ken Perlin - criador do Perlin Noise, base de inúmeros gráficos e jogos
-Alan Kay - pai da programação orientada a objetos moderna
-Barbara Liskov - Liskov Substitution Principle (OOP)
+CIÊNTISTAS DA COMPUTAÇÃO / TECNOLOGIA
+Claude Shannon - teoria da informação
+John McCarthy - IA e LISP
+Donald Knuth - programação
+Niklaus Wirth - linguagens Pascal/Modula/Oberon
+Brian Kernighan - UNIX e C
+Ken Thompson - UNIX e B
+Vint Cerf - TCP/IP
+Tim Berners-Lee - WWW
+Bjarne Stroustrup - C++
+James Gosling - Java
+Guido van Rossum - Python
+Rasmus Lerdorf - PHP
+Brendan Eich - JavaScript
+Margaret Hamilton - Apollo software
+Linus Torvalds - Linux e Git
+Grace Hopper - compiladores
+Dennis Ritchie - C e UNIX
+Larry Page - Google
+John von Neumann - arquitetura de computadores
+Edsger Dijkstra - algoritmos
+Ada Lovelace - primeira programadora
+Charles Babbage - máquina analítica
+Silvio Meira - inovação e software
+Steve Jobs - Apple
+Bill Gates - Microsoft
+Ken Perlin - Perlin Noise
+Alan Kay - OOP
+Barbara Liskov - Liskov Substitution
 
-Ciência de Dados, IA e Computação Moderna
-Geoffrey Hinton - “pai do deep learning”
-Yann LeCun - redes neurais convolucionais
-Andrew Ng - popularização da IA moderna
-Demis Hassabis - fundador da DeepMind (AlphaGo, AlphaFold)
+CIÊNTISTAS DE DADOS, IA E COMPUTAÇÃO MODERNA
+Geoffrey Hinton - deep learning
+Yann LeCun - redes convolucionais
+Andrew Ng - IA moderna
+Demis Hassabis - DeepMind
 Marvin Minsky - IA clássica
-Sebastian Lague - criador de conteúdos educativos de computação gráfica, jogos e IA
-Grant Sanderson (3Blue1Brown) - animações matemáticas revolucionárias
-Derek Muller (Veritasium) - ciência experimental e comunicação científica
-Matt Batwings (MattBatWings) - conteúdo de lógica e arquitetura de computadores
-Daniel Shiffman (The Coding Train) - conteúdo educacional de computação gráfica
-Kurzgesagt - canal de ciência e filosofia visual
-Khan Academy (Sal Khan) - ensino global de matemática e computação
+Sebastian Lague - educação em gráficos e IA
+Grant Sanderson - animações matemáticas
+Derek Muller - ciência experimental
+Matt Batwings - lógica e hardware
+Samuel Trajtenberg - mestre em hardware
+Daniel Shiffman - computação gráfica educativa
+Kurzgesagt - ciência visual
+Khan Academy - ensino global
 
-Filosofia / Escritores
-Platão - fundamentos da filosofia ocidental
-Aristóteles - lógica, ética e ciência
-Friedrich Nietzsche - filosofia moderna e crítica da moral
-Jean Piaget - psicologia do desenvolvimento
-Isaac Asimov - ficção científica e robótica (leis da robótica!)
-Jules Verne - precursor da ficção científica moderna
-Jorge Luis Borges - literatura, labirintos e metafísica (perfeito para Pact-Man)
+FILOSIFIA / ESCRITORES
+Dante Alighieri - inferno de Dante
+Platão - filosofia
+Aristóteles - lógica e ética
+Friedrich Nietzsche - filosofia moderna
+Jean Piaget - psicologia
+Isaac Asimov - ficção científica
+Jules Verne - ficção científica
+Jorge Luis Borges - literatura e metafísica
 
 OFERECIMENTO
 Cesar School
@@ -331,7 +334,7 @@ Pirulla
 Árabes de Jõao Carlos
 Magnus Carlsen
 Viniccius 13
-Gabriel Borteleto
+Gabriel Bortoleto
 Vagner Moura
 Fernanda Torres
 Selton Mello

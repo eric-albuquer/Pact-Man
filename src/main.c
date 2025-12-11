@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
     //SetConfigFlags(FLAG_WINDOW_MOUSE_PASSTHROUGH);
 
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Man");
+    SetWindowState(FLAG_WINDOW_UNDECORATED);
     SetExitKey(KEY_F12);
     InitAudioDevice();
     SetTargetFPS(60);
@@ -70,7 +71,7 @@ int main(int argc, char* argv[]) {
     ChangeDirectory(GetApplicationDirectory());
 
     InfernoFont = LoadFont("assets/fonts/PAC-FONT.TTF");
-    Image icon = LoadImage("assets/sprites/icon.ico");
+    Image icon = LoadImage("assets/sprites/icon.png");
     SetWindowIcon(icon);
     UnloadImage(icon);
     loadPopup(GetScreenWidth(), GetScreenHeight(), exitGame);
