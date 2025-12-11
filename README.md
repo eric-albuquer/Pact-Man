@@ -4,7 +4,7 @@
 
 O jogo mistura o arcade clássico do Pac-Man com um estilo exploratório moderno, invertendo os papéis tradicionais: agora o jogador é o fantasminha e deve fugir dos corrompidos Pacts-Man, enfrentar chefes infernais, coletar fragmentos de memória e derrotar o próprio diabo para escapar do inferno.
 
-O jogo foi desenvolvido como projeto da disciplina de **Algoritmos e Estrutura de Dados (AED)** do curso de Ciência da Computação, 3º período, ministrada pela professora Natasha Targino, na CESAR School.
+O jogo foi desenvolvido como projeto da disciplina de **Algoritmos e Estrutura de Dados (AED)** do curso de Ciência da Computação, 3º período, ministrada pela professora Natacha Targino, na CESAR School.
 
 📺 **Vídeo Demonstrativo:** https://www.youtube.com/watch?v=YwxyXMzec_8
 
