@@ -62,14 +62,14 @@ int main(int argc, char* argv[]) {
     //SetConfigFlags(FLAG_FULLSCREEN_MODE);
     //SetConfigFlags(FLAG_WINDOW_MOUSE_PASSTHROUGH);
 
-    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Men");
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Pact-Man");
     SetExitKey(KEY_F12);
     InitAudioDevice();
     SetTargetFPS(60);
 
     ChangeDirectory(GetApplicationDirectory());
 
-    InfernoFont = LoadFont("assets/fonts/Berani.ttf");
+    InfernoFont = LoadFont("assets/fonts/PAC-FONT.TTF");
     Image icon = LoadImage("assets/sprites/icon.ico");
     SetWindowIcon(icon);
     UnloadImage(icon);

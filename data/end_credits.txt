@@ -51,7 +51,7 @@ Hans Zimmer - F1 Main Theme
 Super Mario Bros. Music - Invincible
 Mike Oldfield - Tubular Bells
 
-BIBLIOTECAS
+BIBLIOTECA
 Raylib
 
 FERRAMENTAS DE ÁUDIO
@@ -91,30 +91,42 @@ Across the Bullets
 Formula C
 
 ATORES
-Pinky (fantasma rosa)
 Pac-Man
+Pinky (fantasma rosa)
 Blinky (fantasma vermelho)
 Inky (fantasma ciano)
 Clyde (fantasma laranja)
 
-ALGORÍTMOS E ESTRUTURA DE DADOS
-Hash Table (open addressing)
-Hash Table (chaining)
-Perfect Hashing (Minimal Perfect Hashing)
-Prefix Tree (Trie)
-Tree Node Pointer
-Tree Search (DFS)
-Graph Search (BFS)
-Local Spatial Matrix
-Sorting Network
-Quick Sort
-Merge Sort
-LinkedList
-Stack
-Queue
-Sliding Window
-ArrayList
-Bitwise Operations
+ALGORÍTMOS E ESTRUTURAS DE DADOS
+
+Tabelas Hash
+Hash Table (Open Addressing) - Usada para Chunks
+Hash Table (Chaining) - Antigo sistema de Chunks
+Perfect Hashing (Minimal Perfect Hashing) - Para propriedades de Cells e Chunks
+
+Árvores e Estruturas Hierárquicas
+Prefix Tree (Trie) - Usado para Cheats
+Tree Node Pointer - Armazena o input atual de Cheats
+Tree Search (DFS) - Usado para liberar Cheats
+
+Grafos e Buscas
+Graph Search (BFS) - Utilizado no Path Finder
+Queue - Usada no BFS, tentáculos do boss e fogo
+
+Estruturas Espaciais
+Local Spatial Matrix - Grade do mapa (Map Grid)
+Bitwise Operations - Coordenadas de Cell / Chunk
+
+Ordenação
+Sorting Network - Para o Best Path
+Quick Sort - Para Score
+Merge Sort - Para Score
+
+Listas / Coleções
+LinkedList - Enemies por Chunk
+Stack - Changed Chunk Enemies
+ArrayList - Créditos e banco de dados de Score
+Sliding Window - Créditos
 
 PROFESSORES
 Natacha Targino AED
@@ -122,22 +134,23 @@ Natacha Targino AED
 Tiago Barros PIF
 Pamela Bezerra PIF
 Erick Simões IC
+Mineiro (Henrrique Braga) SD
+Ricardo Cesar LOG
+Diocleciano Dantas P1
+Ana Carolina Melo FP
+Gabrielle Canalle CORD
 Fernando Ferreira IH
 Eduardo Calabria POO
 Eduardo Nascimento SO
 Pietra Ranucci IHC
-Diocleciano Dantas P1
-Ricardo Cesar LOG
-Ana Carolina Melo FP
+Natalia Aquino P3
 Geysa Pimentel GP
 Izabella Nunes FP/SD
-Mineiro (Henrrique Braga) SD
 Diogo SD
 Mauricio Braga FDS
 Juliano Machado GP
 Andre Gomes GP
 Walter Charles MC
-Gabrielle Canalle CORD
 
 COLABORADORES
 Mircio Ferreira
@@ -181,45 +194,127 @@ Eduardo Albuquerque
 Daniel Andrade
 Nathália Melo
 Pedro Ferraz
+Cara da cantina
+Moça da portaria
+Seguranças do Cesar
 
 MENÇÃO HONRROSA
-Toru Iwatani (Pacman)
-Markus Persson (Minecraft)
-Dante Alighieri
-Shigeru Miyamoto (Super Mario)
-Silvio Meira
-Charles Babbage
-Edsger Dijkstra
-Ada Lovace
-Allan Turing
-Linus Torvalds
-John von Neumann
-Steve Jobs
-Bill Gates
-Grace Hopper
-Larry Page
-Denis Richie
-Blaise Pascal
-Isac Newton
-Albert Einsten
-Andrei Markov
-Carl Sagan
-Neil deGrasse Tyson
-Michio Kaku
-Richard Feynman
-Grant Sanderson
-Sebastian Lague
-Derik (Veritasium)
-VSouce
-The Coding Train
-Manual do Mundo
-Pedro Loss
+
+Matemáticos e Teóricos Essenciais
+Leonhard Euler - um dos maiores matemáticos de todos os tempos
+Carl Friedrich Gauss - “o príncipe dos matemáticos”
+Alan Turing - pai da computação moderna (já estava, ficou aqui definido)
+George Boole - lógica booleana (base de circuitos digitais)
+Gottfried Wilhelm Leibniz - cocriador do cálculo e máquinas computacionais
+Kurt Gödel - teoremas da incompletude
+Emmy Noether - bases matemáticas da física moderna
+Henri Poincaré - pai dos sistemas dinâmicos e topologia
+Euclides - fundador da geometria
+Arquimedes - pai da geometria prática e da hidrostática.
+Pitágoras - formulou o famoso teorema e influenciou a matemática ocidental.
+Fibonacci (Leonardo de Pisa) - popularização da famosa sequência
+Blaise Pascal - probabilidade e máquinas precursoras de computadores
+Andrei Markov - processos estocásticos e cadeias de Markov
+David Hilbert - bases da matemática do século XX
+Stephen Wolfram - computação, autômatos e Wolfram|Alpha
+Pierre de Fermat - pioneiro da teoria dos números e do Último Teorema.
+René Descartes - criador da geometria analítica e do sistema cartesiano.
+Pierre-Simon Laplace - desenvolveu a mecânica celeste e a teoria das probabilidades.
+Joseph Fourier - criou a análise de Fourier, base da física e processamento de sinais.
+
+Física e Astronomia
+Stephen Hawking - buracos negros e cosmologia
+Galileo Galilei - pai da ciência moderna
+Johannes Kepler - leis do movimento planetário
+Max Planck - pai da mecânica quântica
+Niels Bohr - modelo atômico e fundamentos da quântica
+Richard Feynman - eletrodinâmica quântica e ensino da física
+Enrico Fermi - física nuclear
+Paul Dirac - teoria quântica e antimatéria
+Erwin Schrödinger - formulou a equação fundamental da mecânica quântica.
+Werner Heisenberg - fundador da mecânica quântica e do Princípio da Incerteza.
+Louis de Broglie - propôs a dualidade onda-partícula da matéria.
+Vera Rubin - descoberta da evidência moderna de matéria escura
+Carl Sagan - divulgação científica e exploração espacial
+Neil deGrasse Tyson - divulgação científica contemporânea
+Michio Kaku - teoria de cordas e divulgação científica
+Isaac Newton - leis do movimento e gravitação universal
+Albert Einstein - relatividade e física moderna
+Hipátia de Alexandria - matemática e astrônoma da antiguidade
+
+Ciência, Biologia e Engenharia
+Marie Curie - pioneira da radioatividade, Nobel dupla
+Louis Pasteur - teoria dos germes, vacinas
+Gregor Mendel - pai da genética
+Nikola Tesla - sistemas elétricos, rádio e bobina de Tesla
+Alexander Graham Bell - inventor do telefone
+James Watt - máquina a vapor e revolução industrial
+Hedy Lamarr - inventora do spread spectrum, base do Wi-Fi e Bluetooth
+Rosalind Franklin - estrutura do DNA
+
+Desenvolvedores de Jogos
+Toru Iwatani - criador de Pac-Man
+Markus Persson (Notch) - criador de Minecraft
+Shigeru Miyamoto - criador de Mario, Zelda, Donkey Kong
+John Carmack - criador das engines de Doom e Quake, ícone do 3D moderno
+Hideo Kojima - criador de Metal Gear e Death Stranding
+Sid Meier - criador da série Civilization
+
+Cientistas da Computação / Tecnologia
+Claude Shannon - pai da teoria da informação
+John McCarthy - inventor do termo Inteligência Artificial e criador de LISP
+Donald Knuth - autor de The Art of Computer Programming
+Niklaus Wirth - criador das linguagens Pascal, Modula e Oberon
+Brian Kernighan - coautor de UNIX e cocriador do C
+Ken Thompson - criador do UNIX e da linguagem B
+Vint Cerf - um dos pais da Internet (TCP/IP)
+Tim Berners-Lee - criador da World Wide Web
+Bjarne Stroustrup - criador do C++
+James Gosling - criador do Java
+Guido van Rossum - criador do Python
+Rasmus Lerdorf - criador do PHP
+Brendan Eich - criador do JavaScript
+Margaret Hamilton - líder do software das missões Apollo
+Linus Torvalds - criador do Linux e do Git
+Grace Hopper - pioneira de compiladores e popularização do termo bug
+Dennis Ritchie - criador da linguagem C e cocriador do UNIX
+Larry Page - cofundador do Google e criador do PageRank
+John von Neumann - pai da arquitetura moderna de computadores
+Edsger Dijkstra - algoritmo de caminhos mínimos e fundamentos da ciência da computação
+Ada Lovelace - primeira programadora da história
+Charles Babbage - idealizador da máquina analítica, precursor do computador
+Silvio Meira - referência brasileira em inovação, computação e engenharia de software
+Steve Jobs - cofundador da Apple, visão de design e tecnologia
+Bill Gates - cofundador da Microsoft
+Ken Perlin - criador do Perlin Noise, base de inúmeros gráficos e jogos
+Alan Kay - pai da programação orientada a objetos moderna
+Barbara Liskov - Liskov Substitution Principle (OOP)
+
+Ciência de Dados, IA e Computação Moderna
+Geoffrey Hinton - “pai do deep learning”
+Yann LeCun - redes neurais convolucionais
+Andrew Ng - popularização da IA moderna
+Demis Hassabis - fundador da DeepMind (AlphaGo, AlphaFold)
+Marvin Minsky - IA clássica
+Sebastian Lague - criador de conteúdos educativos de computação gráfica, jogos e IA
+Grant Sanderson (3Blue1Brown) - animações matemáticas revolucionárias
+Derek Muller (Veritasium) - ciência experimental e comunicação científica
+Matt Batwings (MattBatWings) - conteúdo de lógica e arquitetura de computadores
+Daniel Shiffman (The Coding Train) - conteúdo educacional de computação gráfica
+Kurzgesagt - canal de ciência e filosofia visual
+Khan Academy (Sal Khan) - ensino global de matemática e computação
+
+Filosofia / Escritores
+Platão - fundamentos da filosofia ocidental
+Aristóteles - lógica, ética e ciência
+Friedrich Nietzsche - filosofia moderna e crítica da moral
+Jean Piaget - psicologia do desenvolvimento
+Isaac Asimov - ficção científica e robótica (leis da robótica!)
+Jules Verne - precursor da ficção científica moderna
+Jorge Luis Borges - literatura, labirintos e metafísica (perfeito para Pact-Man)
 
 OFERECIMENTO
 Cesar School
-Cesar Apolo
-Cesar Brum
-Cesar Tiradentes
 Ministério da Cultúra
 Ministério da Educação
 Governo federal
@@ -228,24 +323,20 @@ Prefeitura do Recife
 Versado Café
 
 HOMENAGEM
+VSouce
+Manual do Mundo
+Pedro Loss
+Sergio Sacani
+Pirulla
 Árabes de Jõao Carlos
-Peia de calça
-Mohamed
 Magnus Carlsen
 Viniccius 13
 Gabriel Borteleto
-Ayrton Senna
 Vagner Moura
-Walter Salles
 Fernanda Torres
-Fernanda Montenegro
 Selton Mello
-Kleber Mendonça
 Tom Cavalcanti
 Ivete Sangalo
 Sport
 Náutico
 Santa Cruz
-Cara da cantina
-Moça da portaria
-Seguranças do Cesar

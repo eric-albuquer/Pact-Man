@@ -677,7 +677,7 @@ static void drawHud(Game* this) {
         return;
     }
 
-    static const char* BIOMES[4] = { "Luxuria", "Gula", "Heresia", "Violencia" };
+    static const char* BIOMES[4] = { "luxuria", "gula", "heresia", "violencia" };
 
     float def = map->biomeTime / BIOME_DEGEN_START_TIME;
 

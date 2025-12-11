@@ -8,7 +8,7 @@
 #include "arraylist.h"
 #include "player.h"
 
-#define CREDITS_SPEED 1.05f
+#define CREDITS_SPEED 1.5f
 
 #define ERROR_MSG_DURATION 5.0f
 
