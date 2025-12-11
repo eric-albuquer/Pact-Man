@@ -478,7 +478,7 @@ static void bossDestroyMap(ChunkManager* cm, Enemy* e, LinkedList* firedCells) {
 static inline void bossTentacle(ChunkManager* cm, Enemy* e, LinkedList* tentacleCells) {
     int x = e->x + (rand() & 31) - 16;
     int y = e->y + (rand() & 31) - 16;
-    Cell* cell = cm->getLoadedCell(cm, x, y);
+    Cell* cell = cm->getCellRef(cm, x, y).cell;
     if (cell) {
         tentacleCells->addLast(tentacleCells, cell);
         cell->type = CELL_TENTACLE;
@@ -645,11 +645,11 @@ static void generatePortal(ChunkManager* cm) {
         idx = (idx + 1) & 7;
     }
 
-    int cx = rand() % 7 + 5;
-    int cy = rand() % 7 + 5;
+    int cx = rand() % 5 + 3;
+    int cy = rand() % 5 + 3;
 
-    for (int i = -1; i < 2; i++) {
-        for (int j = -1; j < 2; j++) {
+    for (int i = -2; i < 3; i++) {
+        for (int j = -2; j < 3; j++) {
             Cell* cell = chunk->cellAt(chunk, cx + j, cy + i);
             cell->type = CELL_PORTAL;
             cell->biome = VIOLENCIA;

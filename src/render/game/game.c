@@ -34,6 +34,8 @@ typedef enum {
 
     SPRITE_ICE,
 
+    SPRITE_COBBLESTONE,
+
     SPRITE_BONUS,
 
     SPRITE_PLAYER_EYE_MASK,
@@ -145,8 +147,8 @@ typedef enum {
 static char buffer[1000];
 static bool tutorialVisibleBuffer[CELL_COUNT];
 
-static const Color BIOME_COLOR[4] = { { 255, 255, 0, 255 }, {100, 0, 255, 255}, {0, 255, 0, 255}, {0, 255, 255, 255} };
-static const Color PLAYER_COLOR[4] = { {254, 194, 212, 255},  {74, 223, 202, 255}, {254, 58, 15, 255}, {255, 190, 87, 255} };
+static const Color BIOME_COLOR[4] = { {0, 255, 255, 255}, {100, 0, 255, 255}, {0, 255, 0, 255}, { 255, 255, 0, 255 } };
+static const Color PLAYER_COLOR[4] = { {255, 190, 87, 255}, {254, 58, 15, 255} , {74, 223, 202, 255} , {254, 194, 212, 255} };
 
 //===============================================================
 //  ATUALIZAR ANIMAÇÕES
@@ -169,9 +171,11 @@ static void updateAnimations(Game* this) {
 //  DESENHAR UMA CÉLULA
 //===============================================================
 
-static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens) {
-    if (!cell) return;
+static void drawCell(Game* this, CellRef cr, int x, int y, int size, bool itens) {
+    if (cr.chunk == NULL) return;
 
+    Cell* cell = cr.cell;
+    Chunk* chunk = cr.chunk;
     CellType type = cell->type;
 
     Sprite* sprites = this->sprites;
@@ -179,10 +183,13 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     Player* p = this->map->player;
 
     Sprite sprite = sprites[SPRITE_FLOOR_LUXURIA + cell->biome];
-    Color color = WHITE;
+    Color color = chunk->type == CHUNK_TEMPLE ? LIGHTGRAY : WHITE;
 
     if (type == CELL_WALL) {
-        sprite = sprites[SPRITE_WALL_LUXURIA + cell->biome];
+        if (chunk->type == CHUNK_TRANSITION && !chunk->isBorder)
+            sprite = sprites[SPRITE_COBBLESTONE];
+        else
+            sprite = sprites[SPRITE_WALL_LUXURIA + cell->biome];
     } else if (type == CELL_DEGENERATED_1) {
         sprite = sprites[SPRITE_DEGENERATED_1];
     } else if (type == CELL_DEGENERATED_2) {
@@ -194,6 +201,12 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     }
 
     DrawSprite(sprite, x, y, size, size, color);
+
+    if (type == CELL_WALL) {
+        if (chunk->type == CHUNK_FONT) {
+            DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, y, size, size, (Color) { 255, 255, 255, 150 });
+        }
+    }
 
     color = WHITE;
 
@@ -212,8 +225,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
             DrawAnimationFrame(animations[ANIMATION_FONT], x, y, size, color, 3);
         else {
             DrawAnimation(animations[ANIMATION_FONT], x, y, size, color);
-            DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, y, size, size, (Color){255, 255, 255, 150});
-        }    
+            //DrawSprite(sprites[SPRITE_EFFECT_REGENERATION], x, y, size, size, (Color){255, 255, 255, 100});
+        }
     } else if (type == CELL_GRAVE) {
         DrawSprite(sprites[SPRITE_GRAVE], x, y, size, size, color);
     } else if (type == CELL_GRAVE_INFESTED) {
@@ -224,8 +237,8 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
         float t = (float)(this->map->updateCount % BONUS_DELAY) / BONUS_DELAY;
         Color c = LerpColor(BLACK, p->cellType == CELL_BONUS ? BLUE : PURPLE, t);
         DrawSprite(sprites[SPRITE_BONUS], x, y, size, size, c);
-        if (p->cellType != CELL_BONUS){
-            DrawSprite(sprites[SPRITE_EFFECT_SPEED], x, y, size, size, (Color){255, 255, 255, 150});
+        if (p->cellType != CELL_BONUS) {
+            DrawSprite(sprites[SPRITE_EFFECT_SPEED], x, y, size, size, (Color) { 255, 255, 255, 100 });
         }
     }
 
@@ -271,55 +284,71 @@ static void drawCell(Game* this, Cell* cell, int x, int y, int size, bool itens)
     //DrawText(buffer, x + 15, y + 15, 20, WHITE);
 }
 
+// //===============================================================
+// //  DESENHAR BARRA DE VIDA DO PLAYER
+// //===============================================================
+
+// static void drawLifeBar(Game* this, int x, int y, int width, int height) {
+//     int h = height * 0.26;
+//     int w = width * 0.88;
+//     float t = this->map->player->life / (float)(START_LIFE);
+//     if (t < 0.0f) t = 0.0f;
+//     Color color = RED;
+//     int lx = w * t;
+//     DrawRectangle(x + 50, y + h + 10, w, h, HUD_OPACITY);
+//     DrawRectangle(x + 50, y + h + 10, lx, h, color);
+//     DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
+// }
+
+// //===============================================================
+// //  DESENHAR BATERIA DO PLAYER
+// //===============================================================
+
+// static void drawBateryBar(Game* this, int x, int y, int width, int height) {
+//     if (this->map->player->biome != VIOLENCIA) return;
+//     int w = width * 0.95;
+//     int h = height * 0.35;
+//     int startW = width * 0.025;
+//     float t = this->map->player->batery;
+//     Color color = LerpColor(RED, GREEN, t);
+//     int lx = w * t;
+//     DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);
+//     DrawRectangle(x + startW, y + h, lx, h, color);
+//     DrawSprite(this->sprites[SPRITE_BATERY_BAR], x, y, width, height, WHITE);
+//     //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
+// }
+
+// //===============================================================
+// //  DESENHAR VELOCIDADE DO PLAYER
+// //===============================================================
+
+// static void drawSpeedBar(Game* this, int x, int y, int width, int height) {
+//     int w = width * 0.85;
+//     int h = height * 0.35;
+//     int startW = width * 0.12;
+//     float t = this->map->player->speed / ((float)START_SPEED);
+//     Color color = LerpColor(BLUE, (Color) { 0, 255, 255, 255 }, t);
+//     int lx = w * t;
+//     DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);
+//     DrawRectangle(x + startW, y + h, lx, h, color);
+//     DrawSprite(this->sprites[SPRITE_SPEED_BAR], x, y, width, height, WHITE);
+//     //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
+// }
+
 //===============================================================
-//  DESENHAR BARRA DE VIDA DO PLAYER
+//  DESENHAR BARRA NA HUD
 //===============================================================
 
-static void drawLifeBar(Game* this, int x, int y, int width, int height) {
-    int h = height * 0.26;
-    int w = width * 0.88;
-    float t = this->map->player->life / (float)(START_LIFE);
-    if (t < 0.0f) t = 0.0f;
-    Color color = RED;
-    int lx = w * t;
-    DrawRectangle(x + 50, y + h + 10, w, h, HUD_OPACITY);
-    DrawRectangle(x + 50, y + h + 10, lx, h, color);
-    DrawSprite(this->sprites[SPRITE_LIFE_BAR], x, y, width, height, WHITE);
-}
-
-//===============================================================
-//  DESENHAR BATERIA DO PLAYER
-//===============================================================
-
-static void drawBateryBar(Game* this, int x, int y, int width, int height) {
-    if (this->map->player->biome != VIOLENCIA) return;
-    int w = width * 0.95;
-    int h = height * 0.35;
-    int startW = width * 0.025;
-    float t = this->map->player->batery;
-    Color color = LerpColor(RED, GREEN, t);
-    int lx = w * t;
-    DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);
-    DrawRectangle(x + startW, y + h, lx, h, color);
-    DrawSprite(this->sprites[SPRITE_BATERY_BAR], x, y, width, height, WHITE);
-    //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
-}
-
-//===============================================================
-//  DESENHAR VELOCIDADE DO PLAYER
-//===============================================================
-
-static void drawSpeedBar(Game* this, int x, int y, int width, int height) {
-    int w = width * 0.85;
-    int h = height * 0.35;
+static void drawHudBar(Game* this, int x, int y, int width, int height, int sprite, float t, Color start, Color end) {
+    int w = width * 0.86;
+    int h = height * 0.8;
+    int startH = height * 0.1;
     int startW = width * 0.12;
-    float t = this->map->player->speed / ((float)START_SPEED);
-    Color color = LerpColor(BLUE, (Color) { 0, 255, 255, 255 }, t);
+    Color color = LerpColor(end, start, t);
     int lx = w * t;
-    DrawRectangle(x + startW, y + h, w, h, HUD_OPACITY);
-    DrawRectangle(x + startW, y + h, lx, h, color);
-    DrawSprite(this->sprites[SPRITE_SPEED_BAR], x, y, width, height, WHITE);
-    //DrawAnimation(this->animations[ANIMATION_BATERY], x, y, height, WHITE);
+    DrawRectangle(x + startW, y + startH, w, h, HUD_OPACITY);
+    DrawRectangle(x + startW, y + startH, lx, h, color);
+    DrawSprite(this->sprites[sprite], x, y, width, height, WHITE);
 }
 
 //===============================================================
@@ -524,8 +553,8 @@ static void drawMinimap(Game* this, int x0, int y0, int size, int zoom) {
         int py = map->player->y + y - (zoom >> 1);
         for (int x = 0; x < zoom; x++) {
             int px = map->player->x + x - (zoom >> 1);
-            Cell* cell = cm->getLoadedCell(cm, px, py);
-            drawCell(this, cell, x0 + x * cellSize + 25, y0 + y * cellSize + 25, cellSize, false);
+            CellRef cellRef = cm->getCellRef(cm, px, py);
+            drawCell(this, cellRef, x0 + x * cellSize + 25, y0 + y * cellSize + 25, cellSize, false);
         }
     }
 
@@ -614,7 +643,7 @@ static void drawPauseHud(Game* this) {
     int mins = (int)(p->totalTime) / 60;
     int secs = (int)(p->totalTime) % 60;
     sprintf(buffer, "Tempo: %02d:%02d\nMoedas: %d\nFragmentos: %d", mins, secs, p->totalCoins, p->totalFragment);
-    
+
     drawCenteredText(buffer, halfX, statsH, statsSize, WHITE);
 
     drawPopup();
@@ -658,9 +687,16 @@ static void drawHud(Game* this) {
         DrawTextEx(InfernoFont, BIOMES[p->biome], biomeNamePos, 90, 10, BIOME_COLOR[p->biome]);
     }
 
-    drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
-    drawSpeedBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
-    drawBateryBar(this, this->offsetHalfX - 200, this->height - 290, 400, 80);
+    // drawLifeBar(this, this->offsetHalfX - 300, this->height - 150, 600, 100);
+    // drawSpeedBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
+    // drawBateryBar(this, this->offsetHalfX - 200, this->height - 290, 400, 80);
+
+    drawHudBar(this, this->offsetHalfX - 250, this->height - 120, 500, 60, SPRITE_LIFE_BAR, p->life / (float)(START_LIFE), RED, RED);
+    drawHudBar(this, this->offsetHalfX - 250, this->height - 180, 500, 60, SPRITE_SPEED_BAR, p->speed / (float)(START_SPEED), (Color) { 0, 255, 255, 255 }, DARKPURPLE);
+
+    if (p->biome == VIOLENCIA)
+        drawHudBar(this, this->offsetHalfX - 250, this->height - 240, 500, 60, SPRITE_BATERY_BAR, p->batery, GREEN, RED);
+
     drawInfoHud(this, this->width - 280, 550, 80);
 
     drawFragmentEffect(this);
@@ -840,12 +876,12 @@ static void drawMap(Game* this) {
         for (int j = -this->renderDistX; j <= this->renderDistX; j++) {
             int xIdx = j + px;
 
-            Cell* cell = cm->getLoadedCell(cm, xIdx, yIdx);
+            CellRef cellRef = cm->getCellRef(cm, xIdx, yIdx);
 
             int x = offsetHalfXAnimated + j * this->cellSize;
             int y = offsetHalfYAnimated + i * this->cellSize;
 
-            drawCell(this, cell, x, y, this->cellSize, true);
+            drawCell(this, cellRef, x, y, this->cellSize, true);
         }
     }
 
@@ -1101,6 +1137,8 @@ static void loadSprites(Game* this) {
 
     sprites[SPRITE_ICE] = LoadSprite("assets/sprites/common_cells/ice.png");
 
+    sprites[SPRITE_COBBLESTONE] = LoadSprite("assets/sprites/common_cells/cobblestone.png");
+
     sprites[SPRITE_BONUS] = LoadSprite("assets/sprites/common_cells/bonus.png");
 
     sprites[SPRITE_EFFECT_REGENERATION] = LoadSprite("assets/sprites/effects/regeneration.png");
@@ -1112,9 +1150,9 @@ static void loadSprites(Game* this) {
     sprites[SPRITE_EFFECT_SPEED] = LoadSprite("assets/sprites/effects/speed.png");
 
     sprites[SPRITE_MINIMAP] = LoadSprite("assets/sprites/hud/minimap.png");
-    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/lifebar.png");
-    sprites[SPRITE_SPEED_BAR] = LoadSprite("assets/sprites/hud/speed_hud.png");
-    sprites[SPRITE_BATERY_BAR] = LoadSprite("assets/sprites/hud/batery_hud.png");
+    sprites[SPRITE_LIFE_BAR] = LoadSprite("assets/sprites/hud/life_hud3.png");
+    sprites[SPRITE_SPEED_BAR] = LoadSprite("assets/sprites/hud/speed_hud3.png");
+    sprites[SPRITE_BATERY_BAR] = LoadSprite("assets/sprites/hud/batery_hud3.png");
     sprites[SPRITE_ARROW_NEXT_BIOME] = LoadSprite("assets/sprites/hud/biomeNextArrow.png");
 
     sprites[SPRITE_GAME_OVER] = LoadSprite("assets/sprites/hud/game_over.jpg");

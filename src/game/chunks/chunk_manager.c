@@ -69,16 +69,18 @@ static void updateChunks(ChunkManager* this){
 //  PEGAR UMA CÉLULA CARREGADA
 //===============================================================
 
-static inline Cell* getLoadedCell(ChunkManager* this, int x, int y){
-    if (x < 0 || y < 0) return NULL;
+static inline CellRef getCellRef(ChunkManager* this, int x, int y){
+    CellRef cRef = {0};
+    if (x < 0 || y < 0) return cRef;
     int cx = (x >> CHUNK_SHIFT) - this->player->chunkX + 3;
     int cy = (y >> CHUNK_SHIFT) - this->player->chunkY + 3;
 
-    if (cx < 0 || cx > 6 || cy < 0 || cy > 6) return NULL;
+    if (cx < 0 || cx > 6 || cy < 0 || cy > 6) return cRef;
     Chunk* chunk = this->adjacents[cy * 7 + cx];
-    if (chunk == NULL) return NULL;
-    Cell* cells = chunk->cells;
-    return &cells[(x & CHUNK_MASK) | ((y & CHUNK_MASK) << CHUNK_SHIFT)];
+    if (chunk == NULL) return cRef;
+    cRef.chunk = chunk;
+    cRef.cell = &chunk->cells[(x & CHUNK_MASK) | ((y & CHUNK_MASK) << CHUNK_SHIFT)];
+    return cRef;
 }
 
 //===============================================================
@@ -173,7 +175,7 @@ ChunkManager* new_ChunkManager(int biomeCols, int rows, Player* p) {
     loadSpawnChunk(this);
 
     this->getLoadedChunk = getLoadedChunk;
-    this->getLoadedCell = getLoadedCell;
+    this->getCellRef = getCellRef;
     this->getUpdatedCell = getUpdatedCell;
     this->loadAdjacents = loadAdjacents;
     this->updateChunks = updateChunks;

@@ -197,7 +197,7 @@ static void generateBiomeTransition(ChunkLoader* this, Chunk* chunk) {
     }
 
     for (int k = 0; k < 9; k++) {
-        int stoneX = 1 + randChunk(this, chunk) % (CHUNK_SIZE - 2);
+        int stoneX = 3 + randChunk(this, chunk) % (CHUNK_SIZE - 6);
         int stoneY = 1 + randChunk(this, chunk) % (CHUNK_SIZE - 2);
 
         for (int i = 0; i < 2; i++) {
