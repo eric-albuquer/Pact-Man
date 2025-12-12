@@ -128,6 +128,11 @@ Stack - Changed Chunk Enemies
 ArrayList - Créditos e banco de dados de Score
 Sliding Window - Créditos
 
+Processamento Paralelo
+Thread Pool de Carregamento - Processa chunks e entidades próximos ao jogador
+Update Multithread - Atualiza inimigos e ambientes em regiões independentes
+Sincronização Leve - Minimiza locks usando dados imutáveis e buffers separados
+
 PROFESSORES
 Natacha Targino AED
 

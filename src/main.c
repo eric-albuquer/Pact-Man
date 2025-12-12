@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
     loadPopup(GetScreenWidth(), GetScreenHeight(), exitGame);
 
     controller = new_Controller();
-    map = new_Map(5, 9, 300, 61);
+    map = new_Map(5, 9, 16, 61);
     render = new_Render(GetScreenWidth(), GetScreenHeight(), 50, map);
 
     while (!WindowShouldClose()) {
