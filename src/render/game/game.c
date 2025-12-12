@@ -672,6 +672,9 @@ static void drawHud(Game* this) {
 
     drawMinimap(this, this->width - 520, 40, 500, 80);
 
+    if (this->map->running == false)
+        drawPauseHud(this);
+
     if (map->manager->heaven) {
         drawHeavenHud(this);
         return;
@@ -691,11 +694,13 @@ static void drawHud(Game* this) {
     // drawSpeedBar(this, this->offsetHalfX - 200, this->height - 220, 400, 80);
     // drawBateryBar(this, this->offsetHalfX - 200, this->height - 290, 400, 80);
 
-    drawHudBar(this, this->offsetHalfX - 250, this->height - 120, 500, 60, SPRITE_LIFE_BAR, p->life / (float)(START_LIFE), RED, RED);
-    drawHudBar(this, this->offsetHalfX - 250, this->height - 180, 500, 60, SPRITE_SPEED_BAR, p->speed / (float)(START_SPEED), (Color) { 0, 255, 255, 255 }, DARKPURPLE);
+    if (this->map->running) {
+        drawHudBar(this, this->offsetHalfX - 250, this->height - 120, 500, 60, SPRITE_LIFE_BAR, p->life / (float)(START_LIFE), RED, RED);
+        drawHudBar(this, this->offsetHalfX - 250, this->height - 180, 500, 60, SPRITE_SPEED_BAR, p->speed / (float)(START_SPEED), (Color) { 0, 255, 255, 255 }, DARKPURPLE);
 
-    if (p->biome == VIOLENCIA)
-        drawHudBar(this, this->offsetHalfX - 250, this->height - 240, 500, 60, SPRITE_BATERY_BAR, p->batery, GREEN, RED);
+        if (p->biome == VIOLENCIA)
+            drawHudBar(this, this->offsetHalfX - 250, this->height - 240, 500, 60, SPRITE_BATERY_BAR, p->batery, GREEN, RED);
+    }
 
     drawInfoHud(this, this->width - 280, 550, 80);
 
@@ -704,9 +709,6 @@ static void drawHud(Game* this) {
 
     if (p->biomeFragment >= 2 && this->map->updateCount & 4 && p->biome < VIOLENCIA)
         drawArrowToNextBiome(this, this->offsetHalfX - 300, 100, 600, 150);
-
-    if (this->map->running == false)
-        drawPauseHud(this);
 }
 
 //===============================================================
@@ -1092,7 +1094,7 @@ static void loadSprites(Game* this) {
 
     const char* spike[] = { "assets/sprites/violencia/spike1.png", "assets/sprites/violencia/spike2.png", "assets/sprites/violencia/spike3.png" };
 
-    const char* portal[] = { "assets/sprites/common_cells/portal1.png", "assets/sprites/common_cells/portal2.png", "assets/sprites/common_cells/portal3.png" };
+    const char* portal[] = { "assets/sprites/common_cells/portal0.png", "assets/sprites/common_cells/portal1.png", "assets/sprites/common_cells/portal2.png", "assets/sprites/common_cells/portal3.png", "assets/sprites/common_cells/portal4.png", "assets/sprites/common_cells/portal5.png", "assets/sprites/common_cells/portal6.png", "assets/sprites/common_cells/portal7.png", "assets/sprites/common_cells/portal8.png", "assets/sprites/common_cells/portal9.png", "assets/sprites/common_cells/portal10.png", "assets/sprites/common_cells/portal11.png", "assets/sprites/common_cells/portal12.png", "assets/sprites/common_cells/portal13.png", "assets/sprites/common_cells/portal14.png", "assets/sprites/common_cells/portal15.png" };
 
     const char* rightWind[] = { "assets/sprites/luxuria/RightArrow1.png", "assets/sprites/luxuria/RightArrow2.png" };
     const char* leftWind[] = { "assets/sprites/luxuria/LeftArrow1.png", "assets/sprites/luxuria/LeftArrow2.png" };
@@ -1113,7 +1115,7 @@ static void loadSprites(Game* this) {
 
     animations[ANIMATION_SPIKE] = LoadAnimation(3, spike);
 
-    animations[ANIMATION_PORTAL] = LoadAnimation(3, portal);
+    animations[ANIMATION_PORTAL] = LoadAnimation(16, portal);
 
     sprites[SPRITE_FLOOR_LUXURIA] = LoadSprite("assets/sprites/luxuria/chao.png");
     sprites[SPRITE_WALL_LUXURIA] = LoadSprite("assets/sprites/luxuria/parede.png");

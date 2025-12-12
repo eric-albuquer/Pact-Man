@@ -645,11 +645,11 @@ static void generatePortal(ChunkManager* cm) {
         idx = (idx + 1) & 7;
     }
 
-    int cx = rand() % 5 + 3;
-    int cy = rand() % 5 + 3;
+    int cx = rand() % 8 + 4;
+    int cy = rand() % 8 + 4;
 
-    for (int i = -2; i < 3; i++) {
-        for (int j = -2; j < 3; j++) {
+    for (int i = -3; i < 4; i++) {
+        for (int j = -3; j < 4; j++) {
             Cell* cell = chunk->cellAt(chunk, cx + j, cy + i);
             cell->type = CELL_PORTAL;
             cell->biome = VIOLENCIA;
