@@ -516,7 +516,7 @@ static bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, LinkedList* 
                     e->free(e);
                     enemies->removeNode(enemies, node);
                     return true;
-                } else {
+                } else if (p->effects.freezeTime.duration == 0){
                     p->life -= ENEMY_DAMAGE;
                     p->damaged = true;
                     if (!e->isBoss) e->needToTeleport = true;
@@ -602,18 +602,18 @@ static void removeBossMecanics(ChunkManager* cm, LinkedList* firedCells, LinkedL
     while (tentacleCells->length > BOSS_TENTACLE_QUANTITY) {
         Cell* cell = tentacleCells->removeFirst(tentacleCells);
         int prob = rand() % 100;
-        if (prob < 70)
+        if (prob < 60)
             cell->type = CELL_EMPTY;
-        else if (prob < 96)
+        else if (prob < 94)
             cell->type = CELL_COIN;
         else if (prob < 97)
-            cell->type = CELL_FREEZE_TIME;
+            cell->type = CELL_FRUIT;
         else if (prob < 98)
             cell->type = CELL_REGENERATION;
         else if (prob < 99)
             cell->type = CELL_INVISIBILITY;
         else if (prob < 100)
-            cell->type = CELL_FRUIT;
+            cell->type = CELL_FREEZE_TIME;
     }
 
     if (cm->heaven) {

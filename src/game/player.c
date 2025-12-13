@@ -42,6 +42,7 @@ static void restart(Player* this){
     this->damaged = false;
     this->hitEnemy = false;
     this->biomeCoins = this->totalCoins = this->biomeFragment = this->totalFragment = this->totalTime = 0;
+    this->fragmentByCoins = 0;
     this->alive = 1;
     this->batery = 1.0f;
 }
