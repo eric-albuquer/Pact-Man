@@ -201,10 +201,10 @@ static void updateMainContent(Menu* this) {
         strcpy(this->difficulty->text, dificultyText[dificulty]);
     }
 
-    if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) > 0.5f && this->frameCount % 8 == 0) || IsKeyPressed(KEY_DOWN)) {
+    if (IsKeyPressed(KEY_DOWN) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_DOWN) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) > 0.5f && this->frameCount % 8 == 0)) {
         buttons[selected]->hovered = false;
         selected = (selected + 1) % 6;
-    } else if (IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) < -0.5f && this->frameCount % 8 == 0) || IsKeyPressed(KEY_UP)) {
+    } else if (IsKeyPressed(KEY_UP) || IsGamepadButtonPressed(0, GAMEPAD_BUTTON_LEFT_FACE_UP) || (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) < -0.5f && this->frameCount % 8 == 0)) {
         buttons[selected]->hovered = false;
         selected = selected - 1;
         if (selected == -1) selected = 5;
