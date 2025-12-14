@@ -101,7 +101,7 @@ static void applyPlayerEffects(Player* p, CellType type, unsigned int updateCoun
     // }
     else if (type == CELL_BONUS) {
         p->speed = min(p->speed + SPEED_RELOAD, START_SPEED);
-    } else if (isDegenerated(type)) {
+    } else if (isDegenerated(type) && p->effects.invulnerability.duration == 0) {
         p->effects.degeneration.duration = DEGENERATION_DURATION;
         p->effects.degeneration.strenght = (type - CELL_DEGENERATED_1) + 1;
     } else if (type == CELL_INVISIBILITY) {
@@ -516,7 +516,7 @@ static bool handlePlayerEnemyColision(ChunkManager* cm, Node* node, LinkedList* 
                     e->free(e);
                     enemies->removeNode(enemies, node);
                     return true;
-                } else if (p->effects.freezeTime.duration == 0){
+                } else if (p->effects.freezeTime.duration == 0 && p->effects.invisibility.duration == 0){
                     p->life -= ENEMY_DAMAGE;
                     p->damaged = true;
                     if (!e->isBoss) e->needToTeleport = true;

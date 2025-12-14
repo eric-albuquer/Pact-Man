@@ -788,7 +788,7 @@ static void playAudio(Game* this) {
         audio->playSound(audio, SOUND_POTION);
     } else if (type == CELL_TENTACLE) {
         audio->playSound(audio, SOUND_TENTACLE);
-    } else if (type == CELL_FIRE_ON) {
+    } else if (type == CELL_FIRE_ON && p->effects.invulnerability.duration == 0) {
         audio->playSound(audio, SOUND_FIRE);
     } else if (type == CELL_BONUS && p->speed < START_SPEED) {
         audio->playSound(audio, SOUND_SPEED_RELOAD);
